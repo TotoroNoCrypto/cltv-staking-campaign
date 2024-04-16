@@ -1,0 +1,40 @@
+@api = http://localhost:3000/api/stakings
+
+### Get stakings
+GET {{api}}
+
+### Create staking 1
+POST {{api}}
+Content-Type: application/json
+
+{
+  "campaignId": 1,
+  "address": "address1",
+  "quantity": 1,
+  "block": 1500200
+}
+
+### Create staking 2
+POST {{api}}
+Content-Type: application/json
+
+{
+  "campaignId": 1,
+  "address": "address2",
+  "quantity": 1,
+  "block": 1500220
+}
+
+### Create staking 3
+POST {{api}}
+Content-Type: application/json
+
+{
+  "campaignId": 2,
+  "address": "address1",
+  "quantity": 5,
+  "block": 1500225
+}
+
+### Get staking
+GET {{api}}/1

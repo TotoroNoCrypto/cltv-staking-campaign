@@ -1,31 +1,23 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../database/database.js";
-import { Staking } from "./Staking.js";
 
-export const Campaign = sequelize.define(
-    "campaigns",
+export const Staking = sequelize.define(
+    "stakings",
     {
         id: {
             type: DataTypes.INTEGER,
             primaryKey: true,
             autoIncrement: true
         },
-        name: {
+        address: {
             type: DataTypes.STRING
         },
         quantity: {
             type: DataTypes.INTEGER
         },
-        blockstart: {
-            type: DataTypes.INTEGER
-        },
-        blockend: {
+        block: {
             type: DataTypes.INTEGER
         }
     }
 );
 
-Staking.belongsTo(Campaign, {
-    foreinkey: "campaignId",
-    targetId: "id"
-});
