@@ -1,0 +1,15 @@
+{
+  "name": "cltv-staking-campaign",
+  "version": "1.0.0",
+  "description": "CLTV Staking Campaign",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "author": "TotoroNoCrypto",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
