@@ -103,18 +103,16 @@ export async function computeRewards(req, res) {
                 share = Math.round(share * 10 ** 8) / 10 ** 8;
 
                 stakings.forEach(async staking => {
-                    if (staking.campaignId == campaign.id && staking.block < block && block != start) {
-                        if (!stakerRewards.has(staking.address)) {
-                            stakerRewards.set(staking.address, 0);
+                    if (staking.campaignId == campaign.id) {
+                        if (staking.block < block) {
+                            if (!stakerRewards.has(staking.address)) {
+                                stakerRewards.set(staking.address, 0);
+                            }
+                            
+                            const reward = stakerRewards.get(staking.address);
+                            stakerRewards.set(staking.address, reward + staking.quantity * share);
                         }
-                        
-                        const reward = stakerRewards.get(staking.address);
-                        stakerRewards.set(staking.address, reward + staking.quantity * share);
-                    }
-                });
-
-                stakings.forEach(async staking => {
-                    if (staking.campaignId == campaign.id && staking.block <= block) {
+    
                         if (staking.block == block || (block == start && staking.block < start)) {
                             totalQuantities += staking.quantity;
                         }
