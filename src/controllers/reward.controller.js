@@ -83,19 +83,23 @@ export async function computeRewards(req, res) {
     try {
         const { blockid } = req.params;
         const campaigns = await Campaign.findAll({
-            atributes: ["id", "name", "quantity", "blockstart", "blockend"],
+            atributes: ["id", "name", "quantity", "blockStart", "blockEnd", "lastBlockReward"],
         });
         const stakings = await Staking.findAll({
             atributes: ["id", "campaignId", "address", "quantity", "block"],
         });
 
-        campaigns.forEach(campaign => {
-            const rewardPerBlock = campaign.quantity / (campaign.blockend - campaign.blockstart);
+        campaigns.forEach(async campaign => {
+            const rewardPerBlock = campaign.quantity / (campaign.blockEnd - campaign.blockStart);
 
             const stakerRewards = new Map();
-            for (let block = campaign.blockstart; block <= blockid; block++) {
-                const share = rewardPerBlock / stakerRewards.size;
-                stakings.forEach(staking => {
+            const start = campaign.lastBlockReward > campaign.blockStart ?
+                campaign.lastBlockReward :
+                campaign.blockStart;
+            const end = blockid;
+            for (let block = start; block <= end; block++) {
+                const share = stakerRewards.size > 0 ? rewardPerBlock / stakerRewards.size : 0;
+                stakings.forEach(async staking => {
                     if (staking.campaignId == campaign.id && staking.block <= block) {
                         if (!stakerRewards.has(staking.address)) {
                             stakerRewards.set(staking.address, 0);
@@ -109,12 +113,19 @@ export async function computeRewards(req, res) {
             }
 
             stakerRewards.forEach(async (value, key) => {
-                const [ reward, created ] = await Reward.upsert({
-                    campaignId: campaign.id,
-                    address: key,
-                    quantity: value
+                const [ reward, created ] = await Reward.findOrCreate({
+                    where: {
+                        campaignId: campaign.id,
+                        address: key
+                    },
+                    quantity: 0
                 });
+                reward.quantity += value;
+                reward.save();
             });
+
+            campaign.lastBlockReward = blockid;
+            await campaign.save();
         });
         
         return res.sendStatus(204);

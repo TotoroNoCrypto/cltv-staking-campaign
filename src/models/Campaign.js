@@ -18,10 +18,13 @@ export const Campaign = sequelize.define(
         quantity: {
             type: DataTypes.INTEGER
         },
-        blockstart: {
+        blockStart: {
             type: DataTypes.INTEGER
         },
-        blockend: {
+        blockEnd: {
+            type: DataTypes.INTEGER
+        },
+        lastBlockReward: {
             type: DataTypes.INTEGER
         }
     }

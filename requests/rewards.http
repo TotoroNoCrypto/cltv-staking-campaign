@@ -35,7 +35,7 @@ Content-Type: application/json
 }
 
 ### Delete reward
-DELETE {{api}}/2
+DELETE {{api}}/1
 
 ### Compute rewards
-PUT {{api}}/compute/840031
+PUT {{api}}/compute/840030

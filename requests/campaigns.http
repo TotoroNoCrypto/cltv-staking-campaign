@@ -10,8 +10,9 @@ Content-Type: application/json
 {
   "name": "FCDP",
   "quantity": 1000000,
-  "blockstart": 840000,
-  "blockend": 841000
+  "blockStart": 840000,
+  "blockEnd": 841000,
+  "lastBlockReward": 0
 }
 
 ### Create OSHI campaign
@@ -21,8 +22,9 @@ Content-Type: application/json
 {
   "name": "OSHI",
   "quantity": 2000000,
-  "blockstart": 840000,
-  "blockend": 841000
+  "blockStart": 840000,
+  "blockEnd": 841000,
+  "lastBlockReward": 0
 }
 
 ### Get campaign
@@ -33,10 +35,17 @@ PUT {{api}}/1
 Content-Type: application/json
 
 {
-  "name": "FCDP v2",
   "quantity": 1000000,
-  "blockstart": 1500000,
-  "blockend": 1502000
+  "blockStart": 1500000,
+  "blockEnd": 1502000
+}
+
+### Reset last block rewards
+PUT {{api}}/1
+Content-Type: application/json
+
+{
+  "lastBlockReward": 0
 }
 
 ### Delete campaign

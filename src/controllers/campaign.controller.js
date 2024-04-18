@@ -3,7 +3,7 @@ import { Campaign } from "../models/Campaign.js";
 export async function getCampaigns(_, res) {
     try {
         const campaigns = await Campaign.findAll({
-            atributes: ["id", "name", "quantity", "blockstart", "blockend"],
+            atributes: ["id", "name", "quantity", "blockStart", "blockEnd", "lastBlockReward"],
         });
         res.json(campaigns);
     } catch (error) {
@@ -15,15 +15,16 @@ export async function getCampaigns(_, res) {
 
 export async function createCampaign(req, res) {
     try {
-        const { name, quantity, blockstart, blockend } = req.body;
+        const { name, quantity, blockStart, blockEnd, lastBlockReward } = req.body;
         let newCampaign = await Campaign.create({
             name,
             quantity,
-            blockstart,
-            blockend
+            blockStart,
+            blockEnd,
+            lastBlockReward
         },
         {
-            fields: ["name", "quantity", "blockstart", "blockend"],
+            fields: ["name", "quantity", "blockStart", "blockEnd", "lastBlockReward"],
         });
         return res.json(newCampaign);
     } catch (error) {
@@ -52,13 +53,14 @@ export async function getCampaign(req, res) {
 export const updateCampaign = async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, quantity, blockstart, blockend } = req.body;
+        const { name, quantity, blockStart, blockEnd, lastBlockReward } = req.body;
 
         const campaign = await Campaign.findByPk(id);
         campaign.name = name;
         campaign.quantity = quantity;
-        campaign.blockstart = blockstart;
-        campaign.blockend = blockend;
+        campaign.blockStart = blockStart;
+        campaign.blockEnd = blockEnd;
+        campaign.lastBlockReward = lastBlockReward;
         await campaign.save();
 
         res.json(campaign);
