@@ -14,8 +14,8 @@ export async function getRewards(_, res) {
 }
 
 export async function createReward(req, res) {
-    const { campaignId, address, quantity } = req.body;
     try {
+        const { campaignId, address, quantity } = req.body;
         let newReward = await Reward.create({
             campaignId,
             address,
@@ -30,12 +30,11 @@ export async function createReward(req, res) {
             message: error.message,
         });
     }
-    res.json("received");
 }
 
 export async function getReward(req, res) {
-    const { id } = req.params;
     try {
+        const { id } = req.params;
         const Reward = await Reward.findOne({
             where: {
                 id
@@ -65,8 +64,8 @@ export const updateReward = async (req, res) => {
 };
 
 export async function deleteReward(req, res) {
-    const { id } = req.params;
     try {
+        const { id } = req.params;
         await Reward.destroy({
             where: {
                 id,

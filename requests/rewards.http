@@ -35,4 +35,4 @@ Content-Type: application/json
 }
 
 ### Delete campaign
-DELETE {{api}}/3
+DELETE {{api}}/2

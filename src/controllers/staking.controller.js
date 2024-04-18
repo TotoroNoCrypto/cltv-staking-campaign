@@ -14,8 +14,8 @@ export async function getStakings(_, res) {
 }
 
 export async function createStaking(req, res) {
-    const { campaignId, address, quantity, block } = req.body;
     try {
+        const { campaignId, address, quantity, block } = req.body;
         let newStaking = await Staking.create({
             campaignId,
             address,
@@ -31,18 +31,17 @@ export async function createStaking(req, res) {
             message: error.message,
         });
     }
-    res.json("received");
 }
 
 export async function getStaking(req, res) {
-    const { id } = req.params;
     try {
-        const Staking = await Staking.findOne({
+        const { id } = req.params;
+        const staking = await Staking.findOne({
             where: {
                 id
             }
         });
-        res.json(Staking);
+        res.json(staking);
     } catch (error) {
         res.status(500).json({
             message: error.message,

@@ -14,8 +14,8 @@ export async function getCampaigns(_, res) {
 }
 
 export async function createCampaign(req, res) {
-    const { name, quantity, blockstart, blockend } = req.body;
     try {
+        const { name, quantity, blockstart, blockend } = req.body;
         let newCampaign = await Campaign.create({
             name,
             quantity,
@@ -31,12 +31,11 @@ export async function createCampaign(req, res) {
             message: error.message,
         });
     }
-    res.json("received");
 }
 
 export async function getCampaign(req, res) {
-    const { id } = req.params;
     try {
+        const { id } = req.params;
         const campaign = await Campaign.findOne({
             where: {
                 id
@@ -69,8 +68,8 @@ export const updateCampaign = async (req, res) => {
 };
 
 export async function deleteCampaign(req, res) {
-    const { id } = req.params;
     try {
+        const { id } = req.params;
         await Campaign.destroy({
             where: {
                 id,
