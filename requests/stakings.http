@@ -11,7 +11,7 @@ Content-Type: application/json
   "campaignId": 1,
   "address": "address1",
   "quantity": 1,
-  "block": 1500200
+  "block": 1500020
 }
 
 ### Create staking 2
@@ -22,7 +22,7 @@ Content-Type: application/json
   "campaignId": 1,
   "address": "address2",
   "quantity": 1,
-  "block": 1500220
+  "block": 1500030
 }
 
 ### Create staking 3
@@ -33,7 +33,7 @@ Content-Type: application/json
   "campaignId": 2,
   "address": "address1",
   "quantity": 5,
-  "block": 1500225
+  "block": 1500025
 }
 
 ### Get staking

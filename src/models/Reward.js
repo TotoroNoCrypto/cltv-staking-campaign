@@ -10,11 +10,18 @@ export const Reward = sequelize.define(
             autoIncrement: true
         },
         address: {
-            type: DataTypes.STRING,
-            unique: true
+            type: DataTypes.STRING
         },
         quantity: {
             type: DataTypes.INTEGER
         }
+    },
+    {
+        indexes: [
+            {
+                unique: true,
+                fields: ['campaignId', 'address']
+            }
+        ]
     }
 );

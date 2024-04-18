@@ -2,10 +2,10 @@ import { Staking } from "../models/Staking.js";
 
 export async function getStakings(_, res) {
     try {
-        const Stakings = await Staking.findAll({
+        const stakings = await Staking.findAll({
             atributes: ["id", "campaignId", "address", "quantity", "block"],
         });
-        res.json(Stakings);
+        res.json(stakings);
     } catch (error) {
         res.status(500).json({
             message: error.message,

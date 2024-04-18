@@ -4,7 +4,8 @@ import {
     createReward,
     getReward,
     updateReward,
-    deleteReward
+    deleteReward,
+    computeRewards
 } from "../controllers/reward.controller.js";
 
 const router = Router();
@@ -15,5 +16,6 @@ router.post("/", createReward);
 router.get("/:id", getReward);
 router.put("/:id", updateReward);
 router.delete("/:id", deleteReward);
+router.put("/compute/:blockid", computeRewards);
 
 export default router;

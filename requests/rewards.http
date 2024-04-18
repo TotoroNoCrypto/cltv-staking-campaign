@@ -34,5 +34,8 @@ Content-Type: application/json
   "quantity": 50
 }
 
-### Delete campaign
+### Delete reward
 DELETE {{api}}/2
+
+### Compute rewards
+PUT {{api}}/compute/1500035
