@@ -99,8 +99,8 @@ export async function computeRewards(req, res) {
                 campaign.blockStart;
             const end = blockid;
             for (let block = start; block <= end; block++) {
-                const share = totalQuantities > 0 ? rewardPerBlock / totalQuantities : 0;
-                console.log(`share: ${share}`);
+                let share = totalQuantities > 0 ? rewardPerBlock / totalQuantities : 0;
+                share = Math.round(share * 10 ** 8) / 10 ** 8;
 
                 stakings.forEach(async staking => {
                     if (staking.campaignId == campaign.id && staking.block < block && block != start) {
@@ -109,7 +109,6 @@ export async function computeRewards(req, res) {
                         }
                         
                         const reward = stakerRewards.get(staking.address);
-                        console.log(`'${staking.address}' quantity: ${staking.quantity}`);
                         stakerRewards.set(staking.address, reward + staking.quantity * share);
                     }
                 });
@@ -121,8 +120,6 @@ export async function computeRewards(req, res) {
                         }
                     }
                 });
-
-                console.log(`totalQuantities: ${totalQuantities}`);
             }
 
             stakerRewards.forEach(async (value, key) => {
@@ -139,6 +136,7 @@ export async function computeRewards(req, res) {
 
             campaign.lastBlockReward = blockid;
             await campaign.save();
+
         });
         
         return res.sendStatus(204);
