@@ -10,8 +10,8 @@ Content-Type: application/json
 {
   "name": "FCDP",
   "quantity": 1000000,
-  "blockstart": 1500000,
-  "blockend": 1501000
+  "blockstart": 840000,
+  "blockend": 841000
 }
 
 ### Create OSHI campaign
@@ -21,8 +21,8 @@ Content-Type: application/json
 {
   "name": "OSHI",
   "quantity": 2000000,
-  "blockstart": 1500000,
-  "blockend": 1501000
+  "blockstart": 840000,
+  "blockend": 841000
 }
 
 ### Get campaign

@@ -89,16 +89,21 @@ export async function computeRewards(req, res) {
             atributes: ["id", "campaignId", "address", "quantity", "block"],
         });
 
-        const stakerRewards = new Map();
         campaigns.forEach(campaign => {
+            const rewardPerBlock = campaign.quantity / (campaign.blockend - campaign.blockstart);
+
+            const stakerRewards = new Map();
             for (let block = campaign.blockstart; block <= blockid; block++) {
+                const share = rewardPerBlock / stakerRewards.size;
                 stakings.forEach(staking => {
-                    if (staking.block <= block) {
+                    if (staking.campaignId == campaign.id && staking.block <= block) {
                         if (!stakerRewards.has(staking.address)) {
                             stakerRewards.set(staking.address, 0);
                         }
-                        let reward = stakerRewards.get(staking.address);
-                        stakerRewards.set(staking.address, reward + 1);
+                        if (block > staking.block) {
+                            let reward = stakerRewards.get(staking.address);
+                            stakerRewards.set(staking.address, reward + share);
+                        }
                     }
                 });
             }
