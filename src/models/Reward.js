@@ -13,7 +13,7 @@ export const Reward = sequelize.define(
             type: DataTypes.STRING
         },
         quantity: {
-            type: DataTypes.INTEGER
+            type: DataTypes.FLOAT
         }
     },
     {

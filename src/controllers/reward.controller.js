@@ -91,29 +91,42 @@ export async function computeRewards(req, res) {
 
         campaigns.forEach(async campaign => {
             const rewardPerBlock = campaign.quantity / (campaign.blockEnd - campaign.blockStart);
-
+            
             const stakerRewards = new Map();
+            let totalQuantities = 0;
             const start = campaign.lastBlockReward > campaign.blockStart ?
                 campaign.lastBlockReward :
                 campaign.blockStart;
             const end = blockid;
             for (let block = start; block <= end; block++) {
-                const share = stakerRewards.size > 0 ? rewardPerBlock / stakerRewards.size : 0;
+                const share = totalQuantities > 0 ? rewardPerBlock / totalQuantities : 0;
+                console.log(`share: ${share}`);
+
                 stakings.forEach(async staking => {
-                    if (staking.campaignId == campaign.id && staking.block <= block) {
+                    if (staking.campaignId == campaign.id && staking.block < block && block != start) {
                         if (!stakerRewards.has(staking.address)) {
                             stakerRewards.set(staking.address, 0);
                         }
-                        if (block > staking.block) {
-                            let reward = stakerRewards.get(staking.address);
-                            stakerRewards.set(staking.address, reward + share);
+                        
+                        const reward = stakerRewards.get(staking.address);
+                        console.log(`'${staking.address}' quantity: ${staking.quantity}`);
+                        stakerRewards.set(staking.address, reward + staking.quantity * share);
+                    }
+                });
+
+                stakings.forEach(async staking => {
+                    if (staking.campaignId == campaign.id && staking.block <= block) {
+                        if (staking.block == block || (block == start && staking.block < start)) {
+                            totalQuantities += staking.quantity;
                         }
                     }
                 });
+
+                console.log(`totalQuantities: ${totalQuantities}`);
             }
 
             stakerRewards.forEach(async (value, key) => {
-                const [ reward, created ] = await Reward.findOrCreate({
+                const [ reward, _ ] = await Reward.findOrCreate({
                     where: {
                         campaignId: campaign.id,
                         address: key
@@ -121,7 +134,7 @@ export async function computeRewards(req, res) {
                     quantity: 0
                 });
                 reward.quantity += value;
-                reward.save();
+                await reward.save();
             });
 
             campaign.lastBlockReward = blockid;

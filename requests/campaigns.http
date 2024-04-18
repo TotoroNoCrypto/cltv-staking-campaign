@@ -40,8 +40,16 @@ Content-Type: application/json
   "blockEnd": 1502000
 }
 
-### Reset last block rewards
+### Reset last block rewards 1
 PUT {{api}}/1
+Content-Type: application/json
+
+{
+  "lastBlockReward": 0
+}
+
+### Reset last block rewards 1
+PUT {{api}}/2
 Content-Type: application/json
 
 {

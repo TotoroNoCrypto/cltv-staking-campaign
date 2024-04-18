@@ -36,5 +36,16 @@ Content-Type: application/json
   "block": 840025
 }
 
+### Create staking 4
+POST {{api}}
+Content-Type: application/json
+
+{
+  "campaignId": 1,
+  "address": "address1",
+  "quantity": 1,
+  "block": 840035
+}
+
 ### Get staking
 GET {{api}}/4
