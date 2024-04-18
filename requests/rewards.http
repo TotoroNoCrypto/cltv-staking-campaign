@@ -1,0 +1,38 @@
+@api = http://localhost:3000/api/rewards
+
+### Get rewards
+GET {{api}}
+
+### Create reward 1
+POST {{api}}
+Content-Type: application/json
+
+{
+  "campaignId": 1,
+  "address": "address1",
+  "quantity": 120
+}
+
+### Create reward 2
+POST {{api}}
+Content-Type: application/json
+
+{
+  "campaignId": 1,
+  "address": "address2",
+  "quantity": 1
+}
+
+### Get reward
+GET {{api}}/1
+
+### Update reward
+PUT {{api}}/1
+Content-Type: application/json
+
+{
+  "quantity": 50
+}
+
+### Delete campaign
+DELETE {{api}}/3

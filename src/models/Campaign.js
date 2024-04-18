@@ -1,6 +1,7 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../database/database.js";
 import { Staking } from "./Staking.js";
+import { Reward } from "./Reward.js";
 
 export const Campaign = sequelize.define(
     "campaigns",
@@ -11,7 +12,8 @@ export const Campaign = sequelize.define(
             autoIncrement: true
         },
         name: {
-            type: DataTypes.STRING
+            type: DataTypes.STRING,
+            unique: true
         },
         quantity: {
             type: DataTypes.INTEGER
@@ -26,6 +28,11 @@ export const Campaign = sequelize.define(
 );
 
 Staking.belongsTo(Campaign, {
+    foreinkey: "campaignId",
+    targetId: "id"
+});
+
+Reward.belongsTo(Campaign, {
     foreinkey: "campaignId",
     targetId: "id"
 });
