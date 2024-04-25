@@ -1,0 +1,17 @@
+{
+    "compilerOptions":{
+        "module":"CommonJS",
+        "target":"ESNext",
+        "strict":true,
+        "esModuleInterop":true,
+        "forceConsistentCasingInFileNames":true,
+        "outDir":"./dist"
+    },
+    "include":[
+        "src/**/*"
+    ],
+    "exclude":[
+        "**/*.spec.ts"
+    ]
+  }
+  

@@ -6,7 +6,7 @@ import {
     updateReward,
     deleteReward,
     computeRewards
-} from "../controllers/reward.controller.js";
+} from "../controllers/reward.controller";
 
 const router = Router();
 

@@ -1,7 +1,7 @@
 import express from "express";
-import campaignRoutes from "./routes/campaigns.routes.js";
-import stakingRoutes from "./routes/stakings.routes.js";
-import rewardRoutes from "./routes/rewards.routes.js";
+import campaignRoutes from "./routes/campaigns.routes";
+import stakingRoutes from "./routes/stakings.routes";
+import rewardRoutes from "./routes/rewards.routes";
 
 const app = express();
 

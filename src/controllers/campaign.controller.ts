@@ -1,19 +1,20 @@
-import { Campaign } from "../models/Campaign.js";
+import { Request, Response } from 'express';
+import { Campaign } from "../models/Campaign";
 
-export async function getCampaigns(_, res) {
+export async function getCampaigns(_: Request, res: Response) {
     try {
         const campaigns = await Campaign.findAll({
-            atributes: ["id", "name", "quantity", "blockStart", "blockEnd", "lastBlockReward"],
+            attributes: ["id", "name", "quantity", "blockStart", "blockEnd", "lastBlockReward"],
         });
         res.json(campaigns);
     } catch (error) {
-        res.status(500).json({
-            message: error.message,
-        });
+        if (error instanceof Error) {
+            res.status(500).json({ message: error.message });
+        }
     }
 }
 
-export async function createCampaign(req, res) {
+export async function createCampaign(req: Request, res: Response) {
     try {
         const { name, quantity, blockStart, blockEnd, lastBlockReward } = req.body;
         let newCampaign = await Campaign.create({
@@ -28,13 +29,13 @@ export async function createCampaign(req, res) {
         });
         return res.json(newCampaign);
     } catch (error) {
-        res.status(500).json({
-            message: error.message,
-        });
+        if (error instanceof Error) {
+            res.status(500).json({ message: error.message });
+        }
     }
 }
 
-export async function getCampaign(req, res) {
+export async function getCampaign(req: Request, res: Response) {
     try {
         const { id } = req.params;
         const campaign = await Campaign.findOne({
@@ -44,18 +45,22 @@ export async function getCampaign(req, res) {
         });
         res.json(campaign);
     } catch (error) {
-        res.status(500).json({
-            message: error.message,
-        });
+        if (error instanceof Error) {
+            res.status(500).json({ message: error.message });
+        }
     }
 }
 
-export const updateCampaign = async (req, res) => {
+export const updateCampaign = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
         const { name, quantity, blockStart, blockEnd, lastBlockReward } = req.body;
 
         const campaign = await Campaign.findByPk(id);
+        if (!campaign) {
+            throw new Error('Model not found')
+        }
+        
         campaign.name = name;
         campaign.quantity = quantity;
         campaign.blockStart = blockStart;
@@ -65,11 +70,13 @@ export const updateCampaign = async (req, res) => {
 
         res.json(campaign);
     } catch (error) {
-        return res.status(500).json({ message: error.message });
+        if (error instanceof Error) {
+            return res.status(500).json({ message: error.message });
+        }
     }
 };
 
-export async function deleteCampaign(req, res) {
+export async function deleteCampaign(req: Request, res: Response) {
     try {
         const { id } = req.params;
         await Campaign.destroy({
@@ -79,6 +86,8 @@ export async function deleteCampaign(req, res) {
         });
         return res.sendStatus(204);
     } catch (error) {
-        return res.status(500).json({ message: error.message });
+        if (error instanceof Error) {
+            return res.status(500).json({ message: error.message });
+        }
     }
 }

@@ -1,7 +1,15 @@
-import { DataTypes } from "sequelize";
-import { sequelize } from "../database/database.js";
+import { DataTypes, Model } from "sequelize";
+import { sequelize } from "../database/database";
 
-export const Staking = sequelize.define(
+interface StakingModel extends Model {
+    id: number;
+    campaignId: number;
+    address: string;
+    quantity: number;
+    block: number;
+}
+
+export const Staking = sequelize.define<StakingModel>(
     "stakings",
     {
         id: {

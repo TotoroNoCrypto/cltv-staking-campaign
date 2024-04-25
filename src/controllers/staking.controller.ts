@@ -1,19 +1,20 @@
-import { Staking } from "../models/Staking.js";
+import { Request, Response } from 'express';
+import { Staking } from "../models/Staking";
 
-export async function getStakings(_, res) {
+export async function getStakings(_: Request, res: Response) {
     try {
         const stakings = await Staking.findAll({
-            atributes: ["id", "campaignId", "address", "quantity", "block"],
+            attributes: ["id", "campaignId", "address", "quantity", "block"],
         });
         res.json(stakings);
     } catch (error) {
-        res.status(500).json({
-            message: error.message,
-        });
+        if (error instanceof Error) {
+            res.status(500).json({ message: error.message });
+        }
     }
 }
 
-export async function createStaking(req, res) {
+export async function createStaking(req: Request, res: Response) {
     try {
         const { campaignId, address, quantity, block } = req.body;
         let newStaking = await Staking.create({
@@ -27,13 +28,13 @@ export async function createStaking(req, res) {
         });
         return res.json(newStaking);
     } catch (error) {
-        res.status(500).json({
-            message: error.message,
-        });
+        if (error instanceof Error) {
+            res.status(500).json({ message: error.message });
+        }
     }
 }
 
-export async function getStaking(req, res) {
+export async function getStaking(req: Request, res: Response) {
     try {
         const { id } = req.params;
         const staking = await Staking.findOne({
@@ -43,8 +44,8 @@ export async function getStaking(req, res) {
         });
         res.json(staking);
     } catch (error) {
-        res.status(500).json({
-            message: error.message,
-        });
+        if (error instanceof Error) {
+            res.status(500).json({ message: error.message });
+        }
     }
 }

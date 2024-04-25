@@ -1,21 +1,22 @@
-import { Reward } from "../models/Reward.js";
-import { Campaign } from "../models/Campaign.js";
-import { Staking } from "../models/Staking.js";
+import { Request, Response } from 'express';
+import { Reward } from "../models/Reward";
+import { Campaign } from "../models/Campaign";
+import { Staking } from "../models/Staking";
 
-export async function getRewards(_, res) {
+export async function getRewards(_: Request, res: Response) {
     try {
         const rewards = await Reward.findAll({
-            atributes: ["id", "campaignId", "address", "quantity"],
+            attributes: ["id", "campaignId", "address", "quantity"],
         });
         res.json(rewards);
     } catch (error) {
-        res.status(500).json({
-            message: error.message,
-        });
+        if (error instanceof Error) {
+            res.status(500).json({  message: error.message });
+        }
     }
 }
 
-export async function createReward(req, res) {
+export async function createReward(req: Request, res: Response) {
     try {
         const { campaignId, address, quantity } = req.body;
         let newReward = await Reward.create({
@@ -28,13 +29,13 @@ export async function createReward(req, res) {
         });
         return res.json(newReward);
     } catch (error) {
-        res.status(500).json({
-            message: error.message,
-        });
+        if (error instanceof Error) {
+            res.status(500).json({ message: error.message });
+        }
     }
 }
 
-export async function getReward(req, res) {
+export async function getReward(req: Request, res: Response) {
     try {
         const { id } = req.params;
         const reward = await Reward.findOne({
@@ -44,28 +45,34 @@ export async function getReward(req, res) {
         });
         res.json(reward);
     } catch (error) {
-        res.status(500).json({
-            message: error.message,
-        });
+        if (error instanceof Error) {
+            res.status(500).json({ message: error.message });
+        }
     }
 }
 
-export const updateReward = async (req, res) => {
+export const updateReward = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
         const { quantity } = req.body;
 
         const reward = await Reward.findByPk(id);
+        if (!reward) {
+            throw new Error('Model not found')
+        }
+
         reward.quantity = quantity;
         await reward.save();
 
         res.json(reward);
     } catch (error) {
-        return res.status(500).json({ message: error.message });
+        if (error instanceof Error) {
+            return res.status(500).json({ message: error.message });
+        }
     }
 };
 
-export async function deleteReward(req, res) {
+export async function deleteReward(req: Request, res: Response) {
     try {
         const { id } = req.params;
         await Reward.destroy({
@@ -75,18 +82,20 @@ export async function deleteReward(req, res) {
         });
         return res.sendStatus(204);
     } catch (error) {
-        return res.status(500).json({ message: error.message });
+        if (error instanceof Error) {
+            return res.status(500).json({ message: error.message });
+        }
     }
 }
 
-export async function computeRewards(req, res) {
+export async function computeRewards(req: Request, res: Response) {
     try {
         const { blockid } = req.params;
         const campaigns = await Campaign.findAll({
-            atributes: ["id", "name", "quantity", "blockStart", "blockEnd", "lastBlockReward"],
+            attributes: ["id", "name", "quantity", "blockStart", "blockEnd", "lastBlockReward"],
         });
         const stakings = await Staking.findAll({
-            atributes: ["id", "campaignId", "address", "quantity", "block"],
+            attributes: ["id", "campaignId", "address", "quantity", "block"],
         });
 
         campaigns.forEach(async campaign => {
@@ -97,7 +106,7 @@ export async function computeRewards(req, res) {
             const start = campaign.lastBlockReward > campaign.blockStart ?
                 campaign.lastBlockReward :
                 campaign.blockStart;
-            const end = blockid;
+            const end = parseInt(blockid);
             for (let block = start; block <= end; block++) {
                 let share = totalQuantities > 0 ? rewardPerBlock / totalQuantities : 0;
                 share = Math.round(share * 10 ** 8) / 10 ** 8;
@@ -125,20 +134,21 @@ export async function computeRewards(req, res) {
                     where: {
                         campaignId: campaign.id,
                         address: key
-                    },
-                    quantity: 0
+                    }
                 });
                 reward.quantity += value;
                 await reward.save();
             });
 
-            campaign.lastBlockReward = blockid;
+            campaign.lastBlockReward = parseInt(blockid);
             await campaign.save();
 
         });
         
         return res.sendStatus(204);
     } catch (error) {
-        return res.status(500).json({ message: error.message });
+        if (error instanceof Error) {
+            return res.status(500).json({ message: error.message });
+        }
     }
 }

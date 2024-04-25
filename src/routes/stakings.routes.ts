@@ -3,7 +3,7 @@ import {
     getStakings,
     createStaking,
     getStaking
-} from "../controllers/staking.controller.js";
+} from "../controllers/staking.controller";
 
 const router = Router();
 

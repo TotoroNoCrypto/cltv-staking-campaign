@@ -1,9 +1,18 @@
-import { DataTypes } from "sequelize";
-import { sequelize } from "../database/database.js";
-import { Staking } from "./Staking.js";
-import { Reward } from "./Reward.js";
+import { DataTypes, Model } from "sequelize";
+import { sequelize } from "../database/database";
+import { Staking } from "./Staking";
+import { Reward } from "./Reward";
 
-export const Campaign = sequelize.define(
+interface CampaignModel extends Model {
+    id: number;
+    name: string;
+    quantity: number;
+    blockStart: number;
+    blockEnd: number;
+    lastBlockReward: number;
+}
+
+export const Campaign = sequelize.define<CampaignModel>(
     "campaigns",
     {
         id: {
@@ -30,12 +39,5 @@ export const Campaign = sequelize.define(
     }
 );
 
-Staking.belongsTo(Campaign, {
-    foreinkey: "campaignId",
-    targetId: "id"
-});
-
-Reward.belongsTo(Campaign, {
-    foreinkey: "campaignId",
-    targetId: "id"
-});
+Staking.belongsTo(Campaign, { foreignKey: "campaignId" });
+Reward.belongsTo(Campaign, { foreignKey: "campaignId" });

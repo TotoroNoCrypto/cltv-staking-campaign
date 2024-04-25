@@ -5,7 +5,7 @@ import {
     getCampaign,
     updateCampaign,
     deleteCampaign
-} from "../controllers/campaign.controller.js";
+} from "../controllers/campaign.controller";
 
 const router = Router();
 
