@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
-import { Reward } from "../models/Reward";
-import { Campaign } from "../models/Campaign";
-import { Staking } from "../models/Staking";
+import { Reward } from "../models/reward.model";
+import { Campaign } from "../models/campaign.model";
+import { Staking } from "../models/staking.model";
 
 export async function getRewards(_: Request, res: Response) {
     try {

@@ -1,7 +1,7 @@
 import { DataTypes, Model } from "sequelize";
 import { sequelize } from "../database/database";
-import { Staking } from "./Staking";
-import { Reward } from "./Reward";
+import { Staking } from "./staking.model";
+import { Reward } from "./reward.model";
 
 interface CampaignModel extends Model {
     id: number;

@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { Campaign } from "../models/Campaign";
+import { Campaign } from "../models/campaign.model";
 
 export async function getCampaigns(_: Request, res: Response) {
     try {
@@ -60,7 +60,7 @@ export const updateCampaign = async (req: Request, res: Response) => {
         if (!campaign) {
             throw new Error('Model not found')
         }
-        
+
         campaign.name = name;
         campaign.quantity = quantity;
         campaign.blockStart = blockStart;

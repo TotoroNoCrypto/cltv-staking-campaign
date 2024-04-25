@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { Staking } from "../models/Staking";
+import { Staking } from "../models/staking.model";
 
 export async function getStakings(_: Request, res: Response) {
     try {
