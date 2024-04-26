@@ -54,9 +54,6 @@ export class SignatureService {
     })
 
     psbt.finalizeInput(0, this.getFinalScripts).finalizeInput(1)
-
-    console.log(`Finalized psbt: ${psbt.toBase64()}`)
-
     const tx = psbt.extractTransaction(true)
 
     return {
