@@ -1,8 +1,8 @@
 import { bitcoin } from '@unisat/wallet-sdk/lib/bitcoin-core'
+import { toXOnly } from '@unisat/wallet-sdk/lib/utils'
 import { Network } from 'bitcoinjs-lib/src/networks'
 import { Payment } from 'bitcoinjs-lib/src/payments'
 import { Psbt } from 'bitcoinjs-lib/src/psbt'
-import { toXOnly } from '@unisat/wallet-sdk/lib/utils'
 import { UnisatConnector } from '../unisatConnector'
 import { getFastestFee } from '../utils'
 import config from 'config'
@@ -92,7 +92,7 @@ export class PsbtService {
         address: stakerPayment.address!,
       })
 
-    return psbt.toBase64()
+    return psbt.toHex()
   }
 
   public async claim(
