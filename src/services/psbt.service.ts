@@ -7,25 +7,11 @@ import config from 'config'
 const bip65 = require('bip65')
 
 import { UnisatConnector } from '../unisatConnector'
-import { getFastestFee } from '../utils'
+import { getFastestFee, getTxHex } from '../utils'
 
 const network = config.get<Network>('bitcoin.network')
 const unisatApiToken = config.get<string>('unisat.apiToken')
 const unisatApiUrl = config.get<string>('unisat.apiUrl')
-const claimInscriptionUtxoTxid = Buffer.from(
-  config.get<string>('claimInscriptionUtxo.txid'),
-  'hex',
-)
-const claimInscriptionUtxoTxHex = config.get<string>(
-  'claimInscriptionUtxo.txhex',
-)
-const claimInscriptionUtxoVout = config.get<number>('claimInscriptionUtxo.vout')
-const claimInscriptionSatoshi = config.get<number>(
-  'claimInscriptionUtxo.satoshi',
-)
-const claimTtxid = Buffer.from(config.get<string>('claimUtxo.txid'), 'hex')
-const claimVout = config.get<number>('claimUtxo.vout')
-const claimSatoshi = config.get<number>('claimUtxo.satoshi')
 const blockheight = config.get<number>('blockheight')
 const stakeSize = config.get<number>('stakeSize')
 const claimSize = config.get<number>('claimSize')
@@ -44,7 +30,7 @@ export class PsbtService {
   ): Promise<string> {
     const fastestFee = await getFastestFee()
     const fee = stakeSize * fastestFee
-    const psbt = await this.getPsbt(
+    const psbt = await this.getStakePsbt(
       taprootAddress,
       pubkeyHex,
       inscriptionTxid,
@@ -59,45 +45,18 @@ export class PsbtService {
     taprootAddress: string,
     pubkeyHex: string,
   ): Promise<string> {
-    const pubkey = this.getPubkey(pubkeyHex)
-    const internalPubkey = this.getInternalPubkey(pubkey)
-    const stakerPayment = this.getStakerPayment(internalPubkey)
-    const cltvPayment = this.getCltvPayment(pubkey)
-
     const fastestFee = await getFastestFee()
-    const claimFee = claimSize * fastestFee
+    const fee = claimSize * fastestFee
+    const psbt = await this.getClaimPsbt(
+      taprootAddress,
+      pubkeyHex,
+      fee
+    )
 
-    const lockTime = this.getLocktime()
-
-    const psbt = new Psbt({ network })
-      .setLocktime(lockTime)
-      .addInput({
-        hash: claimInscriptionUtxoTxid,
-        index: claimInscriptionUtxoVout,
-        sequence: 0xfffffffe,
-        nonWitnessUtxo: Buffer.from(claimInscriptionUtxoTxHex, 'hex'),
-        redeemScript: cltvPayment.redeem!.output!,
-      })
-      .addInput({
-        hash: claimTtxid,
-        index: claimVout,
-        sequence: 0,
-        witnessUtxo: { value: claimSatoshi, script: stakerPayment.output! },
-        tapInternalKey: internalPubkey,
-      })
-      .addOutput({
-        script: stakerPayment.output!,
-        value: claimInscriptionSatoshi,
-      })
-      .addOutput({
-        script: stakerPayment.output!,
-        value: claimSatoshi - claimFee,
-      })
-
-    return psbt.toBase64()
+    return psbt.toHex()
   }
 
-  private static async getPsbt(
+  private static async getStakePsbt(
     taprootAddress: string,
     pubkeyHex: string,
     inscriptionTxid: string,
@@ -153,6 +112,82 @@ export class PsbtService {
     return psbt
   }
 
+  private static async getClaimPsbt(
+    taprootAddress: string,
+    pubkeyHex: string,
+    fee: number,
+  ): Promise<Psbt> {
+    const pubkey = this.getPubkey(pubkeyHex)
+    const internalPubkey = this.getInternalPubkey(pubkey)
+    const stakerPayment = this.getStakerPayment(internalPubkey)
+    const cltvPayment = this.getCltvPayment(pubkey)
+
+    const btcUtxo = await this.findBtcUtxo(taprootAddress, fee)
+    if (btcUtxo === undefined) {
+      throw new Error('BTC UTXO not found')
+    }
+
+    let scriptInscriptionUtxos = await this.getInscriptionUtxos(
+      stakerPayment.address!,
+    )
+    // Inscription UTXO should always be index 0
+    if (scriptInscriptionUtxos.length > 1) {
+      scriptInscriptionUtxos = [ scriptInscriptionUtxos[0] ]
+    }
+    const scriptBtcUtxos = await this.getBtcUtxos(
+      stakerPayment.address!,
+    )
+    const scriptUtxos = scriptInscriptionUtxos.concat(scriptBtcUtxos)
+
+    if (scriptUtxos.length === 0 ) {
+      throw new Error('No UTXO found on script')
+    }
+
+    const lockTime = this.getLocktime()
+
+    const psbt = new Psbt({ network })
+      .setLocktime(lockTime)
+    
+    for (let index = 0; index < scriptUtxos.length; index++) {
+      const utxo = scriptUtxos[index]
+      const txHex = await getTxHex(utxo.txid)
+      psbt
+        .addInput({
+          hash: utxo.txid,
+          index: utxo.vout,
+          sequence: 0xfffffffe,
+          nonWitnessUtxo: Buffer.from(txHex, 'hex'),
+          redeemScript: cltvPayment.redeem!.output!,
+        })
+    }
+
+    psbt
+      .addInput({
+        hash: btcUtxo.txid,
+        index: btcUtxo.vout,
+        sequence: 0,
+        witnessUtxo: { value: btcUtxo.satoshi, script: stakerPayment.output! },
+        tapInternalKey: internalPubkey,
+      });
+    
+    for (let index = 0; index < scriptUtxos.length; index++) {
+      const utxo = scriptUtxos[index]
+      psbt
+        .addOutput({
+          script: stakerPayment.output!,
+          value: utxo.satoshi,
+        })
+    }
+    
+    psbt
+      .addOutput({
+        script: stakerPayment.output!,
+        value: btcUtxo.satoshi - fee,
+      })
+
+    return psbt
+  }
+
   private static async findBtcUtxo(
     taprootAddress: string,
     stakeFee: number,
@@ -173,11 +208,6 @@ export class PsbtService {
       cursor++
     } while (utxos.size > 0 && utxo === undefined)
 
-    return {
-      txid: 'df1309581c0c3274ef446e7b48483e0051c160a332b0f4337d4718666e9e3463',
-      vout: 1,
-      satoshi: 7634,
-    }
     return utxo != undefined
       ? { txid: utxo.txid, vout: utxo.vout, satoshi: utxo.satoshi }
       : undefined
@@ -207,14 +237,64 @@ export class PsbtService {
       cursor++
     } while (utxos.size > 0 && utxo === undefined)
 
-    return {
-      txid: 'df950d1d931065a94a2f6e51fe9abdd15042a896d73dcd8f6eb757566e4ebf73',
-      vout: 0,
-      satoshi: 546,
-    }
     return utxo != undefined
       ? { txid: utxo.txid, vout: utxo.vout, satoshi: utxo.satoshi }
       : undefined
+  }
+
+  private static async getBtcUtxos(
+    address: string,
+  ): Promise<Array<{ txid: string; vout: number; satoshi: number }>> {
+    let utxos: Array<{ txid: string; vout: number; satoshi: number }> = []
+    let cursor = 0
+    const size = 16
+
+    do {
+      const result = await this.unisatConnector.general.getBtcUtxo(
+        address,
+        cursor * size,
+        size,
+      )
+      if (result.data.utxo.length == 0) {
+        break;
+      }
+
+      utxos = utxos.concat(result.data.utxo)
+      cursor++
+    } while (true)
+
+    return utxos
+  }
+
+  private static async getInscriptionUtxos(
+    address: string,
+  ): Promise<Array<{ txid: string; vout: number; satoshi: number }>> {
+    let utxos: Array<{ txid: string; vout: number; satoshi: number }> = []
+    let cursor = 0
+    const size = 16
+
+    do {
+      const result = await this.unisatConnector.general.getInscriptionUtxo(
+        address,
+        cursor * size,
+        size,
+      )
+      const filteredUtxos = result.data.utxo.filter(
+        (u: { txid: string; vout: number; inscriptions: { moved: boolean; }[]; }) =>
+          u.inscriptions.find(
+            (i: { moved: boolean; }) =>
+              !i.moved,
+          ) !== undefined,
+      )
+      if (filteredUtxos.length == 0) {
+        break;
+      }
+
+      utxos = utxos.concat(filteredUtxos)
+      cursor++
+    } while (true)
+
+    return utxos
   }
 
   private static getStakerPayment(internalPubkey: Buffer): Payment {
