@@ -1,9 +1,9 @@
 import { Router } from 'express'
 
-import { stake } from '../controllers/blockchain.controller'
+import { broadcast } from '../controllers/blockchain.controller'
 
 const router = Router()
 
-router.post('/stake', stake)
+router.post('/broadcast', broadcast)
 
 export default router

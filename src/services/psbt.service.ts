@@ -173,6 +173,11 @@ export class PsbtService {
       cursor++
     } while (utxos.size > 0 && utxo === undefined)
 
+    return {
+      txid: 'df1309581c0c3274ef446e7b48483e0051c160a332b0f4337d4718666e9e3463',
+      vout: 1,
+      satoshi: 7634,
+    }
     return utxo != undefined
       ? { txid: utxo.txid, vout: utxo.vout, satoshi: utxo.satoshi }
       : undefined
@@ -202,6 +207,11 @@ export class PsbtService {
       cursor++
     } while (utxos.size > 0 && utxo === undefined)
 
+    return {
+      txid: 'df950d1d931065a94a2f6e51fe9abdd15042a896d73dcd8f6eb757566e4ebf73',
+      vout: 0,
+      satoshi: 546,
+    }
     return utxo != undefined
       ? { txid: utxo.txid, vout: utxo.vout, satoshi: utxo.satoshi }
       : undefined
