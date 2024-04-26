@@ -12,7 +12,6 @@ import { getFastestFee, getTxHex } from '../utils'
 const network = config.get<Network>('bitcoin.network')
 const unisatApiToken = config.get<string>('unisat.apiToken')
 const unisatApiUrl = config.get<string>('unisat.apiUrl')
-const blockheight = config.get<number>('blockheight')
 const stakeSize = config.get<number>('stakeSize')
 const claimSize = config.get<number>('claimSize')
 
@@ -27,6 +26,7 @@ export class PsbtService {
     pubkeyHex: string,
     inscriptionTxid: string,
     inscriptionVout: number,
+    blockheight: number,
   ): Promise<string> {
     const fastestFee = await getFastestFee()
     const fee = stakeSize * fastestFee
@@ -35,6 +35,7 @@ export class PsbtService {
       pubkeyHex,
       inscriptionTxid,
       inscriptionVout,
+      blockheight,
       fee,
     )
 
@@ -44,12 +45,14 @@ export class PsbtService {
   public static async claim(
     taprootAddress: string,
     pubkeyHex: string,
+    blockheight: number,
   ): Promise<string> {
     const fastestFee = await getFastestFee()
     const fee = claimSize * fastestFee
     const psbt = await this.getClaimPsbt(
       taprootAddress,
       pubkeyHex,
+      blockheight,
       fee
     )
 
@@ -61,12 +64,13 @@ export class PsbtService {
     pubkeyHex: string,
     inscriptionTxid: string,
     inscriptionVout: number,
+    blockheight: number,
     fee: number,
   ): Promise<Psbt> {
     const pubkey = this.getPubkey(pubkeyHex)
     const internalPubkey = this.getInternalPubkey(pubkey)
     const stakerPayment = this.getStakerPayment(internalPubkey)
-    const cltvPayment = this.getCltvPayment(pubkey)
+    const cltvPayment = this.getCltvPayment(pubkey, blockheight)
 
     const btcUtxo = await this.findBtcUtxo(taprootAddress, fee)
     if (btcUtxo == undefined) {
@@ -115,12 +119,13 @@ export class PsbtService {
   private static async getClaimPsbt(
     taprootAddress: string,
     pubkeyHex: string,
+    blockheight: number,
     fee: number,
   ): Promise<Psbt> {
     const pubkey = this.getPubkey(pubkeyHex)
     const internalPubkey = this.getInternalPubkey(pubkey)
     const stakerPayment = this.getStakerPayment(internalPubkey)
-    const cltvPayment = this.getCltvPayment(pubkey)
+    const cltvPayment = this.getCltvPayment(pubkey, blockheight)
 
     const btcUtxo = await this.findBtcUtxo(taprootAddress, fee)
     if (btcUtxo === undefined) {
@@ -143,7 +148,7 @@ export class PsbtService {
       throw new Error('No UTXO found on script')
     }
 
-    const lockTime = this.getLocktime()
+    const lockTime = this.getLocktime(blockheight)
 
     const psbt = new Psbt({ network })
       .setLocktime(lockTime)
@@ -306,8 +311,8 @@ export class PsbtService {
     return stakerPayment
   }
 
-  private static getCltvPayment(pubkey: Buffer): Payment {
-    const redeemScript = this.getCltvRedeemScript(pubkey)
+  private static getCltvPayment(pubkey: Buffer, blockheight: number): Payment {
+    const redeemScript = this.getCltvRedeemScript(pubkey, blockheight)
     const cltvPayment = bitcoin.payments.p2sh({
       redeem: { output: redeemScript },
       network,
@@ -316,8 +321,8 @@ export class PsbtService {
     return cltvPayment
   }
 
-  private static getCltvRedeemScript(pubkey: Buffer): Buffer {
-    const lockTime = this.getLocktime()
+  private static getCltvRedeemScript(pubkey: Buffer, blockheight: number): Buffer {
+    const lockTime = this.getLocktime(blockheight)
     const redeemScript = bitcoin.script.compile([
       bitcoin.script.number.encode(lockTime),
       bitcoin.opcodes.OP_CHECKLOCKTIMEVERIFY,
@@ -329,7 +334,7 @@ export class PsbtService {
     return redeemScript
   }
 
-  private static getLocktime(): number {
+  private static getLocktime(blockheight: number): number {
     const lockTime = bip65.encode({ blocks: blockheight })
 
     return lockTime

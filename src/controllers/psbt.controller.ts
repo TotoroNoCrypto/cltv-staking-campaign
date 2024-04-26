@@ -3,9 +3,9 @@ import { PsbtService } from '../services/psbt.service'
 
 export async function stake(req: Request, res: Response): Promise<Response> {
   try {
-    const { taproot, pubKey, txid, vout } = req.body
+    const { taproot, pubKey, txid, vout, blockheight } = req.body
 
-    const psbt = await PsbtService.stake(taproot, pubKey, txid, vout)
+    const psbt = await PsbtService.stake(taproot, pubKey, txid, vout, blockheight)
 
     return res.json(psbt)
   } catch (error) {
@@ -18,10 +18,10 @@ export async function stake(req: Request, res: Response): Promise<Response> {
 
 export async function claim(req: Request, res: Response): Promise<Response> {
   try {
-    const { taproot, pubKey } = req.body
+    const { taproot, pubKey, blockheight } = req.body
     console.log('Into claim')
 
-    const psbt = await PsbtService.claim(taproot, pubKey)
+    const psbt = await PsbtService.claim(taproot, pubKey, blockheight)
 
     return res.json(psbt)
   } catch (error) {
