@@ -5,8 +5,7 @@ export async function stake(req: Request, res: Response): Promise<Response> {
   try {
     const { taproot, pubKey, txid, vout } = req.body
 
-    const psbtService = new PsbtService()
-    const psbt = await psbtService.stake(taproot, pubKey, txid, vout)
+    const psbt = await PsbtService.stake(taproot, pubKey, txid, vout)
 
     return res.json(psbt)
   } catch (error) {
@@ -22,8 +21,7 @@ export async function claim(req: Request, res: Response): Promise<Response> {
     const { taproot, pubKey } = req.body
     console.log('Into claim')
 
-    const psbtService = new PsbtService()
-    const psbt = await psbtService.claim(taproot, pubKey)
+    const psbt = await PsbtService.claim(taproot, pubKey)
 
     return res.json(psbt)
   } catch (error) {

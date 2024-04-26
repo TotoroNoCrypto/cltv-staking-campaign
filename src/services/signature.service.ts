@@ -11,7 +11,7 @@ const networkType = config.get<NetworkType>('bitcoin.networkType')
 const wif = config.get<string>('wallet.wif')
 
 export class SignatureService {
-  public async stake(
+  public static async stake(
     psbtHex: string,
   ): Promise<{ txSize: number; psbtHex: string; txHex: string }> {
     const signer = this.getSigner()
@@ -34,7 +34,7 @@ export class SignatureService {
     }
   }
 
-  private getWallet(signer: ECPairInterface): LocalWallet {
+  private static getWallet(signer: ECPairInterface): LocalWallet {
     const wallet = new LocalWallet(
       signer.toWIF(),
       AddressType.P2WPKH,
@@ -44,7 +44,7 @@ export class SignatureService {
     return wallet
   }
 
-  private getSigner(): ECPairInterface {
+  private static getSigner(): ECPairInterface {
     const signer = ECPair.fromWIF(wif, network)
 
     return signer

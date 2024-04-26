@@ -5,8 +5,7 @@ export async function stake(req: Request, res: Response): Promise<Response> {
   try {
     const { psbtHex } = req.body
 
-    const signatureService = new SignatureService()
-    const tx = await signatureService.stake(psbtHex)
+    const tx = await SignatureService.stake(psbtHex)
 
     return res.json(tx)
   } catch (error) {

@@ -31,71 +31,31 @@ const stakeSize = config.get<number>('stakeSize')
 const claimSize = config.get<number>('claimSize')
 
 export class PsbtService {
-  private unisatConnector: UnisatConnector
+  private static unisatConnector: UnisatConnector = new UnisatConnector(
+    unisatApiUrl,
+    unisatApiToken,
+  )
 
-  constructor() {
-    this.unisatConnector = new UnisatConnector(unisatApiUrl, unisatApiToken)
-  }
-
-  public async stake(
+  public static async stake(
     taprootAddress: string,
     pubkeyHex: string,
     inscriptionTxid: string,
     inscriptionVout: number,
   ): Promise<string> {
-    const pubkey = this.getPubkey(pubkeyHex)
-    const internalPubkey = this.getInternalPubkey(pubkey)
-    const stakerPayment = this.getStakerPayment(internalPubkey)
-    const cltvPayment = this.getCltvPayment(pubkey)
-
     const fastestFee = await getFastestFee()
-    const stakeFee = stakeSize * fastestFee
-
-    const btcUtxo = await this.findBtcUtxo(taprootAddress, stakeFee)
-    if (btcUtxo == undefined) {
-      throw new Error('BTC UTXO not found')
-    }
-
-    const inscriptionUtxo = await this.findInscriptionUtxo(
+    const fee = stakeSize * fastestFee
+    const psbt = await this.getPsbt(
       taprootAddress,
+      pubkeyHex,
       inscriptionTxid,
       inscriptionVout,
+      fee,
     )
-    if (inscriptionUtxo == undefined) {
-      throw new Error('Inscription UTXO not found')
-    }
-
-    const psbt = new bitcoin.Psbt({ network })
-      .addInput({
-        hash: inscriptionTxid,
-        index: inscriptionVout,
-        sequence: 0,
-        witnessUtxo: {
-          value: inscriptionUtxo.satoshi,
-          script: stakerPayment.output!,
-        },
-        tapInternalKey: internalPubkey,
-      })
-      .addInput({
-        hash: btcUtxo.txid,
-        index: btcUtxo.vout,
-        sequence: 0,
-        witnessUtxo: { value: btcUtxo.satoshi, script: stakerPayment.output! },
-        tapInternalKey: internalPubkey,
-      })
-      .addOutput({
-        value: inscriptionUtxo.satoshi,
-        address: cltvPayment.address!,
-      })
-      .addOutput({
-        value: btcUtxo.satoshi - stakeFee,
-        address: stakerPayment.address!,
-      })
 
     return psbt.toHex()
   }
 
-  public async claim(
+  public static async claim(
     taprootAddress: string,
     pubkeyHex: string,
   ): Promise<string> {
@@ -137,7 +97,63 @@ export class PsbtService {
     return psbt.toBase64()
   }
 
-  private async findBtcUtxo(
+  private static async getPsbt(
+    taprootAddress: string,
+    pubkeyHex: string,
+    inscriptionTxid: string,
+    inscriptionVout: number,
+    fee: number,
+  ): Promise<Psbt> {
+    const pubkey = this.getPubkey(pubkeyHex)
+    const internalPubkey = this.getInternalPubkey(pubkey)
+    const stakerPayment = this.getStakerPayment(internalPubkey)
+    const cltvPayment = this.getCltvPayment(pubkey)
+
+    const btcUtxo = await this.findBtcUtxo(taprootAddress, fee)
+    if (btcUtxo == undefined) {
+      throw new Error('BTC UTXO not found')
+    }
+
+    const inscriptionUtxo = await this.findInscriptionUtxo(
+      taprootAddress,
+      inscriptionTxid,
+      inscriptionVout,
+    )
+    if (inscriptionUtxo == undefined) {
+      throw new Error('Inscription UTXO not found')
+    }
+
+    const psbt = new bitcoin.Psbt({ network })
+      .addInput({
+        hash: inscriptionTxid,
+        index: inscriptionVout,
+        sequence: 0,
+        witnessUtxo: {
+          value: inscriptionUtxo.satoshi,
+          script: stakerPayment.output!,
+        },
+        tapInternalKey: internalPubkey,
+      })
+      .addInput({
+        hash: btcUtxo.txid,
+        index: btcUtxo.vout,
+        sequence: 0,
+        witnessUtxo: { value: btcUtxo.satoshi, script: stakerPayment.output! },
+        tapInternalKey: internalPubkey,
+      })
+      .addOutput({
+        value: inscriptionUtxo.satoshi,
+        address: cltvPayment.address!,
+      })
+      .addOutput({
+        value: btcUtxo.satoshi - fee,
+        address: stakerPayment.address!,
+      })
+
+    return psbt
+  }
+
+  private static async findBtcUtxo(
     taprootAddress: string,
     stakeFee: number,
   ): Promise<{ txid: string; vout: number; satoshi: number } | undefined> {
@@ -162,7 +178,7 @@ export class PsbtService {
       : undefined
   }
 
-  private async findInscriptionUtxo(
+  private static async findInscriptionUtxo(
     taprootAddress: string,
     inscriptionTxid: string,
     inscriptionVout: number,
@@ -191,7 +207,7 @@ export class PsbtService {
       : undefined
   }
 
-  private getStakerPayment(internalPubkey: Buffer): Payment {
+  private static getStakerPayment(internalPubkey: Buffer): Payment {
     const stakerPayment = bitcoin.payments.p2tr({
       internalPubkey,
       network,
@@ -200,7 +216,7 @@ export class PsbtService {
     return stakerPayment
   }
 
-  private getCltvPayment(pubkey: Buffer): Payment {
+  private static getCltvPayment(pubkey: Buffer): Payment {
     const redeemScript = this.getCltvRedeemScript(pubkey)
     const cltvPayment = bitcoin.payments.p2sh({
       redeem: { output: redeemScript },
@@ -210,7 +226,7 @@ export class PsbtService {
     return cltvPayment
   }
 
-  private getCltvRedeemScript(pubkey: Buffer): Buffer {
+  private static getCltvRedeemScript(pubkey: Buffer): Buffer {
     const lockTime = this.getLocktime()
     const redeemScript = bitcoin.script.compile([
       bitcoin.script.number.encode(lockTime),
@@ -223,19 +239,19 @@ export class PsbtService {
     return redeemScript
   }
 
-  private getLocktime(): number {
+  private static getLocktime(): number {
     const lockTime = bip65.encode({ blocks: blockheight })
 
     return lockTime
   }
 
-  private getInternalPubkey(pubkey: Buffer): Buffer {
+  private static getInternalPubkey(pubkey: Buffer): Buffer {
     const internalPubkey = toXOnly(pubkey)
 
     return internalPubkey
   }
 
-  private getPubkey(pubkeyHex: string): Buffer {
+  private static getPubkey(pubkeyHex: string): Buffer {
     const pubkey = Buffer.from(pubkeyHex, 'hex')
 
     return pubkey
