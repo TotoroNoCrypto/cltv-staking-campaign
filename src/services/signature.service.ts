@@ -2,15 +2,15 @@ import {
   ECPair,
   ECPairInterface,
   bitcoin,
-} from '@unisat/wallet-sdk/lib/bitcoin-core';
+} from '@unisat/wallet-sdk/lib/bitcoin-core'
 import { AddressType } from '@unisat/wallet-sdk/lib/'
 import { NetworkType } from '@unisat/wallet-sdk/lib/network'
 import { LocalWallet } from '@unisat/wallet-sdk/lib/wallet'
 import { Network } from 'bitcoinjs-lib/src/networks'
 import { Psbt } from 'bitcoinjs-lib/src/psbt'
-import { PsbtInput } from 'bip174/src/lib/interfaces';
+import { PsbtInput } from 'bip174/src/lib/interfaces'
 import config from 'config'
-const varuint = require('varuint-bitcoin');
+const varuint = require('varuint-bitcoin')
 
 const network = config.get<Network>('bitcoin.network')
 const networkType = config.get<NetworkType>('bitcoin.networkType')
@@ -51,13 +51,13 @@ export class SignatureService {
         { index: 0, publicKey: wallet.pubkey },
         { index: 1, publicKey: wallet.pubkey },
       ],
-    });
+    })
 
-    psbt.finalizeInput(0, this.getFinalScripts).finalizeInput(1);
+    psbt.finalizeInput(0, this.getFinalScripts).finalizeInput(1)
 
-    console.log(`Finalized psbt: ${psbt.toBase64()}`);
+    console.log(`Finalized psbt: ${psbt.toBase64()}`)
 
-    const tx = psbt.extractTransaction(true);
+    const tx = psbt.extractTransaction(true)
 
     return {
       txSize: tx.virtualSize(),
@@ -90,53 +90,53 @@ export class SignatureService {
     isP2SH: boolean,
     isP2WSH: boolean,
   ): {
-    finalScriptSig: Buffer | undefined;
-    finalScriptWitness: Buffer | undefined;
+    finalScriptSig: Buffer | undefined
+    finalScriptWitness: Buffer | undefined
   } {
     let payment: bitcoin.Payment = {
       network,
       input: bitcoin.script.compile([input.partialSig![0].signature]),
       output: script,
-    };
+    }
     if (isP2WSH && isSegwit)
       payment = bitcoin.payments.p2wsh({
         network,
         redeem: payment,
-      });
+      })
     if (isP2SH)
       payment = bitcoin.payments.p2sh({
         network,
         redeem: payment,
-      });
+      })
 
     function witnessStackToScriptWitness(witness: Buffer[]): Buffer {
-      let buffer = Buffer.allocUnsafe(0);
+      let buffer = Buffer.allocUnsafe(0)
 
       function writeSlice(slice: Buffer): void {
-        buffer = Buffer.concat([buffer, Buffer.from(slice)]);
+        buffer = Buffer.concat([buffer, Buffer.from(slice)])
       }
 
       function writeVarInt(i: number): void {
-        const currentLen = buffer.length;
-        const varintLen = varuint.encodingLength(i);
+        const currentLen = buffer.length
+        const varintLen = varuint.encodingLength(i)
 
-        buffer = Buffer.concat([buffer, Buffer.allocUnsafe(varintLen)]);
-        varuint.encode(i, buffer, currentLen);
+        buffer = Buffer.concat([buffer, Buffer.allocUnsafe(varintLen)])
+        varuint.encode(i, buffer, currentLen)
       }
 
       function writeVarSlice(slice: Buffer): void {
-        writeVarInt(slice.length);
-        writeSlice(slice);
+        writeVarInt(slice.length)
+        writeSlice(slice)
       }
 
       function writeVector(vector: Buffer[]): void {
-        writeVarInt(vector.length);
-        vector.forEach(writeVarSlice);
+        writeVarInt(vector.length)
+        vector.forEach(writeVarSlice)
       }
 
-      writeVector(witness);
+      writeVector(witness)
 
-      return buffer;
+      return buffer
     }
 
     return {
@@ -145,6 +145,6 @@ export class SignatureService {
         payment.witness && payment.witness.length > 0
           ? witnessStackToScriptWitness(payment.witness)
           : undefined,
-    };
+    }
   }
 }

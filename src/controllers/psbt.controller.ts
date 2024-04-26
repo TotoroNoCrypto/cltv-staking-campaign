@@ -5,7 +5,13 @@ export async function stake(req: Request, res: Response): Promise<Response> {
   try {
     const { taproot, pubKey, txid, vout, blockheight } = req.body
 
-    const psbt = await PsbtService.stake(taproot, pubKey, txid, vout, blockheight)
+    const psbt = await PsbtService.stake(
+      taproot,
+      pubKey,
+      txid,
+      vout,
+      blockheight,
+    )
 
     return res.json(psbt)
   } catch (error) {

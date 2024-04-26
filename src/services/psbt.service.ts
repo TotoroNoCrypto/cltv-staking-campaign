@@ -53,7 +53,7 @@ export class PsbtService {
       taprootAddress,
       pubkeyHex,
       blockheight,
-      fee
+      fee,
     )
 
     return psbt.toHex()
@@ -137,58 +137,51 @@ export class PsbtService {
     )
     // Inscription UTXO should always be index 0
     if (scriptInscriptionUtxos.length > 1) {
-      scriptInscriptionUtxos = [ scriptInscriptionUtxos[0] ]
+      scriptInscriptionUtxos = [scriptInscriptionUtxos[0]]
     }
-    const scriptBtcUtxos = await this.getBtcUtxos(
-      stakerPayment.address!,
-    )
+    const scriptBtcUtxos = await this.getBtcUtxos(stakerPayment.address!)
     const scriptUtxos = scriptInscriptionUtxos.concat(scriptBtcUtxos)
 
-    if (scriptUtxos.length === 0 ) {
+    if (scriptUtxos.length === 0) {
       throw new Error('No UTXO found on script')
     }
 
     const lockTime = this.getLocktime(blockheight)
 
-    const psbt = new Psbt({ network })
-      .setLocktime(lockTime)
-    
+    const psbt = new Psbt({ network }).setLocktime(lockTime)
+
     for (let index = 0; index < scriptUtxos.length; index++) {
       const utxo = scriptUtxos[index]
       const txHex = await getTxHex(utxo.txid)
-      psbt
-        .addInput({
-          hash: utxo.txid,
-          index: utxo.vout,
-          sequence: 0xfffffffe,
-          nonWitnessUtxo: Buffer.from(txHex, 'hex'),
-          redeemScript: cltvPayment.redeem!.output!,
-        })
+      psbt.addInput({
+        hash: utxo.txid,
+        index: utxo.vout,
+        sequence: 0xfffffffe,
+        nonWitnessUtxo: Buffer.from(txHex, 'hex'),
+        redeemScript: cltvPayment.redeem!.output!,
+      })
     }
 
-    psbt
-      .addInput({
-        hash: btcUtxo.txid,
-        index: btcUtxo.vout,
-        sequence: 0,
-        witnessUtxo: { value: btcUtxo.satoshi, script: stakerPayment.output! },
-        tapInternalKey: internalPubkey,
-      });
-    
+    psbt.addInput({
+      hash: btcUtxo.txid,
+      index: btcUtxo.vout,
+      sequence: 0,
+      witnessUtxo: { value: btcUtxo.satoshi, script: stakerPayment.output! },
+      tapInternalKey: internalPubkey,
+    })
+
     for (let index = 0; index < scriptUtxos.length; index++) {
       const utxo = scriptUtxos[index]
-      psbt
-        .addOutput({
-          script: stakerPayment.output!,
-          value: utxo.satoshi,
-        })
-    }
-    
-    psbt
-      .addOutput({
+      psbt.addOutput({
         script: stakerPayment.output!,
-        value: btcUtxo.satoshi - fee,
+        value: utxo.satoshi,
       })
+    }
+
+    psbt.addOutput({
+      script: stakerPayment.output!,
+      value: btcUtxo.satoshi - fee,
+    })
 
     return psbt
   }
@@ -261,7 +254,7 @@ export class PsbtService {
         size,
       )
       if (result.data.utxo.length == 0) {
-        break;
+        break
       }
 
       utxos = utxos.concat(result.data.utxo)
@@ -285,14 +278,16 @@ export class PsbtService {
         size,
       )
       const filteredUtxos = result.data.utxo.filter(
-        (u: { txid: string; vout: number; inscriptions: { moved: boolean; }[]; }) =>
-          u.inscriptions.find(
-            (i: { moved: boolean; }) =>
-              !i.moved,
-          ) !== undefined,
+        (u: {
+          txid: string
+          vout: number
+          inscriptions: { moved: boolean }[]
+        }) =>
+          u.inscriptions.find((i: { moved: boolean }) => !i.moved) !==
+          undefined,
       )
       if (filteredUtxos.length == 0) {
-        break;
+        break
       }
 
       utxos = utxos.concat(filteredUtxos)
@@ -321,7 +316,10 @@ export class PsbtService {
     return cltvPayment
   }
 
-  private static getCltvRedeemScript(pubkey: Buffer, blockheight: number): Buffer {
+  private static getCltvRedeemScript(
+    pubkey: Buffer,
+    blockheight: number,
+  ): Buffer {
     const lockTime = this.getLocktime(blockheight)
     const redeemScript = bitcoin.script.compile([
       bitcoin.script.number.encode(lockTime),

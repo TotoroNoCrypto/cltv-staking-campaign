@@ -16,7 +16,7 @@ export async function getFastestFee(): Promise<number> {
 export async function getTxHex(txid: string): Promise<string> {
   if (process.env.NODE_ENV === 'mainnet') {
     const {
-      bitcoin: { transactions  },
+      bitcoin: { transactions },
     } = mempoolJS({ hostname: 'mempool.space' })
     const txHex = await transactions.getTxHex({ txid })
 
@@ -24,11 +24,11 @@ export async function getTxHex(txid: string): Promise<string> {
   } else if (process.env.NODE_ENV === 'mainnet') {
     const {
       bitcoin: { transactions },
-    } = mempoolJS({ hostname: 'mempool.space',  network: 'testnet' })
+    } = mempoolJS({ hostname: 'mempool.space', network: 'testnet' })
     const txHex = await transactions.getTxHex({ txid })
 
     return txHex
   }
-  
+
   return ''
 }
