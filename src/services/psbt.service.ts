@@ -3,11 +3,11 @@ import { toXOnly } from '@unisat/wallet-sdk/lib/utils'
 import { Network } from 'bitcoinjs-lib/src/networks'
 import { Payment } from 'bitcoinjs-lib/src/payments'
 import { Psbt } from 'bitcoinjs-lib/src/psbt'
+import config from 'config'
+const bip65 = require('bip65')
+
 import { UnisatConnector } from '../unisatConnector'
 import { getFastestFee } from '../utils'
-import config from 'config'
-
-const bip65 = require('bip65')
 
 const network = config.get<Network>('bitcoin.network')
 const unisatApiToken = config.get<string>('unisat.apiToken')

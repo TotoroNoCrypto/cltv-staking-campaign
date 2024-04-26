@@ -6,7 +6,7 @@ export async function getFastestFee(): Promise<number> {
       bitcoin: { fees },
     } = mempoolJS({ hostname: 'mempool.space' })
     const feesRecmmended = await fees.getFeesRecommended()
-  
+
     return feesRecmmended.fastestFee
   }
 
