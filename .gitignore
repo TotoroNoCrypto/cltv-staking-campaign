@@ -1,1 +1,7 @@
 node_modules/
+dist/
+
+# Config
+config/mainnet.ts
+config/regtest.ts
+config/testnet.ts

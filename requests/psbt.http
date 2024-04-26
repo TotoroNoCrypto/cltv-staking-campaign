@@ -1,0 +1,21 @@
+@api = http://localhost:3000/api/psbt
+
+### Stake
+POST {{api}}/stake
+Content-Type: application/json
+
+{
+    "taproot": "tb1plfn5y8lh4jdw4c5xhxgv9ln8y44ts8duqactuuhrnz0kz2eyk49scr99xq",
+    "pubKey": "02f4a8fdc9e48808e0db8d9e1bb18b1eea68625a1a2a03ab4385a52bf847a70132",
+    "txid": "c0a6ecaed4a047d98a2a0d6ccd4021998cdc728138ea8a768e2771b62a159cd6",
+    "vout": 0
+}
+
+### Claim
+POST {{api}}/claim
+Content-Type: application/json
+
+{
+    "taproot": "tb1plfn5y8lh4jdw4c5xhxgv9ln8y44ts8duqactuuhrnz0kz2eyk49scr99xq",
+    "pubKey": "02f4a8fdc9e48808e0db8d9e1bb18b1eea68625a1a2a03ab4385a52bf847a70132"
+}

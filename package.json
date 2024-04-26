@@ -14,12 +14,20 @@
   "author": "TotoroNoCrypto",
   "license": "ISC",
   "dependencies": {
+    "@mempool/mempool.js": "^2.3.0",
+    "@unisat/wallet-sdk": "^1.5.3",
+    "axios": "^1.6.8",
+    "bip65": "^1.0.3",
+    "config": "^3.3.11",
     "express": "^4.19.2",
     "pg": "^8.11.5",
     "sequelize": "^6.37.3"
   },
   "devDependencies": {
+    "@types/bitcore-lib": "^0.15.6",
+    "@types/config": "^3.3.4",
     "@types/express": "^4.17.21",
+    "@types/ws": "^8.5.10",
     "@typescript-eslint/eslint-plugin": "^7.7.1",
     "@typescript-eslint/parser": "^7.7.1",
     "eslint": "^8.57.0",
