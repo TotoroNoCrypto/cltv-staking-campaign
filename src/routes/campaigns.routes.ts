@@ -1,19 +1,19 @@
-import { Router } from "express";
+import { Router } from 'express'
 import {
-    getCampaigns,
-    createCampaign,
-    getCampaign,
-    updateCampaign,
-    deleteCampaign
-} from "../controllers/campaign.controller";
+  getCampaigns,
+  createCampaign,
+  getCampaign,
+  updateCampaign,
+  deleteCampaign,
+} from '../controllers/campaign.controller'
 
-const router = Router();
+const router = Router()
 
 // Routes
-router.get("/", getCampaigns);
-router.post("/", createCampaign);
-router.get("/:id", getCampaign);
-router.put("/:id", updateCampaign);
-router.delete("/:id", deleteCampaign);
+router.get('/', getCampaigns)
+router.post('/', createCampaign)
+router.get('/:id', getCampaign)
+router.put('/:id', updateCampaign)
+router.delete('/:id', deleteCampaign)
 
-export default router;
+export default router

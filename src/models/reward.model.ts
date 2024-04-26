@@ -1,34 +1,34 @@
-import { DataTypes, Model } from "sequelize";
-import { sequelize } from "../database/database";
+import { DataTypes, Model } from 'sequelize'
+import { sequelize } from '../database/database'
 
 interface RewardModel extends Model {
-    id: number;
-    campaignId: number;
-    address: string;
-    quantity: number;
+  id: number
+  campaignId: number
+  address: string
+  quantity: number
 }
 
 export const Reward = sequelize.define<RewardModel>(
-    "rewards",
-    {
-        id: {
-            type: DataTypes.INTEGER,
-            primaryKey: true,
-            autoIncrement: true
-        },
-        address: {
-            type: DataTypes.STRING
-        },
-        quantity: {
-            type: DataTypes.FLOAT
-        }
+  'rewards',
+  {
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
     },
-    {
-        indexes: [
-            {
-                unique: true,
-                fields: ['campaignId', 'address']
-            }
-        ]
-    }
-);
+    address: {
+      type: DataTypes.STRING,
+    },
+    quantity: {
+      type: DataTypes.FLOAT,
+    },
+  },
+  {
+    indexes: [
+      {
+        unique: true,
+        fields: ['campaignId', 'address'],
+      },
+    ],
+  },
+)
