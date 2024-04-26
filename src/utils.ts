@@ -1,10 +1,14 @@
 import mempoolJS from '@mempool/mempool.js'
 
 export async function getFastestFee(): Promise<number> {
-  const {
-    bitcoin: { fees },
-  } = mempoolJS({ hostname: 'mempool.space' })
-  const feesRecmmended = await fees.getFeesRecommended()
+  if (process.env.NODE_ENV === 'mainnet') {
+    const {
+      bitcoin: { fees },
+    } = mempoolJS({ hostname: 'mempool.space' })
+    const feesRecmmended = await fees.getFeesRecommended()
+  
+    return feesRecmmended.fastestFee
+  }
 
-  return feesRecmmended.fastestFee
+  return 1
 }
