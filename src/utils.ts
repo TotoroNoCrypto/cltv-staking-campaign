@@ -21,7 +21,7 @@ export async function getTxHex(txid: string): Promise<string> {
     const txHex = await transactions.getTxHex({ txid })
 
     return txHex
-  } else if (process.env.NODE_ENV === 'mainnet') {
+  } else if (process.env.NODE_ENV === 'testnet') {
     const {
       bitcoin: { transactions },
     } = mempoolJS({ hostname: 'mempool.space', network: 'testnet' })

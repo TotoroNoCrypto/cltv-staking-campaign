@@ -123,7 +123,7 @@ export async function computeRewards(req: Request, res: Response) {
         share = Math.round(share * 10 ** 8) / 10 ** 8
 
         stakings.forEach(async staking => {
-          if (staking.campaignId == campaign.id) {
+          if (staking.campaignId === campaign.id) {
             if (staking.block < block) {
               if (!stakerRewards.has(staking.address)) {
                 stakerRewards.set(staking.address, 0)
@@ -137,8 +137,8 @@ export async function computeRewards(req: Request, res: Response) {
             }
 
             if (
-              staking.block == block ||
-              (block == start && staking.block < start)
+              staking.block === block ||
+              (block === start && staking.block < start)
             ) {
               totalQuantities += staking.quantity
             }

@@ -73,7 +73,7 @@ export class PsbtService {
     const cltvPayment = this.getCltvPayment(pubkey, blockheight)
 
     const btcUtxo = await this.findBtcUtxo(taprootAddress, fee)
-    if (btcUtxo == undefined) {
+    if (btcUtxo === undefined) {
       throw new Error('BTC UTXO not found')
     }
 
@@ -82,7 +82,7 @@ export class PsbtService {
       inscriptionTxid,
       inscriptionVout,
     )
-    if (inscriptionUtxo == undefined) {
+    if (inscriptionUtxo === undefined) {
       throw new Error('Inscription UTXO not found')
     }
 
@@ -133,13 +133,13 @@ export class PsbtService {
     }
 
     let scriptInscriptionUtxos = await this.getInscriptionUtxos(
-      stakerPayment.address!,
+      cltvPayment.address!,
     )
     // Inscription UTXO should always be index 0
     if (scriptInscriptionUtxos.length > 1) {
       scriptInscriptionUtxos = [scriptInscriptionUtxos[0]]
     }
-    const scriptBtcUtxos = await this.getBtcUtxos(stakerPayment.address!)
+    const scriptBtcUtxos = await this.getBtcUtxos(cltvPayment.address!)
     const scriptUtxos = scriptInscriptionUtxos.concat(scriptBtcUtxos)
 
     if (scriptUtxos.length === 0) {
@@ -194,6 +194,7 @@ export class PsbtService {
     let utxo = undefined
     let cursor = 0
     const size = 16
+    let resultSize = 0
 
     do {
       const result = await this.unisatConnector.general.getBtcUtxo(
@@ -202,9 +203,10 @@ export class PsbtService {
         size,
       )
       utxos = result.data.utxo
+      resultSize = utxos.length
       utxo = utxos.find((u: { satoshi: number }) => u.satoshi >= stakeFee)
       cursor++
-    } while (utxos.size > 0 && utxo === undefined)
+    } while (resultSize === size && utxo === undefined)
 
     return utxo != undefined
       ? { txid: utxo.txid, vout: utxo.vout, satoshi: utxo.satoshi }
@@ -220,6 +222,7 @@ export class PsbtService {
     let utxo = undefined
     let cursor = 0
     const size = 16
+    let resultSize = 0
 
     do {
       const result = await this.unisatConnector.general.getInscriptionUtxo(
@@ -228,12 +231,13 @@ export class PsbtService {
         size,
       )
       utxos = result.data.utxo
+      resultSize = utxos.length
       utxo = utxos.find(
         (u: { txid: string; vout: number }) =>
           u.txid === inscriptionTxid && u.vout === inscriptionVout,
       )
       cursor++
-    } while (utxos.size > 0 && utxo === undefined)
+    } while (resultSize === size && utxo === undefined)
 
     return utxo != undefined
       ? { txid: utxo.txid, vout: utxo.vout, satoshi: utxo.satoshi }
@@ -246,6 +250,7 @@ export class PsbtService {
     let utxos: Array<{ txid: string; vout: number; satoshi: number }> = []
     let cursor = 0
     const size = 16
+    let resultSize = 0
 
     do {
       const result = await this.unisatConnector.general.getBtcUtxo(
@@ -253,13 +258,10 @@ export class PsbtService {
         cursor * size,
         size,
       )
-      if (result.data.utxo.length == 0) {
-        break
-      }
-
+      resultSize = result.data.utxo.length
       utxos = utxos.concat(result.data.utxo)
       cursor++
-    } while (true)
+    } while (resultSize === size)
 
     return utxos
   }
@@ -270,6 +272,7 @@ export class PsbtService {
     let utxos: Array<{ txid: string; vout: number; satoshi: number }> = []
     let cursor = 0
     const size = 16
+    let resultSize = 0
 
     do {
       const result = await this.unisatConnector.general.getInscriptionUtxo(
@@ -277,6 +280,7 @@ export class PsbtService {
         cursor * size,
         size,
       )
+      resultSize = result.data.utxo.length
       const filteredUtxos = result.data.utxo.filter(
         (u: {
           txid: string
@@ -286,13 +290,14 @@ export class PsbtService {
           u.inscriptions.find((i: { moved: boolean }) => !i.moved) !==
           undefined,
       )
-      if (filteredUtxos.length == 0) {
+      
+      if (filteredUtxos.length === 0) {
         break
       }
 
       utxos = utxos.concat(filteredUtxos)
       cursor++
-    } while (true)
+    } while (resultSize === size)
 
     return utxos
   }

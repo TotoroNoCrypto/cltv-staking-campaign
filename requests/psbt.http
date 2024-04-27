@@ -17,7 +17,7 @@ POST {{api}}/claim
 Content-Type: application/json
 
 {
-    "taproot": "bc1pafup76rku5y3h689hpvesfgzdq28wkn6uuagepehdj9a2elzsnxqqmh9n3",
-    "pubKey": "02c2b18c95e7b93daf55de2d8155f6b0620426ccc4a6de0533e3cb959caadb1354",
+    "taproot": "tb1plfn5y8lh4jdw4c5xhxgv9ln8y44ts8duqactuuhrnz0kz2eyk49scr99xq",
+    "pubKey": "02f4a8fdc9e48808e0db8d9e1bb18b1eea68625a1a2a03ab4385a52bf847a70132",
     "blockheight": 2585676
 }
