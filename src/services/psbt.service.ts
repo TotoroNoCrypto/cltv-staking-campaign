@@ -135,10 +135,6 @@ export class PsbtService {
     let scriptInscriptionUtxos = await this.getInscriptionUtxos(
       cltvPayment.address!,
     )
-    // Inscription UTXO should always be index 0
-    if (scriptInscriptionUtxos.length > 1) {
-      scriptInscriptionUtxos = [scriptInscriptionUtxos[0]]
-    }
     const scriptBtcUtxos = await this.getBtcUtxos(cltvPayment.address!)
     const scriptUtxos = scriptInscriptionUtxos.concat(scriptBtcUtxos)
 
@@ -290,7 +286,7 @@ export class PsbtService {
           u.inscriptions.find((i: { moved: boolean }) => !i.moved) !==
           undefined,
       )
-      
+
       if (filteredUtxos.length === 0) {
         break
       }

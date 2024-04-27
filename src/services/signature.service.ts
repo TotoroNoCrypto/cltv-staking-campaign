@@ -46,14 +46,24 @@ export class SignatureService {
     const signer = this.getSigner()
     const wallet = this.getWallet(signer)
     const psbt = Psbt.fromHex(psbtHex)
+    let toSignInputs: Array<{ index: number; publicKey: string; }> = []
+    psbt.txInputs.map(((input, index) => toSignInputs = toSignInputs.concat({ index, publicKey: wallet.pubkey })))
     await wallet.signPsbt(psbt, {
-      toSignInputs: [
-        { index: 0, publicKey: wallet.pubkey },
-        { index: 1, publicKey: wallet.pubkey },
-      ],
+      toSignInputs,
     })
 
-    psbt.finalizeInput(0, this.getFinalScripts).finalizeInput(1)
+    for (let index = 0; index < psbt.txInputs.length; index++) {
+      const txInput = psbt.txInputs[index];
+      // Wallet input
+      if (txInput.sequence === 0) {
+        psbt.finalizeInput(index)
+      }
+      // Script input
+      else {
+        psbt.finalizeInput(index, this.getFinalScripts)
+      }
+    }
+    
     const tx = psbt.extractTransaction(true)
 
     return {

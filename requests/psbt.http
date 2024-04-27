@@ -7,9 +7,9 @@ Content-Type: application/json
 {
     "taproot": "tb1plfn5y8lh4jdw4c5xhxgv9ln8y44ts8duqactuuhrnz0kz2eyk49scr99xq",
     "pubKey": "02f4a8fdc9e48808e0db8d9e1bb18b1eea68625a1a2a03ab4385a52bf847a70132",
-    "txid": "df950d1d931065a94a2f6e51fe9abdd15042a896d73dcd8f6eb757566e4ebf73",
+    "txid": "d0709972ba970dbdf88da7da9aeb49f735accdc2e563a58144754303577af22a",
     "vout": 0,
-    "blockheight": 2585676
+    "blockheight": 2743150
 }
 
 ### Claim
@@ -19,5 +19,5 @@ Content-Type: application/json
 {
     "taproot": "tb1plfn5y8lh4jdw4c5xhxgv9ln8y44ts8duqactuuhrnz0kz2eyk49scr99xq",
     "pubKey": "02f4a8fdc9e48808e0db8d9e1bb18b1eea68625a1a2a03ab4385a52bf847a70132",
-    "blockheight": 2585676
+    "blockheight": 2743150
 }
