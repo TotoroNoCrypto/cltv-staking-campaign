@@ -2,11 +2,11 @@
   "name": "cltv-staking-campaign",
   "version": "1.0.0",
   "description": "CLTV Staking Campaign",
-  "main": "src/index.ts",
+  "main": "index.ts",
   "scripts": {
     "build": "tsc",
     "start": "ts-node ./src/index.ts",
-    "start:dist": "node ./dist/src/index.js",
+    "start:dist": "node ./dist/index.js",
     "dev": "nodemon - exec 'ts-node' src/index.ts",
     "lint": "eslint . --ext .ts --fix",
     "format": "prettier --ignore-path .gitignore --write \"**/*.+(ts|json)\""
