@@ -4,6 +4,8 @@ import { Payment } from 'bitcoinjs-lib/src/payments'
 import config from 'config'
 const bip65 = require('bip65')
 
+import { Reward } from '../models/reward.model'
+
 const network = config.get<Network>('bitcoin.network')
 
 export class UserService {
@@ -16,6 +18,19 @@ export class UserService {
     const cltvAddress = cltvPayment.address!
 
     return cltvAddress
+  }
+  public static async getReward(
+    campaignId: number,
+    taprootAddress: string,
+  ): Promise<number> {
+    const reward = await Reward.findOne({
+      where: {
+        campaignId,
+        address: taprootAddress,
+      },
+    })
+
+    return reward?.quantity!
   }
 
   private static getCltvPayment(pubkey: Buffer, blockheight: number): Payment {

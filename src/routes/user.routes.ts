@@ -1,9 +1,10 @@
 import { Router } from 'express'
 
-import { getScriptAddress } from '../controllers/user.controller'
+import { getScriptAddress, getReward } from '../controllers/user.controller'
 
 const router = Router()
 
 router.post('/scriptaddress', getScriptAddress)
+router.post('/reward', getReward)
 
 export default router

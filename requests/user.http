@@ -1,10 +1,19 @@
 @api = http://localhost:3000/api/user
 
-### Stake
+### Get Script Address
 POST {{api}}/scriptaddress
 Content-Type: application/json
 
 {
     "pubKey": "02c2b18c95e7b93daf55de2d8155f6b0620426ccc4a6de0533e3cb959caadb1354",
     "blockheight": 838318
+}
+
+### Get Reward
+POST {{api}}/reward
+Content-Type: application/json
+
+{
+    "campaignId": 1,
+    "taproot": "address1"
 }
