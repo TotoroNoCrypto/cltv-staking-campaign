@@ -1,7 +1,7 @@
 @api = http://localhost:3000/api/user
 
 ### Get Script Address
-POST {{api}}/scriptaddress
+GET {{api}}/stakingaddress
 Content-Type: application/json
 
 {
@@ -10,7 +10,7 @@ Content-Type: application/json
 }
 
 ### Get Reward
-POST {{api}}/reward
+GET {{api}}/reward
 Content-Type: application/json
 
 {

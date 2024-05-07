@@ -9,7 +9,7 @@ import { Reward } from '../models/reward.model'
 const network = config.get<Network>('bitcoin.network')
 
 export class UserService {
-  public static async getScriptAddress(
+  public static async getStakingAddress(
     pubkeyHex: string,
     blockheight: number,
   ): Promise<string> {

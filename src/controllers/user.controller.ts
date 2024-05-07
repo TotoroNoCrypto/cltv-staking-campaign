@@ -1,14 +1,14 @@
 import { Request, Response } from 'express'
 import { UserService } from '../services/user.service'
 
-export async function getScriptAddress(
+export async function getStakingAddress(
   req: Request,
   res: Response,
 ): Promise<Response> {
   try {
     const { pubKey, blockheight } = req.body
 
-    const scriptAddress = await UserService.getScriptAddress(
+    const scriptAddress = await UserService.getStakingAddress(
       pubKey,
       blockheight,
     )
