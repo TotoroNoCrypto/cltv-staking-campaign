@@ -12,6 +12,18 @@ Content-Type: application/json
     "blockheight": 2743150
 }
 
+### Stake MAINNET
+POST {{api}}/stake
+Content-Type: application/json
+
+{
+    "taproot": "bc1pafup76rku5y3h689hpvesfgzdq28wkn6uuagepehdj9a2elzsnxqqmh9n3",
+    "pubKey": "02c2b18c95e7b93daf55de2d8155f6b0620426ccc4a6de0533e3cb959caadb1354",
+    "txid": "925cd2ebfd869e70edae016c216ccb6bbf08fb54f138583f771c8e1bb335752d",
+    "vout": 0,
+    "blockheight": 838318
+}
+
 ### Claim
 POST {{api}}/claim
 Content-Type: application/json

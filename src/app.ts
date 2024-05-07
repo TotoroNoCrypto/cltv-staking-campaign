@@ -5,6 +5,7 @@ import rewardRoutes from './routes/rewards.routes'
 import psbtRoutes from './routes/psbt.routes'
 import signatureRoutes from './routes/signature.routes'
 import blockchainRoutes from './routes/blockchain.routes'
+import userRoutes from './routes/user.routes'
 
 const app = express()
 
@@ -16,5 +17,6 @@ app.use('/api/rewards', rewardRoutes)
 app.use('/api/psbt', psbtRoutes)
 app.use('/api/signature', signatureRoutes)
 app.use('/api/blockchain', blockchainRoutes)
+app.use('/api/user', userRoutes)
 
 export default app
