@@ -3,8 +3,10 @@ import { toXOnly } from '@unisat/wallet-sdk/lib/utils'
 import { Network } from 'bitcoinjs-lib/src/networks'
 import { Payment } from 'bitcoinjs-lib/src/payments'
 import { Psbt } from 'bitcoinjs-lib/src/psbt'
+import { PsbtInput } from 'bip174/src/lib/interfaces'
 import config from 'config'
 const bip65 = require('bip65')
+const varuint = require('varuint-bitcoin')
 
 import { UnisatConnector } from '../unisatConnector'
 import { getFastestFee, getTxHex } from '../utils'
@@ -42,6 +44,20 @@ export class PsbtService {
     return psbt.toHex()
   }
 
+  public static async finalizeStake(
+    psbtHex: string,
+  ): Promise<{ txSize: number; psbtHex: string; txHex: string }> {
+    const psbt = Psbt.fromHex(psbtHex)
+    psbt.finalizeAllInputs()
+    const tx = psbt.extractTransaction(true)
+
+    return {
+      txSize: tx.virtualSize(),
+      psbtHex: psbt.toHex(),
+      txHex: tx.toHex(),
+    }
+  }
+
   public static async claim(
     taprootAddress: string,
     pubkeyHex: string,
@@ -57,6 +73,32 @@ export class PsbtService {
     )
 
     return psbt.toHex()
+  }
+
+  public static async finalizeClaim(
+    psbtHex: string,
+  ): Promise<{ txSize: number; psbtHex: string; txHex: string }> {
+    const psbt = Psbt.fromHex(psbtHex)
+
+    for (let index = 0; index < psbt.txInputs.length; index++) {
+      const txInput = psbt.txInputs[index]
+      // Wallet input
+      if (txInput.sequence === 0) {
+        psbt.finalizeInput(index)
+      }
+      // Script input
+      else {
+        psbt.finalizeInput(index, this.getFinalScripts)
+      }
+    }
+
+    const tx = psbt.extractTransaction(true)
+
+    return {
+      txSize: tx.virtualSize(),
+      psbtHex: psbt.toHex(),
+      txHex: tx.toHex(),
+    }
   }
 
   private static async getStakePsbt(
@@ -349,5 +391,71 @@ export class PsbtService {
     const pubkey = Buffer.from(pubkeyHex, 'hex')
 
     return pubkey
+  }
+
+  private static getFinalScripts(
+    inputIndex: number,
+    input: PsbtInput,
+    script: Buffer,
+    isSegwit: boolean,
+    isP2SH: boolean,
+    isP2WSH: boolean,
+  ): {
+    finalScriptSig: Buffer | undefined
+    finalScriptWitness: Buffer | undefined
+  } {
+    let payment: bitcoin.Payment = {
+      network,
+      input: bitcoin.script.compile([input.partialSig![0].signature]),
+      output: script,
+    }
+    if (isP2WSH && isSegwit)
+      payment = bitcoin.payments.p2wsh({
+        network,
+        redeem: payment,
+      })
+    if (isP2SH)
+      payment = bitcoin.payments.p2sh({
+        network,
+        redeem: payment,
+      })
+
+    function witnessStackToScriptWitness(witness: Buffer[]): Buffer {
+      let buffer = Buffer.allocUnsafe(0)
+
+      function writeSlice(slice: Buffer): void {
+        buffer = Buffer.concat([buffer, Buffer.from(slice)])
+      }
+
+      function writeVarInt(i: number): void {
+        const currentLen = buffer.length
+        const varintLen = varuint.encodingLength(i)
+
+        buffer = Buffer.concat([buffer, Buffer.allocUnsafe(varintLen)])
+        varuint.encode(i, buffer, currentLen)
+      }
+
+      function writeVarSlice(slice: Buffer): void {
+        writeVarInt(slice.length)
+        writeSlice(slice)
+      }
+
+      function writeVector(vector: Buffer[]): void {
+        writeVarInt(vector.length)
+        vector.forEach(writeVarSlice)
+      }
+
+      writeVector(witness)
+
+      return buffer
+    }
+
+    return {
+      finalScriptSig: payment.input,
+      finalScriptWitness:
+        payment.witness && payment.witness.length > 0
+          ? witnessStackToScriptWitness(payment.witness)
+          : undefined,
+    }
   }
 }

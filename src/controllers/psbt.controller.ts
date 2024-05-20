@@ -22,12 +22,47 @@ export async function stake(req: Request, res: Response): Promise<Response> {
   }
 }
 
+export async function finalizeStake(
+  req: Request,
+  res: Response,
+): Promise<Response> {
+  try {
+    const { psbtHex } = req.body
+
+    const psbt = await PsbtService.finalizeStake(psbtHex)
+
+    return res.json(psbt)
+  } catch (error) {
+    if (error instanceof Error) {
+      return res.status(500).json({ message: error.message })
+    }
+    return res.status(500).json({ message: 'Internal Error' })
+  }
+}
+
 export async function claim(req: Request, res: Response): Promise<Response> {
   try {
     const { taproot, pubKey, blockheight } = req.body
-    console.log('Into claim')
 
     const psbt = await PsbtService.claim(taproot, pubKey, blockheight)
+
+    return res.json(psbt)
+  } catch (error) {
+    if (error instanceof Error) {
+      return res.status(500).json({ message: error.message })
+    }
+    return res.status(500).json({ message: 'Internal Error' })
+  }
+}
+
+export async function finalizeClaim(
+  req: Request,
+  res: Response,
+): Promise<Response> {
+  try {
+    const { psbtHex } = req.body
+
+    const psbt = await PsbtService.finalizeClaim(psbtHex)
 
     return res.json(psbt)
   } catch (error) {

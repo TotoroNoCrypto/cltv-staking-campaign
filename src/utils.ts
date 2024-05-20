@@ -10,7 +10,7 @@ export async function getFastestFee(): Promise<number> {
     return feesRecmmended.fastestFee
   }
 
-  return 1
+  return 30
 }
 
 export async function getTxHex(txid: string): Promise<string> {
