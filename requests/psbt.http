@@ -7,12 +7,12 @@ Content-Type: application/json
 {
     "taproot": "tb1plfn5y8lh4jdw4c5xhxgv9ln8y44ts8duqactuuhrnz0kz2eyk49scr99xq",
     "pubKey": "02f4a8fdc9e48808e0db8d9e1bb18b1eea68625a1a2a03ab4385a52bf847a70132",
-    "txid": "9d4f98353cacfeef80d071d1d4542209352dc934b20b59ef2a097da168a7ab36",
+    "txid": "daf6db03703bf780f7dc742aac4fa35895d977e321ba97e9aead53ad491dd8d2",
     "vout": 0,
-    "blockheight": 2800000
+    "blockheight": 2800100
 }
 
-### Stake MAINNET
+### Stake M3rl1n
 POST {{api}}/stake
 Content-Type: application/json
 
@@ -24,12 +24,24 @@ Content-Type: application/json
     "blockheight": 843696
 }
 
+### Stake Totoro
+POST {{api}}/stake
+Content-Type: application/json
+
+{
+    "taproot": "bc1plvqwcy5chr9ja359rm4zkhyfyxacn2tj4rvjtfk40w5ctzagssnszte0m6",
+    "pubKey": "02dde3a8a673f9cba281b28077dd6928af5a4aff475af0c031df7afc5d65920b67",
+    "txid": "269665ee8b1bf1e1f216389095e15f93d0a2c31b01208c07ae7d9f09f3c9d5df",
+    "vout": 0,
+    "blockheight": 845250
+}
+
 ### Finalize Stake
 POST {{api}}/finalizeStake
 Content-Type: application/json
 
 {
-    "psbtHex": "70736274ff0100a7020000000236aba768a17d092aef590bb234c92d35092254d4d171d080effeac3c35984f9d0000000000000000000fd65e5391a3856c2ec397c0c95db6493e7be106c5d050e09a4695163ef1310101000000000000000002220200000000000017a9147eae2877c5a900eebaf9a3e79134c7bd6c30e2ff87c63d010000000000225120fa67421ff7ac9aeae286b990c2fe67256ab81dbc0770be72e3989f612b24b54b000000000001012b2202000000000000225120fa67421ff7ac9aeae286b990c2fe67256ab81dbc0770be72e3989f612b24b54b0113403fefc9c0244dedd03075f7e38f066365c90c566cb53ebbc2b71e584aaf2f809aefa935057986ca79cfdbd131f21412d5f94a32a86cdf525b2a93feeff58783d5011720f4a8fdc9e48808e0db8d9e1bb18b1eea68625a1a2a03ab4385a52bf847a701320001012b5455010000000000225120fa67421ff7ac9aeae286b990c2fe67256ab81dbc0770be72e3989f612b24b54b01134070fd9f40792ca0ab3a19f220012246b0631b2334a553c2f49169e7fb7034cc15cc8305c65f9ecea27b1eaa502e91ee99dffcd2f22d6e2ff9857b6ab0a4002ffd011720f4a8fdc9e48808e0db8d9e1bb18b1eea68625a1a2a03ab4385a52bf847a70132000000"
+    "psbtHex": "70736274ff0100a70200000002dfd5c9f3099f7dae078c20011bc3a2d0935fe195903816f2e1f11b8bee65962600000000000000000084ea63404e40311b238a1379057e802d1f6888440d87df2654488c98080d117d01000000000000000002220200000000000017a91476e96cfac04a91d03a0268f79f6d4ab1b825cd4787d4e8000000000000225120fb00ec1298b8cb2ec6851eea2b5c8921bb89a972a8d925a6d57ba9858ba88427000000000001012b2202000000000000225120fb00ec1298b8cb2ec6851eea2b5c8921bb89a972a8d925a6d57ba9858ba88427010842014006ed93d836c0e065b68b63b8d76ef7d8eca4037512658c2dd9662bde4b41990f740ffd829fd2189ea61e07f825558f44f84495b8b856d92ccd63780720d179850001012baef0000000000000225120fb00ec1298b8cb2ec6851eea2b5c8921bb89a972a8d925a6d57ba9858ba88427010842014018cab0a7df2685e6c0a2edfdb50ca514b7d7562c478f46b806aea39f82d8f210200376ebdc605dfce3e26bb290787851df1766d39ba74a90a031939beaaf15a5000000"
 }
 
 ### Claim
@@ -39,10 +51,10 @@ Content-Type: application/json
 {
     "taproot": "tb1plfn5y8lh4jdw4c5xhxgv9ln8y44ts8duqactuuhrnz0kz2eyk49scr99xq",
     "pubKey": "02f4a8fdc9e48808e0db8d9e1bb18b1eea68625a1a2a03ab4385a52bf847a70132",
-    "blockheight": 2800000
+    "blockheight": 2800100
 }
 
-### Claim MAINNET
+### Claim M3rl1n
 POST {{api}}/claim
 Content-Type: application/json
 
@@ -50,6 +62,16 @@ Content-Type: application/json
     "taproot": "bc1pafup76rku5y3h689hpvesfgzdq28wkn6uuagepehdj9a2elzsnxqqmh9n3",
     "pubKey": "02c2b18c95e7b93daf55de2d8155f6b0620426ccc4a6de0533e3cb959caadb1354",
     "blockheight": 843696
+}
+
+### Claim Totoro
+POST {{api}}/claim
+Content-Type: application/json
+
+{
+    "taproot": "bc1plvqwcy5chr9ja359rm4zkhyfyxacn2tj4rvjtfk40w5ctzagssnszte0m6",
+    "pubKey": "02dde3a8a673f9cba281b28077dd6928af5a4aff475af0c031df7afc5d65920b67",
+    "blockheight": 845250
 }
 
 ### Finalize Claim

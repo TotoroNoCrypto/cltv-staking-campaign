@@ -18,11 +18,11 @@ export async function getRewards(_: Request, res: Response) {
 
 export async function createReward(req: Request, res: Response) {
   try {
-    const { campaignId, address, quantity } = req.body
+    const { campaignId, taproot, quantity } = req.body
     const newReward = await Reward.create(
       {
         campaignId,
-        address,
+        address: taproot,
         quantity,
       },
       {

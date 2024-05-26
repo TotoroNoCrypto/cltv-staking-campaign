@@ -9,7 +9,7 @@ Content-Type: application/json
 
 {
   "campaignId": 1,
-  "address": "address1",
+  "taproot": "bc1plvqwcy5chr9ja359rm4zkhyfyxacn2tj4rvjtfk40w5ctzagssnszte0m6",
   "quantity": 120
 }
 
@@ -19,7 +19,7 @@ Content-Type: application/json
 
 {
   "campaignId": 1,
-  "address": "address2",
+  "taproot": "bc1pafup76rku5y3h689hpvesfgzdq28wkn6uuagepehdj9a2elzsnxqqmh9n3",
   "quantity": 1
 }
 

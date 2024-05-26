@@ -16,11 +16,11 @@ export async function getStakings(_: Request, res: Response) {
 
 export async function createStaking(req: Request, res: Response) {
   try {
-    const { campaignId, address, quantity, block } = req.body
+    const { campaignId, taproot, quantity, block } = req.body
     const newStaking = await Staking.create(
       {
         campaignId,
-        address,
+        address: taproot,
         quantity,
         block,
       },
