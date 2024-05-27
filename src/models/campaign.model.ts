@@ -3,7 +3,7 @@ import { sequelize } from '../database/database'
 import { Staking } from './staking.model'
 import { Reward } from './reward.model'
 
-interface CampaignModel extends Model {
+export interface CampaignModel extends Model {
   id: number
   name: string
   quantity: number

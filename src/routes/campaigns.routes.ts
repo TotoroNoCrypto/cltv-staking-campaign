@@ -1,19 +1,13 @@
 import { Router } from 'express'
-import {
-  getCampaigns,
-  createCampaign,
-  getCampaign,
-  updateCampaign,
-  deleteCampaign,
-} from '../controllers/campaign.controller'
+import { CampaignController } from '../controllers/campaign.controller'
 
 const router = Router()
 
 // Routes
-router.get('/', getCampaigns)
-router.post('/', createCampaign)
-router.get('/:id', getCampaign)
-router.put('/:id', updateCampaign)
-router.delete('/:id', deleteCampaign)
+router.get('/', CampaignController.getCampaigns)
+router.post('/', CampaignController.createCampaign)
+router.get('/:id', CampaignController.getCampaign)
+router.put('/:id', CampaignController.updateCampaign)
+router.delete('/:id', CampaignController.deleteCampaign)
 
 export default router
