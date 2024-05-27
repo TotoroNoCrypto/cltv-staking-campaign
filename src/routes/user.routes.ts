@@ -1,10 +1,10 @@
 import { Router } from 'express'
 
-import { getStakingAddress, getReward } from '../controllers/user.controller'
+import { UserController } from '../controllers/user.controller'
 
 const router = Router()
 
-router.get('/stakingaddress', getStakingAddress)
-router.get('/reward', getReward)
+router.get('/stakingaddress', UserController.getStakingAddress)
+router.get('/reward', UserController.getReward)
 
 export default router
