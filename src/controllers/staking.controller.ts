@@ -1,53 +1,44 @@
 import { Request, Response } from 'express'
-import { Staking } from '../models/staking.model'
+import { StakingRepository } from '../repositories/staking.repository'
 
-export async function getStakings(_: Request, res: Response) {
-  try {
-    const stakings = await Staking.findAll({
-      attributes: ['id', 'campaignId', 'address', 'quantity', 'block'],
-    })
-    res.json(stakings)
-  } catch (error) {
-    if (error instanceof Error) {
-      res.status(500).json({ message: error.message })
+export class StakingController {
+  public static async getStakings(_: Request, res: Response) {
+    try {
+      const stakings = await StakingRepository.getStakings()
+      res.json(stakings)
+    } catch (error) {
+      if (error instanceof Error) {
+        res.status(500).json({ message: error.message })
+      }
     }
   }
-}
 
-export async function createStaking(req: Request, res: Response) {
-  try {
-    const { campaignId, taproot, quantity, block } = req.body
-    const newStaking = await Staking.create(
-      {
+  public static async createStaking(req: Request, res: Response) {
+    try {
+      const { campaignId, taproot, quantity, block } = req.body
+      const newStaking = await StakingRepository.createStaking(
         campaignId,
-        address: taproot,
+        taproot,
         quantity,
         block,
-      },
-      {
-        fields: ['campaignId', 'address', 'quantity', 'block'],
-      },
-    )
-    return res.json(newStaking)
-  } catch (error) {
-    if (error instanceof Error) {
-      res.status(500).json({ message: error.message })
+      )
+      return res.json(newStaking)
+    } catch (error) {
+      if (error instanceof Error) {
+        res.status(500).json({ message: error.message })
+      }
     }
   }
-}
 
-export async function getStaking(req: Request, res: Response) {
-  try {
-    const { id } = req.params
-    const staking = await Staking.findOne({
-      where: {
-        id,
-      },
-    })
-    res.json(staking)
-  } catch (error) {
-    if (error instanceof Error) {
-      res.status(500).json({ message: error.message })
+  public static async getStaking(req: Request, res: Response) {
+    try {
+      const { id } = req.params
+      const staking = await StakingRepository.getStaking(Number(id))
+      res.json(staking)
+    } catch (error) {
+      if (error instanceof Error) {
+        res.status(500).json({ message: error.message })
+      }
     }
   }
 }

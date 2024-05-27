@@ -1,15 +1,11 @@
 import { Router } from 'express'
-import {
-  getStakings,
-  createStaking,
-  getStaking,
-} from '../controllers/staking.controller'
+import { StakingController } from '../controllers/staking.controller'
 
 const router = Router()
 
 // Routes
-router.get('/', getStakings)
-router.post('/', createStaking)
-router.get('/:id', getStaking)
+router.get('/', StakingController.getStakings)
+router.post('/', StakingController.createStaking)
+router.get('/:id', StakingController.getStaking)
 
 export default router

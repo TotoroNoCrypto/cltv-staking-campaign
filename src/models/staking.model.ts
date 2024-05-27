@@ -1,7 +1,7 @@
 import { DataTypes, Model } from 'sequelize'
 import { sequelize } from '../database/database'
 
-interface StakingModel extends Model {
+export interface StakingModel extends Model {
   id: number
   campaignId: number
   address: string
