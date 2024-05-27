@@ -21,12 +21,12 @@ export class UserService {
   }
   public static async getReward(
     campaignId: number,
-    taprootAddress: string,
+    walletAddress: string,
   ): Promise<number> {
     const reward = await Reward.findOne({
       where: {
         campaignId,
-        address: taprootAddress,
+        address: walletAddress,
       },
     })
 

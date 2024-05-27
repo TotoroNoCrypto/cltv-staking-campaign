@@ -4,7 +4,7 @@ import { sequelize } from '../database/database'
 export interface RewardModel extends Model {
   id: number
   campaignId: number
-  address: string
+  walletAddress: string
   quantity: number
 }
 
@@ -16,7 +16,7 @@ export const Reward = sequelize.define<RewardModel>(
       primaryKey: true,
       autoIncrement: true,
     },
-    address: {
+    walletAddress: {
       type: DataTypes.STRING,
     },
     quantity: {
@@ -27,7 +27,7 @@ export const Reward = sequelize.define<RewardModel>(
     indexes: [
       {
         unique: true,
-        fields: ['campaignId', 'address'],
+        fields: ['campaignId', 'walletAddress'],
       },
     ],
   },

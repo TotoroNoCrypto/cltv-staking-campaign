@@ -3,7 +3,14 @@ import { StakingModel, Staking } from '../models/staking.model'
 export class StakingRepository {
   public static async getStakings(): Promise<StakingModel[]> {
     const stakings = await Staking.findAll({
-      attributes: ['id', 'campaignId', 'address', 'quantity', 'block'],
+      attributes: [
+        'id',
+        'campaignId',
+        'walletAddress',
+        'scriptAddress',
+        'quantity',
+        'block',
+      ],
     })
 
     return stakings
@@ -11,17 +18,19 @@ export class StakingRepository {
 
   public static async createStaking(
     campaignId: number,
-    taproot: string,
-    quantity: number
+    walletAddress: string,
+    scriptAddress: string,
+    quantity: number,
   ): Promise<StakingModel> {
     const newStaking = await Staking.create(
       {
         campaignId,
-        address: taproot,
+        walletAddress,
+        scriptAddress,
         quantity,
       },
       {
-        fields: ['campaignId', 'address', 'quantity'],
+        fields: ['campaignId', 'walletAddress', 'scriptAddress', 'quantity'],
       },
     )
 

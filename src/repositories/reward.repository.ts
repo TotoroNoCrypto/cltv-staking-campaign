@@ -5,7 +5,7 @@ import { Staking } from '../models/staking.model'
 export class RewardRepository {
   public static async getRewards(): Promise<RewardModel[]> {
     const rewards = await Reward.findAll({
-      attributes: ['id', 'campaignId', 'address', 'quantity'],
+      attributes: ['id', 'campaignId', 'walletAddress', 'quantity'],
     })
 
     return rewards
@@ -19,11 +19,11 @@ export class RewardRepository {
     const newReward = await Reward.create(
       {
         campaignId,
-        address: taproot,
+        taproot,
         quantity,
       },
       {
-        fields: ['campaignId', 'address', 'quantity'],
+        fields: ['campaignId', 'walletAddress', 'quantity'],
       },
     )
 
@@ -75,7 +75,14 @@ export class RewardRepository {
       ],
     })
     const stakings = await Staking.findAll({
-      attributes: ['id', 'campaignId', 'address', 'quantity', 'block'],
+      attributes: [
+        'id',
+        'campaignId',
+        'walletAddress',
+        'scriptAddress',
+        'quantity',
+        'block',
+      ],
     })
 
     campaigns.forEach(async campaign => {
@@ -96,13 +103,13 @@ export class RewardRepository {
         stakings.forEach(async staking => {
           if (staking.campaignId === campaign.id) {
             if (staking.block < block) {
-              if (!stakerRewards.has(staking.address)) {
-                stakerRewards.set(staking.address, 0)
+              if (!stakerRewards.has(staking.walletAddress)) {
+                stakerRewards.set(staking.walletAddress, 0)
               }
 
-              const reward = stakerRewards.get(staking.address)
+              const reward = stakerRewards.get(staking.walletAddress)
               stakerRewards.set(
-                staking.address,
+                staking.walletAddress,
                 reward + staking.quantity * share,
               )
             }
@@ -121,7 +128,7 @@ export class RewardRepository {
         const [reward] = await Reward.findOrCreate({
           where: {
             campaignId: campaign.id,
-            address: key,
+            walletAddress: key,
           },
         })
         reward.quantity += value

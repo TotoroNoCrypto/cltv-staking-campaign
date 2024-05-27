@@ -6,13 +6,7 @@ export class CampaignController {
     try {
       const { taproot, pubKey, txid, vout, tick, amt } = req.body
 
-      const psbt = await PsbtService.stake(
-        taproot,
-        pubKey,
-        txid,
-        vout,
-        tick
-      )
+      const psbt = await PsbtService.stake(taproot, pubKey, txid, vout, tick)
 
       return res.json(psbt)
     } catch (error) {
@@ -28,9 +22,15 @@ export class CampaignController {
     res: Response,
   ): Promise<Response> {
     try {
-      const { taproot, psbtHex, tick, amt } = req.body
+      const { taproot, pubKey, psbtHex, tick, amt } = req.body
 
-      const psbt = await PsbtService.finalizeStake(taproot, psbtHex, tick, amt)
+      const psbt = await PsbtService.finalizeStake(
+        taproot,
+        pubKey,
+        psbtHex,
+        tick,
+        amt,
+      )
 
       return res.json(psbt)
     } catch (error) {

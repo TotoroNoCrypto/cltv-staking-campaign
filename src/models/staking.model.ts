@@ -4,7 +4,8 @@ import { sequelize } from '../database/database'
 export interface StakingModel extends Model {
   id: number
   campaignId: number
-  address: string
+  walletAddress: string
+  scriptAddress: string
   quantity: number
   block: number
 }
@@ -15,7 +16,10 @@ export const Staking = sequelize.define<StakingModel>('stakings', {
     primaryKey: true,
     autoIncrement: true,
   },
-  address: {
+  walletAddress: {
+    type: DataTypes.STRING,
+  },
+  scriptAddress: {
     type: DataTypes.STRING,
   },
   quantity: {

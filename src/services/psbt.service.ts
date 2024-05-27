@@ -26,7 +26,7 @@ export class PsbtService {
   )
 
   public static async stake(
-    taprootAddress: string,
+    walletAddress: string,
     pubkeyHex: string,
     inscriptionTxid: string,
     inscriptionVout: number,
@@ -35,7 +35,7 @@ export class PsbtService {
     const fastestFee = await getFastestFee()
     const fee = stakeSize * fastestFee
     const psbt = await this.getStakePsbt(
-      taprootAddress,
+      walletAddress,
       pubkeyHex,
       inscriptionTxid,
       inscriptionVout,
@@ -47,7 +47,8 @@ export class PsbtService {
   }
 
   public static async finalizeStake(
-    taprootAddress: string,
+    walletAddress: string,
+    pubkeyHex: string,
     psbtHex: string,
     ticker: string,
     quantity: number,
@@ -60,7 +61,17 @@ export class PsbtService {
     if (campaign === null) {
       throw new Error('Campaign not found')
     }
-    await StakingRepository.createStaking(campaign.id, taprootAddress, quantity)
+
+    const pubkey = this.getPubkey(pubkeyHex)
+    const blockheight = campaign.blockEnd
+    const cltvPayment = this.getCltvPayment(pubkey, blockheight)
+    const scriptAddress = cltvPayment.address!
+    await StakingRepository.createStaking(
+      campaign.id,
+      walletAddress,
+      scriptAddress,
+      quantity,
+    )
 
     return {
       txSize: tx.virtualSize(),
@@ -70,14 +81,14 @@ export class PsbtService {
   }
 
   public static async claim(
-    taprootAddress: string,
+    walletAddress: string,
     pubkeyHex: string,
     blockheight: number,
   ): Promise<string> {
     const fastestFee = await getFastestFee()
     const fee = claimSize * fastestFee
     const psbt = await this.getClaimPsbt(
-      taprootAddress,
+      walletAddress,
       pubkeyHex,
       blockheight,
       fee,
@@ -113,7 +124,7 @@ export class PsbtService {
   }
 
   private static async getStakePsbt(
-    taprootAddress: string,
+    walletAddress: string,
     pubkeyHex: string,
     inscriptionTxid: string,
     inscriptionVout: number,
@@ -131,13 +142,13 @@ export class PsbtService {
     const blockheight = campaign.blockEnd
     const cltvPayment = this.getCltvPayment(pubkey, blockheight)
 
-    const btcUtxo = await this.findBtcUtxo(taprootAddress, fee)
+    const btcUtxo = await this.findBtcUtxo(walletAddress, fee)
     if (btcUtxo === undefined) {
       throw new Error('BTC UTXO not found')
     }
 
     const inscriptionUtxo = await this.findInscriptionUtxo(
-      taprootAddress,
+      walletAddress,
       inscriptionTxid,
       inscriptionVout,
     )
@@ -176,7 +187,7 @@ export class PsbtService {
   }
 
   private static async getClaimPsbt(
-    taprootAddress: string,
+    walletAddress: string,
     pubkeyHex: string,
     blockheight: number,
     fee: number,
@@ -186,7 +197,7 @@ export class PsbtService {
     const stakerPayment = this.getStakerPayment(internalPubkey)
     const cltvPayment = this.getCltvPayment(pubkey, blockheight)
 
-    const btcUtxo = await this.findBtcUtxo(taprootAddress, fee)
+    const btcUtxo = await this.findBtcUtxo(walletAddress, fee)
     if (btcUtxo === undefined) {
       throw new Error('BTC UTXO not found')
     }
@@ -242,7 +253,7 @@ export class PsbtService {
   }
 
   private static async findBtcUtxo(
-    taprootAddress: string,
+    walletAddress: string,
     stakeFee: number,
   ): Promise<{ txid: string; vout: number; satoshi: number } | undefined> {
     let utxos = []
@@ -253,7 +264,7 @@ export class PsbtService {
 
     do {
       const result = await this.unisatConnector.general.getBtcUtxo(
-        taprootAddress,
+        walletAddress,
         cursor * size,
         size,
       )
@@ -269,7 +280,7 @@ export class PsbtService {
   }
 
   private static async findInscriptionUtxo(
-    taprootAddress: string,
+    walletAddress: string,
     inscriptionTxid: string,
     inscriptionVout: number,
   ): Promise<{ txid: string; vout: number; satoshi: number } | undefined> {
@@ -281,7 +292,7 @@ export class PsbtService {
 
     do {
       const result = await this.unisatConnector.general.getInscriptionUtxo(
-        taprootAddress,
+        walletAddress,
         cursor * size,
         size,
       )
