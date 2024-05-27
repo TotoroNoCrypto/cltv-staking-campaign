@@ -1,9 +1,9 @@
 import { Router } from 'express'
 
-import { broadcast } from '../controllers/blockchain.controller'
+import { CampaignController } from '../controllers/blockchain.controller'
 
 const router = Router()
 
-router.post('/broadcast', broadcast)
+router.post('/broadcast', CampaignController.broadcast)
 
 export default router

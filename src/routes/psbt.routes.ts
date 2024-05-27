@@ -1,17 +1,12 @@
 import { Router } from 'express'
 
-import {
-  stake,
-  finalizeStake,
-  claim,
-  finalizeClaim,
-} from '../controllers/psbt.controller'
+import { CampaignController } from '../controllers/psbt.controller'
 
 const router = Router()
 
-router.post('/stake', stake)
-router.post('/finalizeStake', finalizeStake)
-router.post('/claim', claim)
-router.post('/finalizeClaim', finalizeClaim)
+router.post('/stake', CampaignController.stake)
+router.post('/finalizeStake', CampaignController.finalizeStake)
+router.post('/claim', CampaignController.claim)
+router.post('/finalizeClaim', CampaignController.finalizeClaim)
 
 export default router

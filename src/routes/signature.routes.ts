@@ -1,10 +1,10 @@
 import { Router } from 'express'
 
-import { stake, claim } from '../controllers/signature.controller'
+import { CampaignController } from '../controllers/signature.controller'
 
 const router = Router()
 
-router.post('/stake', stake)
-router.post('/claim', claim)
+router.post('/stake', CampaignController.stake)
+router.post('/claim', CampaignController.claim)
 
 export default router
