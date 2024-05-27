@@ -16,7 +16,12 @@ export class CampaignController {
   public static async createCampaign(req: Request, res: Response) {
     try {
       const { name, quantity, blockStart, blockEnd } = req.body
-      const newCampaign = await CampaignRepository.createCampaign(name, quantity, blockStart, blockEnd)
+      const newCampaign = await CampaignRepository.createCampaign(
+        name,
+        quantity,
+        blockStart,
+        blockEnd,
+      )
       return res.json(newCampaign)
     } catch (error) {
       if (error instanceof Error) {
@@ -36,14 +41,21 @@ export class CampaignController {
       }
     }
   }
-  
-  public static async updateCampaign (req: Request, res: Response) {
+
+  public static async updateCampaign(req: Request, res: Response) {
     try {
       const { id } = req.params
       const { name, quantity, blockStart, blockEnd, lastBlockReward } = req.body
-  
-      const campaign = await CampaignRepository.updateCampaign(Number(id), name, quantity, blockStart, blockEnd, lastBlockReward)
-  
+
+      const campaign = await CampaignRepository.updateCampaign(
+        Number(id),
+        name,
+        quantity,
+        blockStart,
+        blockEnd,
+        lastBlockReward,
+      )
+
       res.json(campaign)
     } catch (error) {
       if (error instanceof Error) {
@@ -51,7 +63,7 @@ export class CampaignController {
       }
     }
   }
-  
+
   public static async deleteCampaign(req: Request, res: Response) {
     try {
       const { id } = req.params

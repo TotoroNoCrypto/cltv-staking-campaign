@@ -15,7 +15,12 @@ export class CampaignRepository {
     return campaigns
   }
 
-  public static async createCampaign(name: string, quantity: number, blockStart: number, blockEnd: number): Promise<CampaignModel> {
+  public static async createCampaign(
+    name: string,
+    quantity: number,
+    blockStart: number,
+    blockEnd: number,
+  ): Promise<CampaignModel> {
     const newCampaign = await Campaign.create(
       {
         name,
@@ -24,12 +29,7 @@ export class CampaignRepository {
         blockEnd,
       },
       {
-        fields: [
-          'name',
-          'quantity',
-          'blockStart',
-          'blockEnd',
-        ],
+        fields: ['name', 'quantity', 'blockStart', 'blockEnd'],
       },
     )
     return newCampaign
@@ -43,23 +43,30 @@ export class CampaignRepository {
     })
     return campaign
   }
-  
-  public static async updateCampaign (id: number, name: string, quantity: number, blockStart: number, blockEnd: number, lastBlockReward: number): Promise<CampaignModel> {
+
+  public static async updateCampaign(
+    id: number,
+    name: string,
+    quantity: number,
+    blockStart: number,
+    blockEnd: number,
+    lastBlockReward: number,
+  ): Promise<CampaignModel> {
     const campaign = await Campaign.findByPk(id)
-      if (!campaign) {
-        throw new Error('Model not found')
-      }
-  
-      campaign.name = name
-      campaign.quantity = quantity
-      campaign.blockStart = blockStart
-      campaign.blockEnd = blockEnd
-      campaign.lastBlockReward = lastBlockReward
-      await campaign.save()
-  
-      return campaign
+    if (!campaign) {
+      throw new Error('Model not found')
+    }
+
+    campaign.name = name
+    campaign.quantity = quantity
+    campaign.blockStart = blockStart
+    campaign.blockEnd = blockEnd
+    campaign.lastBlockReward = lastBlockReward
+    await campaign.save()
+
+    return campaign
   }
-  
+
   public static async deleteCampaign(id: number) {
     await Campaign.destroy({
       where: {
