@@ -10,6 +10,7 @@ const varuint = require('varuint-bitcoin')
 
 import { UnisatConnector } from '../unisatConnector'
 import { getFastestFee, getTxHex } from '../utils'
+import { CampaignRepository } from '../repositories/campaign.repository'
 
 const network = config.get<Network>('bitcoin.network')
 const unisatApiToken = config.get<string>('unisat.apiToken')
@@ -28,7 +29,8 @@ export class PsbtService {
     pubkeyHex: string,
     inscriptionTxid: string,
     inscriptionVout: number,
-    blockheight: number,
+    ticker: string,
+    amount: number,
   ): Promise<string> {
     const fastestFee = await getFastestFee()
     const fee = stakeSize * fastestFee
@@ -37,7 +39,8 @@ export class PsbtService {
       pubkeyHex,
       inscriptionTxid,
       inscriptionVout,
-      blockheight,
+      ticker,
+      amount,
       fee,
     )
 
@@ -48,7 +51,7 @@ export class PsbtService {
     psbtHex: string,
   ): Promise<{ txSize: number; psbtHex: string; txHex: string }> {
     const psbt = Psbt.fromHex(psbtHex)
-    psbt.finalizeAllInputs()
+    // psbt.finalizeAllInputs()
     const tx = psbt.extractTransaction(true)
 
     return {
@@ -106,12 +109,19 @@ export class PsbtService {
     pubkeyHex: string,
     inscriptionTxid: string,
     inscriptionVout: number,
-    blockheight: number,
+    ticker: string,
+    amount: number,
     fee: number,
   ): Promise<Psbt> {
     const pubkey = this.getPubkey(pubkeyHex)
     const internalPubkey = this.getInternalPubkey(pubkey)
     const stakerPayment = this.getStakerPayment(internalPubkey)
+    const campaign = await CampaignRepository.getCampaignByName(ticker)
+    if (campaign === null) {
+      throw new Error('Campaign not found')
+    }
+
+    const blockheight = campaign.blockEnd
     const cltvPayment = this.getCltvPayment(pubkey, blockheight)
 
     const btcUtxo = await this.findBtcUtxo(taprootAddress, fee)

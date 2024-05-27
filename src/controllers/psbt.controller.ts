@@ -4,14 +4,15 @@ import { PsbtService } from '../services/psbt.service'
 export class CampaignController {
   public static async stake(req: Request, res: Response): Promise<Response> {
     try {
-      const { taproot, pubKey, txid, vout, blockheight } = req.body
+      const { taproot, pubKey, txid, vout, tick, amt } = req.body
 
       const psbt = await PsbtService.stake(
         taproot,
         pubKey,
         txid,
         vout,
-        blockheight,
+        tick,
+        amt,
       )
 
       return res.json(psbt)

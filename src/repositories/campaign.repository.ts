@@ -44,6 +44,17 @@ export class CampaignRepository {
     return campaign
   }
 
+  public static async getCampaignByName(
+    name: string,
+  ): Promise<CampaignModel | null> {
+    const campaign = await Campaign.findOne({
+      where: {
+        name,
+      },
+    })
+    return campaign
+  }
+
   public static async updateCampaign(
     id: number,
     name: string,
