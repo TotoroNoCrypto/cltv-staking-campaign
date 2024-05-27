@@ -1,7 +1,7 @@
 import { DataTypes, Model } from 'sequelize'
 import { sequelize } from '../database/database'
 
-interface RewardModel extends Model {
+export interface RewardModel extends Model {
   id: number
   campaignId: number
   address: string
