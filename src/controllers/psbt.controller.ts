@@ -22,14 +22,16 @@ export class CampaignController {
     res: Response,
   ): Promise<Response> {
     try {
-      const { taproot, pubKey, psbtHex, tick, amt } = req.body
+      const { taproot, pubKey, txid, vout, tick, amt, psbtHex } = req.body
 
       const psbt = await PsbtService.finalizeStake(
         taproot,
         pubKey,
-        psbtHex,
+        txid,
+        vout,
         tick,
         amt,
+        psbtHex,
       )
 
       return res.json(psbt)

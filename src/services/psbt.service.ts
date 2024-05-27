@@ -8,23 +8,16 @@ import config from 'config'
 const bip65 = require('bip65')
 const varuint = require('varuint-bitcoin')
 
-import { UnisatConnector } from '../unisatConnector'
 import { getFastestFee, getTxHex } from '../utils'
 import { CampaignRepository } from '../repositories/campaign.repository'
 import { StakingRepository } from '../repositories/staking.repository'
+import { UnisatService } from '../services/unisat.service'
 
 const network = config.get<Network>('bitcoin.network')
-const unisatApiToken = config.get<string>('unisat.apiToken')
-const unisatApiUrl = config.get<string>('unisat.apiUrl')
 const stakeSize = config.get<number>('stakeSize')
 const claimSize = config.get<number>('claimSize')
 
 export class PsbtService {
-  private static unisatConnector: UnisatConnector = new UnisatConnector(
-    unisatApiUrl,
-    unisatApiToken,
-  )
-
   public static async stake(
     walletAddress: string,
     pubkeyHex: string,
@@ -49,9 +42,11 @@ export class PsbtService {
   public static async finalizeStake(
     walletAddress: string,
     pubkeyHex: string,
-    psbtHex: string,
+    inscriptionTxId: string,
+    inscriptionVout: number,
     ticker: string,
     quantity: number,
+    psbtHex: string,
   ): Promise<{ txSize: number; psbtHex: string; txHex: string }> {
     const psbt = Psbt.fromHex(psbtHex)
     // psbt.finalizeAllInputs()
@@ -70,6 +65,8 @@ export class PsbtService {
       campaign.id,
       walletAddress,
       scriptAddress,
+      inscriptionTxId,
+      inscriptionVout,
       quantity,
     )
 
@@ -142,12 +139,12 @@ export class PsbtService {
     const blockheight = campaign.blockEnd
     const cltvPayment = this.getCltvPayment(pubkey, blockheight)
 
-    const btcUtxo = await this.findBtcUtxo(walletAddress, fee)
+    const btcUtxo = await UnisatService.findBtcUtxo(walletAddress, fee)
     if (btcUtxo === undefined) {
       throw new Error('BTC UTXO not found')
     }
 
-    const inscriptionUtxo = await this.findInscriptionUtxo(
+    const inscriptionUtxo = await UnisatService.findInscriptionUtxo(
       walletAddress,
       inscriptionTxid,
       inscriptionVout,
@@ -197,15 +194,15 @@ export class PsbtService {
     const stakerPayment = this.getStakerPayment(internalPubkey)
     const cltvPayment = this.getCltvPayment(pubkey, blockheight)
 
-    const btcUtxo = await this.findBtcUtxo(walletAddress, fee)
+    const btcUtxo = await UnisatService.findBtcUtxo(walletAddress, fee)
     if (btcUtxo === undefined) {
       throw new Error('BTC UTXO not found')
     }
 
-    let scriptInscriptionUtxos = await this.getInscriptionUtxos(
+    let scriptInscriptionUtxos = await UnisatService.getInscriptionUtxos(
       cltvPayment.address!,
     )
-    const scriptBtcUtxos = await this.getBtcUtxos(cltvPayment.address!)
+    const scriptBtcUtxos = await UnisatService.getBtcUtxos(cltvPayment.address!)
     const scriptUtxos = scriptInscriptionUtxos.concat(scriptBtcUtxos)
 
     if (scriptUtxos.length === 0) {
@@ -250,122 +247,6 @@ export class PsbtService {
     })
 
     return psbt
-  }
-
-  private static async findBtcUtxo(
-    walletAddress: string,
-    stakeFee: number,
-  ): Promise<{ txid: string; vout: number; satoshi: number } | undefined> {
-    let utxos = []
-    let utxo = undefined
-    let cursor = 0
-    const size = 16
-    let resultSize = 0
-
-    do {
-      const result = await this.unisatConnector.general.getBtcUtxo(
-        walletAddress,
-        cursor * size,
-        size,
-      )
-      utxos = result.data.utxo
-      resultSize = utxos.length
-      utxo = utxos.find((u: { satoshi: number }) => u.satoshi >= stakeFee)
-      cursor++
-    } while (resultSize === size && utxo === undefined)
-
-    return utxo != undefined
-      ? { txid: utxo.txid, vout: utxo.vout, satoshi: utxo.satoshi }
-      : undefined
-  }
-
-  private static async findInscriptionUtxo(
-    walletAddress: string,
-    inscriptionTxid: string,
-    inscriptionVout: number,
-  ): Promise<{ txid: string; vout: number; satoshi: number } | undefined> {
-    let utxos = []
-    let utxo = undefined
-    let cursor = 0
-    const size = 16
-    let resultSize = 0
-
-    do {
-      const result = await this.unisatConnector.general.getInscriptionUtxo(
-        walletAddress,
-        cursor * size,
-        size,
-      )
-      utxos = result.data.utxo
-      resultSize = utxos.length
-      utxo = utxos.find(
-        (u: { txid: string; vout: number }) =>
-          u.txid === inscriptionTxid && u.vout === inscriptionVout,
-      )
-      cursor++
-    } while (resultSize === size && utxo === undefined)
-
-    return utxo != undefined
-      ? { txid: utxo.txid, vout: utxo.vout, satoshi: utxo.satoshi }
-      : undefined
-  }
-
-  private static async getBtcUtxos(
-    address: string,
-  ): Promise<Array<{ txid: string; vout: number; satoshi: number }>> {
-    let utxos: Array<{ txid: string; vout: number; satoshi: number }> = []
-    let cursor = 0
-    const size = 16
-    let resultSize = 0
-
-    do {
-      const result = await this.unisatConnector.general.getBtcUtxo(
-        address,
-        cursor * size,
-        size,
-      )
-      resultSize = result.data.utxo.length
-      utxos = utxos.concat(result.data.utxo)
-      cursor++
-    } while (resultSize === size)
-
-    return utxos
-  }
-
-  private static async getInscriptionUtxos(
-    address: string,
-  ): Promise<Array<{ txid: string; vout: number; satoshi: number }>> {
-    let utxos: Array<{ txid: string; vout: number; satoshi: number }> = []
-    let cursor = 0
-    const size = 16
-    let resultSize = 0
-
-    do {
-      const result = await this.unisatConnector.general.getInscriptionUtxo(
-        address,
-        cursor * size,
-        size,
-      )
-      resultSize = result.data.utxo.length
-      const filteredUtxos = result.data.utxo.filter(
-        (u: {
-          txid: string
-          vout: number
-          inscriptions: { moved: boolean }[]
-        }) =>
-          u.inscriptions.find((i: { moved: boolean }) => !i.moved) !==
-          undefined,
-      )
-
-      if (filteredUtxos.length === 0) {
-        break
-      }
-
-      utxos = utxos.concat(filteredUtxos)
-      cursor++
-    } while (resultSize === size)
-
-    return utxos
   }
 
   private static getStakerPayment(internalPubkey: Buffer): Payment {

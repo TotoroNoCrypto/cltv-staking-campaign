@@ -6,6 +6,8 @@ export interface StakingModel extends Model {
   campaignId: number
   walletAddress: string
   scriptAddress: string
+  inscriptionTxId: string
+  inscriptionVout: number
   quantity: number
   block: number
 }
@@ -21,6 +23,12 @@ export const Staking = sequelize.define<StakingModel>('stakings', {
   },
   scriptAddress: {
     type: DataTypes.STRING,
+  },
+  inscriptionTxId: {
+    type: DataTypes.STRING,
+  },
+  inscriptionVout: {
+    type: DataTypes.INTEGER,
   },
   quantity: {
     type: DataTypes.INTEGER,

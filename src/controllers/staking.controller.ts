@@ -15,11 +15,13 @@ export class StakingController {
 
   public static async createStaking(req: Request, res: Response) {
     try {
-      const { campaignId, taproot, script, quantity } = req.body
+      const { campaignId, taproot, script, txid, vout, quantity } = req.body
       const newStaking = await StakingRepository.createStaking(
         campaignId,
         taproot,
         script,
+        txid,
+        vout,
         quantity,
       )
       return res.json(newStaking)
@@ -38,6 +40,21 @@ export class StakingController {
     } catch (error) {
       if (error instanceof Error) {
         res.status(500).json({ message: error.message })
+      }
+    }
+  }
+
+  public static async updateStaking(req: Request, res: Response) {
+    try {
+      const { id } = req.params
+      const { block } = req.body
+
+      const staking = await StakingRepository.updateStaking(Number(id), block)
+
+      res.json(staking)
+    } catch (error) {
+      if (error instanceof Error) {
+        return res.status(500).json({ message: error.message })
       }
     }
   }

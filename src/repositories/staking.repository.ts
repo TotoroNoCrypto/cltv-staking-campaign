@@ -8,6 +8,8 @@ export class StakingRepository {
         'campaignId',
         'walletAddress',
         'scriptAddress',
+        'inscriptionTxId',
+        'inscriptionVout',
         'quantity',
         'block',
       ],
@@ -20,6 +22,8 @@ export class StakingRepository {
     campaignId: number,
     walletAddress: string,
     scriptAddress: string,
+    inscriptionTxId: string,
+    inscriptionVout: number,
     quantity: number,
   ): Promise<StakingModel> {
     const newStaking = await Staking.create(
@@ -27,10 +31,19 @@ export class StakingRepository {
         campaignId,
         walletAddress,
         scriptAddress,
+        inscriptionTxId,
+        inscriptionVout,
         quantity,
       },
       {
-        fields: ['campaignId', 'walletAddress', 'scriptAddress', 'quantity'],
+        fields: [
+          'campaignId',
+          'walletAddress',
+          'scriptAddress',
+          'inscriptionTxId',
+          'inscriptionVout',
+          'quantity',
+        ],
       },
     )
 
@@ -45,5 +58,40 @@ export class StakingRepository {
     })
 
     return staking
+  }
+
+  public static async updateStaking(
+    id: number,
+    block: number,
+  ): Promise<StakingModel> {
+    const staking = await Staking.findByPk(id)
+    if (!staking) {
+      throw new Error('Model not found')
+    }
+
+    staking.block = block
+    await staking.save()
+
+    return staking
+  }
+
+  public static async findUnconfirmedStakings(): Promise<StakingModel[]> {
+    const stakings = await Staking.findAll({
+      where: {
+        block: null,
+      },
+      attributes: [
+        'id',
+        'campaignId',
+        'walletAddress',
+        'scriptAddress',
+        'inscriptionTxId',
+        'inscriptionVout',
+        'quantity',
+        'block',
+      ],
+    })
+
+    return stakings
   }
 }

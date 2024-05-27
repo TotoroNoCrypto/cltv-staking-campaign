@@ -10,9 +10,10 @@ Content-Type: application/json
 {
   "campaignId": 1,
   "taproot": "bc1plvqwcy5chr9ja359rm4zkhyfyxacn2tj4rvjtfk40w5ctzagssnszte0m6",
-  "script": "38bmSDcEmfFS4a4gntr8D6aXe93epGw7f3",
-  "quantity": 1,
-  "block": 840020
+  "script": "3CXmHt6c1a7iCb6ZxZ7DvghdpSFUvVXFza",
+  "txid": "269665ee8b1bf1e1f216389095e15f93d0a2c31b01208c07ae7d9f09f3c9d5df",
+  "vout": 0,
+  "quantity": 1
 }
 
 ### Create staking 2
@@ -22,34 +23,19 @@ Content-Type: application/json
 {
   "campaignId": 1,
   "taproot": "bc1pafup76rku5y3h689hpvesfgzdq28wkn6uuagepehdj9a2elzsnxqqmh9n3",
-  "script": "3JVfbzn43eWmXbRE8TCWoUpTWVqr79VNS4",
-  "quantity": 1,
-  "block": 840030
+  "txid": "4474d12e7e66e4348603645f763da2aa82220eae680b193b872d719fd759f93fi0",
+  "vout": 0,
+  "script": "3M6XAYveXM2qbcEWz4J6PEZepN1xFgc9eM",
+  "quantity": 1
 }
 
-### Create staking 3
-POST {{api}}
+### Update staking
+POST {{api}}/1
 Content-Type: application/json
 
-{
-  "campaignId": 2,
-  "taproot": "bc1plvqwcy5chr9ja359rm4zkhyfyxacn2tj4rvjtfk40w5ctzagssnszte0m6",
-  "script": "38bmSDcEmfFS4a4gntr8D6aXe93epGw7f3",
-  "quantity": 5,
-  "block": 840025
-}
-
-### Create staking 4
-POST {{api}}
-Content-Type: application/json
-
-{
-  "campaignId": 1,
-  "taproot": "bc1plvqwcy5chr9ja359rm4zkhyfyxacn2tj4rvjtfk40w5ctzagssnszte0m6",
-  "script": "38bmSDcEmfFS4a4gntr8D6aXe93epGw7f3",
-  "quantity": 1,
-  "block": 840035
+{,
+  "block": 845020
 }
 
 ### Get staking
-GET {{api}}/4
+GET {{api}}/1
