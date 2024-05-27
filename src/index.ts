@@ -7,6 +7,7 @@ async function main() {
 
   setInterval(async () => {
     await BackgroundService.recordUnconfirmedStakings()
+    await BackgroundService.refreshRewards()
   }, 10000)
 
   app.listen(3000)

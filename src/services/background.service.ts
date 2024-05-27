@@ -1,4 +1,5 @@
 import { StakingRepository } from '../repositories/staking.repository'
+import { RewardRepository } from '../repositories/reward.repository'
 import { UnisatService } from '../services/unisat.service'
 
 export class BackgroundService {
@@ -16,5 +17,13 @@ export class BackgroundService {
         await StakingRepository.updateStaking(staking.id, blockheight)
       }
     })
+  }
+
+  public static async refreshRewards(): Promise<void> {
+    console.log('Refreshing rewards')
+
+    // Unisat displays 1 bloc ahead
+    const height = await UnisatService.getBlockchainHeight() - 1
+    await RewardRepository.computeRewards(Number(height))
   }
 }

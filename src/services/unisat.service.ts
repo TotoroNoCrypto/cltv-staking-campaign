@@ -11,6 +11,12 @@ export class UnisatService {
     unisatApiToken,
   )
 
+  public static async getBlockchainHeight(): Promise<number> {
+    const info = await this.unisatConnector.general.getBlockchainInfo()
+
+    return info.data.blocks
+  }
+
   public static async findBtcUtxo(
     address: string,
     stakeFee: number,

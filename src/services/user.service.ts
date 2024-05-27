@@ -26,7 +26,7 @@ export class UserService {
     const reward = await Reward.findOne({
       where: {
         campaignId,
-        address: walletAddress,
+        walletAddress,
       },
     })
 
