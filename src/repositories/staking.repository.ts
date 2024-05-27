@@ -12,18 +12,16 @@ export class StakingRepository {
   public static async createStaking(
     campaignId: number,
     taproot: string,
-    quantity: number,
-    block: number,
+    quantity: number
   ): Promise<StakingModel> {
     const newStaking = await Staking.create(
       {
         campaignId,
         address: taproot,
         quantity,
-        block,
       },
       {
-        fields: ['campaignId', 'address', 'quantity', 'block'],
+        fields: ['campaignId', 'address', 'quantity'],
       },
     )
 

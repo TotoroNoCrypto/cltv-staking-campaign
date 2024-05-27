@@ -11,8 +11,7 @@ export class CampaignController {
         pubKey,
         txid,
         vout,
-        tick,
-        amt,
+        tick
       )
 
       return res.json(psbt)
@@ -29,9 +28,9 @@ export class CampaignController {
     res: Response,
   ): Promise<Response> {
     try {
-      const { psbtHex } = req.body
+      const { taproot, psbtHex, tick, amt } = req.body
 
-      const psbt = await PsbtService.finalizeStake(psbtHex)
+      const psbt = await PsbtService.finalizeStake(taproot, psbtHex, tick, amt)
 
       return res.json(psbt)
     } catch (error) {

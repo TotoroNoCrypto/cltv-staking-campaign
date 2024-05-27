@@ -11,6 +11,7 @@ const varuint = require('varuint-bitcoin')
 import { UnisatConnector } from '../unisatConnector'
 import { getFastestFee, getTxHex } from '../utils'
 import { CampaignRepository } from '../repositories/campaign.repository'
+import { StakingRepository } from '../repositories/staking.repository'
 
 const network = config.get<Network>('bitcoin.network')
 const unisatApiToken = config.get<string>('unisat.apiToken')
@@ -30,7 +31,6 @@ export class PsbtService {
     inscriptionTxid: string,
     inscriptionVout: number,
     ticker: string,
-    amount: number,
   ): Promise<string> {
     const fastestFee = await getFastestFee()
     const fee = stakeSize * fastestFee
@@ -40,7 +40,6 @@ export class PsbtService {
       inscriptionTxid,
       inscriptionVout,
       ticker,
-      amount,
       fee,
     )
 
@@ -48,11 +47,20 @@ export class PsbtService {
   }
 
   public static async finalizeStake(
+    taprootAddress: string,
     psbtHex: string,
+    ticker: string,
+    quantity: number,
   ): Promise<{ txSize: number; psbtHex: string; txHex: string }> {
     const psbt = Psbt.fromHex(psbtHex)
     // psbt.finalizeAllInputs()
     const tx = psbt.extractTransaction(true)
+
+    const campaign = await CampaignRepository.getCampaignByName(ticker)
+    if (campaign === null) {
+      throw new Error('Campaign not found')
+    }
+    await StakingRepository.createStaking(campaign.id, taprootAddress, quantity)
 
     return {
       txSize: tx.virtualSize(),
@@ -110,7 +118,6 @@ export class PsbtService {
     inscriptionTxid: string,
     inscriptionVout: number,
     ticker: string,
-    amount: number,
     fee: number,
   ): Promise<Psbt> {
     const pubkey = this.getPubkey(pubkeyHex)
