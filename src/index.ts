@@ -4,13 +4,12 @@ import { BackgroundService } from './services/background.service'
 
 async function main() {
   await sequelize.sync({ force: false })
-  
+
   setInterval(async () => {
     try {
       await BackgroundService.recordUnconfirmedStakings()
       await BackgroundService.refreshRewards()
-    }
-    catch (error) {
+    } catch (error) {
       console.log('Background service error')
     }
   }, 300000)

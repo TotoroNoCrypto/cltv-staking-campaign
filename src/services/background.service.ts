@@ -23,7 +23,7 @@ export class BackgroundService {
     console.log('Refreshing rewards')
 
     // Unisat displays 1 bloc ahead
-    const height = await UnisatService.getBlockchainHeight() - 1
+    const height = (await UnisatService.getBlockchainHeight()) - 1
     await RewardRepository.computeRewards(Number(height))
   }
 }

@@ -1,4 +1,4 @@
-import { Op, fn, col } from 'sequelize';
+import { Op, fn, col } from 'sequelize'
 import { StakingModel, Staking } from '../models/staking.model'
 import { CampaignRepository } from '../repositories/campaign.repository'
 
@@ -97,24 +97,26 @@ export class StakingRepository {
     return stakings
   }
 
-  public static async getTVL(): Promise<{ name: string, total: number }[]> {
+  public static async getTVL(): Promise<{ name: string; total: number }[]> {
     const groupStakings = await Staking.findAll({
       group: 'campaignId',
       where: {
-        block: { [Op.not]: null, },
+        block: { [Op.not]: null },
       },
-      attributes: [
-        'campaignId',
-        [fn('SUM', col('quantity')), 'total'],
-      ],
+      attributes: ['campaignId', [fn('SUM', col('quantity')), 'total']],
     })
 
-    let campaignTVL: { name: string, total: number }[] = []
+    let campaignTVL: { name: string; total: number }[] = []
 
     for (let i = 0; i < groupStakings.length; i++) {
-      const staking = groupStakings[i];
-      const campaign = await CampaignRepository.getCampaign(staking.dataValues.campaignId)
-      campaignTVL = campaignTVL.concat({ name: campaign!.name, total: staking.dataValues.total })
+      const staking = groupStakings[i]
+      const campaign = await CampaignRepository.getCampaign(
+        staking.dataValues.campaignId,
+      )
+      campaignTVL = campaignTVL.concat({
+        name: campaign!.name,
+        total: staking.dataValues.total,
+      })
     }
 
     return campaignTVL
