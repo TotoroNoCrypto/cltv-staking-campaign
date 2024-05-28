@@ -4,11 +4,16 @@ import { BackgroundService } from './services/background.service'
 
 async function main() {
   await sequelize.sync({ force: false })
-
+  
   setInterval(async () => {
-    await BackgroundService.recordUnconfirmedStakings()
-    await BackgroundService.refreshRewards()
-  }, 10000)
+    try {
+      await BackgroundService.recordUnconfirmedStakings()
+      await BackgroundService.refreshRewards()
+    }
+    catch (error) {
+      console.log('Background service error')
+    }
+  }, 300000)
 
   app.listen(3000)
   console.log('Server on port 3000')

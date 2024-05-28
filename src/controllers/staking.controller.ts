@@ -58,4 +58,15 @@ export class StakingController {
       }
     }
   }
+
+  public static async getTVL(req: Request, res: Response) {
+    try {
+      const campaignTVL = await StakingRepository.getTVL()
+      res.json(campaignTVL)
+    } catch (error) {
+      if (error instanceof Error) {
+        res.status(500).json({ message: error.message })
+      }
+    }
+  }
 }

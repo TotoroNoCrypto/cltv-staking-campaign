@@ -26,16 +26,32 @@ Content-Type: application/json
   "txid": "4474d12e7e66e4348603645f763da2aa82220eae680b193b872d719fd759f93fi0",
   "vout": 0,
   "script": "3M6XAYveXM2qbcEWz4J6PEZepN1xFgc9eM",
-  "quantity": 1
+  "quantity": 15
+}
+
+### Create staking 3
+POST {{api}}
+Content-Type: application/json
+
+{
+  "campaignId": 2,
+  "taproot": "bc1pafup76rku5y3h689hpvesfgzdq28wkn6uuagepehdj9a2elzsnxqqmh9n3",
+  "txid": "4474d12e7e66e4348603645f763da2aa82220eae680b193b872d719fd759f93fi0",
+  "vout": 0,
+  "script": "3M6XAYveXM2qbcEWz4J6PEZepN1xFgc9eM",
+  "quantity": 10
 }
 
 ### Update staking
-POST {{api}}/1
+POST {{api}}/4
 Content-Type: application/json
 
-{,
+{
   "block": 845020
 }
 
 ### Get staking
 GET {{api}}/1
+
+### Get TVL
+GET {{api}}/tvl

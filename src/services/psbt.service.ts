@@ -49,7 +49,7 @@ export class PsbtService {
     psbtHex: string,
   ): Promise<{ txSize: number; psbtHex: string; txHex: string }> {
     const psbt = Psbt.fromHex(psbtHex)
-    // psbt.finalizeAllInputs()
+    psbt.finalizeAllInputs()
     const tx = psbt.extractTransaction(true)
 
     const campaign = await CampaignRepository.getCampaignByName(ticker)
