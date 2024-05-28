@@ -95,7 +95,7 @@ export class RewardRepository {
         campaign.lastBlockReward > campaign.blockStart
           ? campaign.lastBlockReward
           : campaign.blockStart
-      const end = blockid
+      const end = blockid < campaign.blockEnd ? blockid : campaign.blockEnd
       for (let block = start; block <= end; block++) {
         let share = totalQuantities > 0 ? rewardPerBlock / totalQuantities : 0
         share = Math.round(share * 10 ** 8) / 10 ** 8
