@@ -98,9 +98,10 @@ export class StakingRepository {
     return stakings
   }
 
-  public static async getTVL(): Promise<
-    { name: string; total: number; tvl: number }[]
-  > {
+  public static async getTVL(): Promise<{
+    campaigns: { name: string; total: number; tvl: number }[]
+    tvl: number
+  }> {
     const groupStakings = await Staking.findAll({
       group: 'campaignId',
       where: {
@@ -110,6 +111,7 @@ export class StakingRepository {
     })
 
     let campaignTVL: { name: string; total: number; tvl: number }[] = []
+    let totalTVL = 0
 
     for (let i = 0; i < groupStakings.length; i++) {
       const staking = groupStakings[i]
@@ -123,13 +125,15 @@ export class StakingRepository {
         '1',
         'exactIn',
       )
+      const tvl = Math.floor(staking.dataValues.total * quote)
       campaignTVL = campaignTVL.concat({
         name: campaign!.name,
         total: staking.dataValues.total,
-        tvl: staking.dataValues.total * quote,
+        tvl: tvl,
       })
+      totalTVL += tvl
     }
 
-    return campaignTVL
+    return { campaigns: campaignTVL, tvl: totalTVL }
   }
 }
