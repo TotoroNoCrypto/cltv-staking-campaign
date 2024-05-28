@@ -1,6 +1,7 @@
 import { Op, fn, col } from 'sequelize'
 import { StakingModel, Staking } from '../models/staking.model'
 import { CampaignRepository } from '../repositories/campaign.repository'
+import { UnisatService } from '../services/unisat.service'
 
 export class StakingRepository {
   public static async getStakings(): Promise<StakingModel[]> {
@@ -97,7 +98,9 @@ export class StakingRepository {
     return stakings
   }
 
-  public static async getTVL(): Promise<{ name: string; total: number }[]> {
+  public static async getTVL(): Promise<
+    { name: string; total: number; tvl: number }[]
+  > {
     const groupStakings = await Staking.findAll({
       group: 'campaignId',
       where: {
@@ -106,16 +109,24 @@ export class StakingRepository {
       attributes: ['campaignId', [fn('SUM', col('quantity')), 'total']],
     })
 
-    let campaignTVL: { name: string; total: number }[] = []
+    let campaignTVL: { name: string; total: number; tvl: number }[] = []
 
     for (let i = 0; i < groupStakings.length; i++) {
       const staking = groupStakings[i]
       const campaign = await CampaignRepository.getCampaign(
         staking.dataValues.campaignId,
       )
+      const quote = await UnisatService.getQuote(
+        'bc1pafup76rku5y3h689hpvesfgzdq28wkn6uuagepehdj9a2elzsnxqqmh9n3',
+        campaign!.name,
+        'sats',
+        '1',
+        'exactIn',
+      )
       campaignTVL = campaignTVL.concat({
         name: campaign!.name,
         total: staking.dataValues.total,
+        tvl: staking.dataValues.total * quote,
       })
     }
 

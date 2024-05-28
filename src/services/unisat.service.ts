@@ -169,4 +169,22 @@ export class UnisatService {
 
     return utxo != undefined ? utxo.height : undefined
   }
+
+  public static async getQuote(
+    address: string,
+    tickIn: string,
+    tickOut: string,
+    amount: string,
+    exactType: string,
+  ): Promise<number> {
+    const result = await this.unisatConnector.brc20.getQuoteSwap(
+      address,
+      tickIn,
+      tickOut,
+      amount,
+      exactType,
+    )
+
+    return result.data.amountUSD
+  }
 }

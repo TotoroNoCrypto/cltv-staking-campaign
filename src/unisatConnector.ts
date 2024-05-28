@@ -210,6 +210,19 @@ class BRC20 extends ApiClient {
       `/v1/indexer/address/${address}/brc20/${ticker}/transferable-inscriptions${params}`,
     )
   }
+
+  getQuoteSwap(
+    address: string,
+    tickIn: string,
+    tickOut: string,
+    amount: string,
+    exactType: string,
+  ) {
+    return this.makeRequest(
+      'GET',
+      `/v1/brc20-swap/quote_swap?address=${address}&tickIn=${tickIn}&tickOut=${tickOut}&amount=${amount}&exactType=${exactType}`,
+    )
+  }
 }
 
 export class UnisatConnector {
