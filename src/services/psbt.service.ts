@@ -86,12 +86,7 @@ export class PsbtService {
   ): Promise<string> {
     const fastestFee = await getFastestFee()
     const fee = claimSize * fastestFee
-    const psbt = await this.getClaimPsbt(
-      walletAddress,
-      pubkeyHex,
-      ticker,
-      fee,
-    )
+    const psbt = await this.getClaimPsbt(walletAddress, pubkeyHex, ticker, fee)
 
     return psbt.toHex()
   }
@@ -141,7 +136,10 @@ export class PsbtService {
     const blockheight = campaign.blockEnd
     const cltvPayment = this.getCltvPayment(pubkey, blockheight)
 
-    const btcUtxo = await UnisatService.findBtcUtxo(walletAddress, fee + serviceFee)
+    const btcUtxo = await UnisatService.findBtcUtxo(
+      walletAddress,
+      fee + serviceFee,
+    )
     if (btcUtxo === undefined) {
       throw new Error('BTC UTXO not found')
     }
