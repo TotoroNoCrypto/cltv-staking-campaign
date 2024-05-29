@@ -167,7 +167,7 @@ export class UnisatService {
       cursor++
     } while (resultSize === size && utxo === undefined)
 
-    return utxo != undefined ? utxo.height : undefined
+    return utxo != undefined && utxo.height < 900000 ? utxo.height : undefined
   }
 
   public static async getQuote(
