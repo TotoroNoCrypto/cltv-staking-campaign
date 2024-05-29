@@ -19,7 +19,7 @@ export class UnisatService {
 
   public static async findBtcUtxo(
     address: string,
-    stakeFee: number,
+    fee: number,
   ): Promise<{ txid: string; vout: number; satoshi: number } | undefined> {
     let utxos = []
     let utxo = undefined
@@ -35,7 +35,7 @@ export class UnisatService {
       )
       utxos = result.data.utxo
       resultSize = utxos.length
-      utxo = utxos.find((u: { satoshi: number }) => u.satoshi >= stakeFee)
+      utxo = utxos.find((u: { satoshi: number }) => u.satoshi >= fee)
       cursor++
     } while (resultSize === size && utxo === undefined)
 

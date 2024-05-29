@@ -14,6 +14,8 @@ import { StakingRepository } from '../repositories/staking.repository'
 import { UnisatService } from '../services/unisat.service'
 
 const network = config.get<Network>('bitcoin.network')
+const teamAddress = config.get<string>('cltv.teamAddress')
+const serviceFee = config.get<number>('cltv.serviceFee')
 const stakeSize = config.get<number>('stakeSize')
 const claimSize = config.get<number>('claimSize')
 
@@ -139,7 +141,7 @@ export class PsbtService {
     const blockheight = campaign.blockEnd
     const cltvPayment = this.getCltvPayment(pubkey, blockheight)
 
-    const btcUtxo = await UnisatService.findBtcUtxo(walletAddress, fee)
+    const btcUtxo = await UnisatService.findBtcUtxo(walletAddress, fee + serviceFee)
     if (btcUtxo === undefined) {
       throw new Error('BTC UTXO not found')
     }
@@ -176,7 +178,11 @@ export class PsbtService {
         address: cltvPayment.address!,
       })
       .addOutput({
-        value: btcUtxo.satoshi - fee,
+        value: serviceFee,
+        address: teamAddress,
+      })
+      .addOutput({
+        value: btcUtxo.satoshi - serviceFee - fee,
         address: stakerPayment.address!,
       })
 
