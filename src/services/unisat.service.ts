@@ -170,7 +170,7 @@ export class UnisatService {
     return utxo != undefined
       ? utxo.height < 900000
         ? utxo.height
-        : this.getBlockchainHeight() - 1
+        : await this.getBlockchainHeight() - 1
       : undefined
   }
 
