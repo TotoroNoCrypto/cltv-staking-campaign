@@ -12,7 +12,7 @@ async function main() {
     } catch (error) {
       console.log('Background service error')
     }
-  }, 300000)
+  }, 60000)
 
   app.listen(3000)
   console.log('Server on port 3000')
