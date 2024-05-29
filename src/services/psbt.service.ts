@@ -82,14 +82,14 @@ export class PsbtService {
   public static async claim(
     walletAddress: string,
     pubkeyHex: string,
-    blockheight: number,
+    ticker: string,
   ): Promise<string> {
     const fastestFee = await getFastestFee()
     const fee = claimSize * fastestFee
     const psbt = await this.getClaimPsbt(
       walletAddress,
       pubkeyHex,
-      blockheight,
+      ticker,
       fee,
     )
 
@@ -192,12 +192,18 @@ export class PsbtService {
   private static async getClaimPsbt(
     walletAddress: string,
     pubkeyHex: string,
-    blockheight: number,
+    ticker: string,
     fee: number,
   ): Promise<Psbt> {
     const pubkey = this.getPubkey(pubkeyHex)
     const internalPubkey = this.getInternalPubkey(pubkey)
     const stakerPayment = this.getStakerPayment(internalPubkey)
+    const campaign = await CampaignRepository.getCampaignByName(ticker)
+    if (campaign === null) {
+      throw new Error('Campaign not found')
+    }
+
+    const blockheight = campaign.blockEnd
     const cltvPayment = this.getCltvPayment(pubkey, blockheight)
 
     const btcUtxo = await UnisatService.findBtcUtxo(walletAddress, fee)
