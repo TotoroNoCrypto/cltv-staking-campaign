@@ -1,3 +1,4 @@
+import { Op } from 'sequelize'
 import { RewardModel, Reward } from '../models/reward.model'
 import { Campaign } from '../models/campaign.model'
 import { Staking } from '../models/staking.model'
@@ -75,6 +76,9 @@ export class RewardRepository {
       ],
     })
     const stakings = await Staking.findAll({
+      where: {
+        block: { [Op.not]: null },
+      },
       attributes: [
         'id',
         'campaignId',
