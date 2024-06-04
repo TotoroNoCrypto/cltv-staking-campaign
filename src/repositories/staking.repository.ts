@@ -2,6 +2,9 @@ import { Op, fn, col } from 'sequelize'
 import { StakingModel, Staking } from '../models/staking.model'
 import { CampaignRepository } from '../repositories/campaign.repository'
 import { UnisatService } from '../services/unisat.service'
+import config from 'config'
+
+const teamAddress = config.get<string>('cltv.teamAddress')
 
 export class StakingRepository {
   public static async getStakings(): Promise<StakingModel[]> {
@@ -119,7 +122,7 @@ export class StakingRepository {
         staking.dataValues.campaignId,
       )
       const quote = await UnisatService.getQuote(
-        'bc1pafup76rku5y3h689hpvesfgzdq28wkn6uuagepehdj9a2elzsnxqqmh9n3',
+        teamAddress,
         campaign!.name,
         'sats',
         '1',

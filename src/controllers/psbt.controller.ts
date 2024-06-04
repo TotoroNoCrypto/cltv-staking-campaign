@@ -4,9 +4,9 @@ import { PsbtService } from '../services/psbt.service'
 export class CampaignController {
   public static async stake(req: Request, res: Response): Promise<Response> {
     try {
-      const { taproot, pubKey, txid, vout, tick } = req.body
+      const { taproot, pubKey, txid, vout, tick, amt } = req.body
 
-      const psbt = await PsbtService.stake(taproot, pubKey, txid, vout, tick)
+      const psbt = await PsbtService.stake(taproot, pubKey, txid, vout, tick, amt)
 
       return res.json(psbt)
     } catch (error) {
@@ -45,9 +45,9 @@ export class CampaignController {
 
   public static async claim(req: Request, res: Response): Promise<Response> {
     try {
-      const { taproot, pubKey, tick } = req.body
+      const { taproot, pubKey, tick, amt } = req.body
 
-      const psbt = await PsbtService.claim(taproot, pubKey, tick)
+      const psbt = await PsbtService.claim(taproot, pubKey, tick, amt)
 
       return res.json(psbt)
     } catch (error) {

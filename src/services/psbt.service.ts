@@ -15,7 +15,8 @@ import { UnisatService } from '../services/unisat.service'
 
 const network = config.get<Network>('bitcoin.network')
 const teamAddress = config.get<string>('cltv.teamAddress')
-const serviceFee = config.get<number>('cltv.serviceFee')
+const serviceFeeFix = config.get<number>('cltv.serviceFeeFix')
+const serviceFeeVariable = config.get<number>('cltv.serviceFeeVariable')
 const stakeSize = config.get<number>('stakeSize')
 const claimSize = config.get<number>('claimSize')
 
@@ -26,16 +27,18 @@ export class PsbtService {
     inscriptionTxid: string,
     inscriptionVout: number,
     ticker: string,
+    amt: number
   ): Promise<string> {
     const fastestFee = await getFastestFee()
-    const fee = stakeSize * fastestFee
+    const networkFee = stakeSize * fastestFee
     const psbt = await this.getStakePsbt(
       walletAddress,
       pubkeyHex,
       inscriptionTxid,
       inscriptionVout,
       ticker,
-      fee,
+      amt,
+      networkFee,
     )
 
     return psbt.toHex()
@@ -83,10 +86,11 @@ export class PsbtService {
     walletAddress: string,
     pubkeyHex: string,
     ticker: string,
+    amt: number,
   ): Promise<string> {
     const fastestFee = await getFastestFee()
-    const fee = claimSize * fastestFee
-    const psbt = await this.getClaimPsbt(walletAddress, pubkeyHex, ticker, fee)
+    const networkFee = claimSize * fastestFee
+    const psbt = await this.getClaimPsbt(walletAddress, pubkeyHex, ticker, amt, networkFee)
 
     return psbt.toHex()
   }
@@ -123,7 +127,8 @@ export class PsbtService {
     inscriptionTxid: string,
     inscriptionVout: number,
     ticker: string,
-    fee: number,
+    amt: number,
+    networkFee: number,
   ): Promise<Psbt> {
     const pubkey = this.getPubkey(pubkeyHex)
     const internalPubkey = this.getInternalPubkey(pubkey)
@@ -136,9 +141,24 @@ export class PsbtService {
     const blockheight = campaign.blockEnd
     const cltvPayment = this.getCltvPayment(pubkey, blockheight)
 
+    const quote = await UnisatService.getQuote(
+      teamAddress,
+      ticker,
+      'sats',
+      '1',
+      'exactIn',
+    )
+    let serviceFee = Math.max(serviceFeeFix, amt * quote * (serviceFeeVariable / 100) * (100000000 / 70000))
+    if (serviceFee >= 10 * serviceFeeFix) {
+      serviceFee = 10 * serviceFeeFix
+    }
+
+    console.log(`variable: ${amt * quote * (serviceFeeVariable / 100) * (100000000 / 70000)}`)
+    console.log(`serviceFee: ${serviceFee}`)
+
     const btcUtxo = await UnisatService.findBtcUtxo(
       walletAddress,
-      fee + serviceFee,
+      networkFee + serviceFee,
     )
     if (btcUtxo === undefined) {
       throw new Error('BTC UTXO not found')
@@ -180,7 +200,7 @@ export class PsbtService {
         address: teamAddress,
       })
       .addOutput({
-        value: btcUtxo.satoshi - serviceFee - fee,
+        value: btcUtxo.satoshi - serviceFee - networkFee,
         address: stakerPayment.address!,
       })
 
@@ -191,7 +211,8 @@ export class PsbtService {
     walletAddress: string,
     pubkeyHex: string,
     ticker: string,
-    fee: number,
+    amt: number,
+    networkFee: number,
   ): Promise<Psbt> {
     const pubkey = this.getPubkey(pubkeyHex)
     const internalPubkey = this.getInternalPubkey(pubkey)
@@ -204,7 +225,19 @@ export class PsbtService {
     const blockheight = campaign.blockEnd
     const cltvPayment = this.getCltvPayment(pubkey, blockheight)
 
-    const btcUtxo = await UnisatService.findBtcUtxo(walletAddress, fee)
+    const quote = await UnisatService.getQuote(
+      teamAddress,
+      ticker,
+      'sats',
+      '1',
+      'exactIn',
+    )
+    let serviceFee = Math.max(serviceFeeFix, amt * quote * (serviceFeeVariable / 100) * (100000000 / 70000))
+    if (serviceFee >= 10 * serviceFeeFix) {
+      serviceFee = 10 * serviceFeeFix
+    }
+
+    const btcUtxo = await UnisatService.findBtcUtxo(walletAddress, networkFee + serviceFee)
     if (btcUtxo === undefined) {
       throw new Error('BTC UTXO not found')
     }
@@ -252,8 +285,13 @@ export class PsbtService {
     }
 
     psbt.addOutput({
+      value: serviceFee,
+      address: teamAddress,
+    })
+
+    psbt.addOutput({
       script: stakerPayment.output!,
-      value: btcUtxo.satoshi - fee,
+      value: btcUtxo.satoshi - serviceFee - networkFee,
     })
 
     return psbt
