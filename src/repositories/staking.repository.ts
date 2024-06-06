@@ -28,8 +28,8 @@ export class StakingRepository {
     campaignId: number,
     walletAddress: string,
     scriptAddress: string,
-    inscriptionTxId: string,
-    inscriptionVout: number,
+    inscriptionTxId: string | null,
+    inscriptionVout: number | null,
     quantity: number,
   ): Promise<StakingModel> {
     const newStaking = await Staking.create(

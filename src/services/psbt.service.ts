@@ -18,6 +18,7 @@ const teamAddress = config.get<string>('cltv.teamAddress')
 const serviceFeeFix = config.get<number>('cltv.serviceFeeFix')
 const serviceFeeVariable = config.get<number>('cltv.serviceFeeVariable')
 const stakeSize = config.get<number>('stakeSize')
+const stakeBTCSize = config.get<number>('stakeBTCSize')
 const claimSize = config.get<number>('claimSize')
 
 export class PsbtService {
@@ -37,6 +38,23 @@ export class PsbtService {
       inscriptionTxid,
       inscriptionVout,
       ticker,
+      amt,
+      networkFee,
+    )
+
+    return psbt.toHex()
+  }
+
+  public static async stakeBTC(
+    walletAddress: string,
+    pubkeyHex: string,
+    amt: number
+  ): Promise<string> {
+    const fastestFee = await getFastestFee()
+    const networkFee = stakeBTCSize * fastestFee
+    const psbt = await this.getStakeBTCPsbt(
+      walletAddress,
+      pubkeyHex,
       amt,
       networkFee,
     )
@@ -72,6 +90,41 @@ export class PsbtService {
       scriptAddress,
       inscriptionTxId,
       inscriptionVout,
+      quantity,
+    )
+
+    return {
+      txSize: tx.virtualSize(),
+      psbtHex: psbt.toHex(),
+      txHex: tx.toHex(),
+    }
+  }
+
+  public static async finalizeStakeBTC(
+    walletAddress: string,
+    pubkeyHex: string,
+    quantity: number,
+    psbtHex: string,
+  ): Promise<{ txSize: number; psbtHex: string; txHex: string }> {
+    const psbt = Psbt.fromHex(psbtHex)
+    psbt.finalizeAllInputs()
+    const tx = psbt.extractTransaction(true)
+
+    const campaign = await CampaignRepository.getCampaignByName('BTC')
+    if (campaign === null) {
+      throw new Error('Campaign not found')
+    }
+
+    const pubkey = this.getPubkey(pubkeyHex)
+    const blockheight = campaign.blockEnd
+    const cltvPayment = this.getCltvPayment(pubkey, blockheight)
+    const scriptAddress = cltvPayment.address!
+    await StakingRepository.createStaking(
+      campaign.id,
+      walletAddress,
+      scriptAddress,
+      null,
+      null,
       quantity,
     )
 
@@ -277,6 +330,64 @@ export class PsbtService {
     return psbt
   }
 
+  private static async getStakeBTCPsbt(
+    walletAddress: string,
+    pubkeyHex: string,
+    amt: number,
+    networkFee: number,
+  ): Promise<Psbt> {
+    const pubkey = this.getPubkey(pubkeyHex)
+    const internalPubkey = this.getInternalPubkey(pubkey)
+    const stakerPayment = this.getStakerPayment(internalPubkey)
+    const campaign = await CampaignRepository.getCampaignByName('BTC')
+    if (campaign === null) {
+      throw new Error('Campaign not found')
+    }
+
+    const blockheight = campaign.blockEnd
+    const cltvPayment = this.getCltvPayment(pubkey, blockheight)
+
+    let serviceFee = Math.max(serviceFeeFix, amt * (serviceFeeVariable / 100))
+    if (serviceFee >= 10 * serviceFeeFix) {
+      serviceFee = 10 * serviceFeeFix
+    }
+
+    const btcUtxo = await UnisatService.findBtcUtxo(
+      walletAddress,
+      amt + networkFee + serviceFee,
+    )
+    if (btcUtxo === undefined) {
+      throw new Error('BTC UTXO not found')
+    }
+
+    const psbt = new bitcoin.Psbt({ network })
+      .addInput({
+        hash: btcUtxo.txid,
+        index: btcUtxo.vout,
+        sequence: 0,
+        witnessUtxo: { value: btcUtxo.satoshi, script: stakerPayment.output! },
+        tapInternalKey: internalPubkey,
+      })
+      .addOutput({
+        value: amt,
+        address: cltvPayment.address!,
+      })
+      // .addOutput({
+      //   value: serviceFee,
+      //   address: teamAddress,
+      // })
+      // .addOutput({
+      //   value: btcUtxo.satoshi - amt - serviceFee - networkFee,
+      //   address: stakerPayment.address!,
+      // })
+      .addOutput({
+        value: btcUtxo.satoshi - amt - networkFee,
+        address: stakerPayment.address!,
+      })
+
+    return psbt
+  }
+
   private static async getClaimPsbt(
     walletAddress: string,
     pubkeyHex: string,
@@ -295,14 +406,21 @@ export class PsbtService {
     const blockheight = campaign.blockEnd
     const cltvPayment = this.getCltvPayment(pubkey, blockheight)
 
-    const quote = await UnisatService.getQuote(
-      teamAddress,
-      ticker,
-      'sats',
-      '1',
-      'exactIn',
-    )
-    let serviceFee = Math.max(serviceFeeFix, amt * quote * (serviceFeeVariable / 100) * (100000000 / 70000))
+    let serviceFee = 0
+
+    if (ticker === 'BTC') {
+      serviceFee = Math.max(serviceFeeFix, amt * (serviceFeeVariable / 100))
+    } else {
+      const quote = await UnisatService.getQuote(
+        teamAddress,
+        ticker,
+        'sats',
+        '1',
+        'exactIn',
+      )
+      serviceFee = Math.max(serviceFeeFix, amt * quote * (serviceFeeVariable / 100) * (100000000 / 70000))
+    }
+    
     if (serviceFee >= 10 * serviceFeeFix) {
       serviceFee = 10 * serviceFeeFix
     }

@@ -36,6 +36,17 @@ Content-Type: application/json
   "blockEnd": 852524
 }
 
+### Create BTC campaign
+POST {{api}}
+Content-Type: application/json
+
+{
+  "name": "BTC",
+  "quantity": 10000000,
+  "blockStart": 846730,
+  "blockEnd": 846735
+}
+
 ### Get campaign
 GET {{api}}/1
 

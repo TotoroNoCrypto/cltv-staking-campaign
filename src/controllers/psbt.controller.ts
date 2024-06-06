@@ -17,6 +17,21 @@ export class CampaignController {
     }
   }
 
+  public static async stakeBTC(req: Request, res: Response): Promise<Response> {
+    try {
+      const { taproot, pubKey, amt } = req.body
+
+      const psbt = await PsbtService.stakeBTC(taproot, pubKey, amt)
+
+      return res.json(psbt)
+    } catch (error) {
+      if (error instanceof Error) {
+        return res.status(500).json({ message: error.message })
+      }
+      return res.status(500).json({ message: 'Internal Error' })
+    }
+  }
+
   public static async finalizeStake(
     req: Request,
     res: Response,
@@ -30,6 +45,29 @@ export class CampaignController {
         txid,
         vout,
         tick,
+        amt,
+        psbtHex,
+      )
+
+      return res.json(psbt)
+    } catch (error) {
+      if (error instanceof Error) {
+        return res.status(500).json({ message: error.message })
+      }
+      return res.status(500).json({ message: 'Internal Error' })
+    }
+  }
+
+  public static async finalizeStakeBTC(
+    req: Request,
+    res: Response,
+  ): Promise<Response> {
+    try {
+      const { taproot, pubKey, txid, vout, tick, amt, psbtHex } = req.body
+
+      const psbt = await PsbtService.finalizeStakeBTC(
+        taproot,
+        pubKey,
         amt,
         psbtHex,
       )
