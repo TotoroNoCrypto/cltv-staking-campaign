@@ -4,7 +4,6 @@ import { CampaignController } from '../controllers/signature.controller'
 
 const router = Router()
 
-router.post('/stake', CampaignController.stake)
-router.post('/claim', CampaignController.claim)
+router.post('/sign', CampaignController.sign)
 
 export default router

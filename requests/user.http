@@ -5,8 +5,8 @@ GET {{api}}/stakingaddress
 Content-Type: application/json
 
 {
-    "pubKey": "02c2b18c95e7b93daf55de2d8155f6b0620426ccc4a6de0533e3cb959caadb1354",
-    "blockheight": 845250
+    "pubKey": "02dde3a8a673f9cba281b28077dd6928af5a4aff475af0c031df7afc5d65920b67",
+    "blockheight": 847244
 }
 
 ### Get Reward

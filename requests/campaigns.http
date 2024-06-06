@@ -3,26 +3,37 @@
 ### Get campaigns
 GET {{api}}
 
-### Create OSHI campaign
-POST {{api}}
-Content-Type: application/json
-
-{
-  "name": "OSHI",
-  "quantity": 1000000,
-  "blockStart": 845000,
-  "blockEnd": 845250
-}
-
 ### Create FCDP campaign
 POST {{api}}
 Content-Type: application/json
 
 {
   "name": "FCDP",
-  "quantity": 2000000,
-  "blockStart": 845000,
-  "blockEnd": 845250
+  "quantity": 45316458,
+  "blockStart": 845675,
+  "blockEnd": 847244
+}
+
+### Create OSHI campaign
+POST {{api}}
+Content-Type: application/json
+
+{
+  "name": "OSHI",
+  "quantity": 25895119,
+  "blockStart": 845675,
+  "blockEnd": 847244
+}
+
+### Create CLTV campaign
+POST {{api}}
+Content-Type: application/json
+
+{
+  "name": "CLTV",
+  "quantity": 10000000,
+  "blockStart": 847484,
+  "blockEnd": 852524
 }
 
 ### Get campaign

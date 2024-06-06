@@ -11,21 +11,7 @@ const networkType = config.get<NetworkType>('bitcoin.networkType')
 const wif = config.get<string>('wallet.wif')
 
 export class SignatureService {
-  public static async stake(psbtHex: string): Promise<string> {
-    const signer = this.getSigner()
-    const wallet = this.getWallet(signer)
-    const psbt = Psbt.fromHex(psbtHex)
-    await wallet.signPsbt(psbt, {
-      toSignInputs: [
-        { index: 0, publicKey: wallet.pubkey },
-        { index: 1, publicKey: wallet.pubkey },
-      ],
-    })
-
-    return psbt.toHex()
-  }
-
-  public static async claim(psbtHex: string): Promise<string> {
+  public static async sign(psbtHex: string): Promise<string> {
     const signer = this.getSigner()
     const wallet = this.getWallet(signer)
     const psbt = Psbt.fromHex(psbtHex)

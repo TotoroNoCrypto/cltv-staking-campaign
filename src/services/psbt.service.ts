@@ -121,6 +121,79 @@ export class PsbtService {
     }
   }
 
+  public static async restake(
+    walletAddress: string,
+    pubkeyHex: string,
+    inscriptionTxid: string,
+    inscriptionVout: number,
+    tickerIn: string,
+    tickerOut: string,
+    amt: number
+  ): Promise<string> {
+    const fastestFee = await getFastestFee()
+    const networkFee = stakeSize * fastestFee
+    const psbt = await this.getRestakePsbt(
+      walletAddress,
+      pubkeyHex,
+      inscriptionTxid,
+      inscriptionVout,
+      tickerIn,
+      tickerOut,
+      amt,
+      networkFee,
+    )
+
+    return psbt.toHex()
+  }
+
+  public static async finalizeRestake(
+    walletAddress: string,
+    pubkeyHex: string,
+    inscriptionTxId: string,
+    inscriptionVout: number,
+    ticker: string,
+    quantity: number,
+    psbtHex: string,
+  ): Promise<{ txSize: number; psbtHex: string; txHex: string }> {
+    const psbt = Psbt.fromHex(psbtHex)
+    for (let index = 0; index < psbt.txInputs.length; index++) {
+      const txInput = psbt.txInputs[index]
+      // Wallet input
+      if (txInput.sequence === 0) {
+        psbt.finalizeInput(index)
+      }
+      // Script input
+      else {
+        psbt.finalizeInput(index, this.getFinalScripts)
+      }
+    }
+    const tx = psbt.extractTransaction(true)
+
+    const campaign = await CampaignRepository.getCampaignByName(ticker)
+    if (campaign === null) {
+      throw new Error('Campaign not found')
+    }
+
+    const pubkey = this.getPubkey(pubkeyHex)
+    const blockheight = campaign.blockEnd
+    const cltvPayment = this.getCltvPayment(pubkey, blockheight)
+    const scriptAddress = cltvPayment.address!
+    await StakingRepository.createStaking(
+      campaign.id,
+      walletAddress,
+      scriptAddress,
+      inscriptionTxId,
+      inscriptionVout,
+      quantity,
+    )
+
+    return {
+      txSize: tx.virtualSize(),
+      psbtHex: psbt.toHex(),
+      txHex: tx.toHex(),
+    }
+  }
+
   private static async getStakePsbt(
     walletAddress: string,
     pubkeyHex: string,
@@ -152,9 +225,6 @@ export class PsbtService {
     if (serviceFee >= 10 * serviceFeeFix) {
       serviceFee = 10 * serviceFeeFix
     }
-
-    console.log(`variable: ${amt * quote * (serviceFeeVariable / 100) * (100000000 / 70000)}`)
-    console.log(`serviceFee: ${serviceFee}`)
 
     const btcUtxo = await UnisatService.findBtcUtxo(
       walletAddress,
@@ -297,6 +367,96 @@ export class PsbtService {
     return psbt
   }
 
+  private static async getRestakePsbt(
+    walletAddress: string,
+    pubkeyHex: string,
+    inscriptionTxid: string,
+    inscriptionVout: number,
+    tickerOut: string,
+    tickerIn: string,
+    amt: number,
+    networkFee: number,
+  ): Promise<Psbt> {
+    const pubkey = this.getPubkey(pubkeyHex)
+    const internalPubkey = this.getInternalPubkey(pubkey)
+    const stakerPayment = this.getStakerPayment(internalPubkey)
+    const campaignOut = await CampaignRepository.getCampaignByName(tickerOut)
+    const campaignIn = await CampaignRepository.getCampaignByName(tickerIn)
+    if (campaignOut === null || campaignIn === null) {
+      throw new Error('Campaign not found')
+    }
+
+    const campaignOutBlockheight = campaignOut.blockEnd
+    const campaignOutCltvPayment = this.getCltvPayment(pubkey, campaignOutBlockheight)
+
+    const campaignInBlockheight = campaignIn.blockEnd
+    const campaignInCltvPayment = this.getCltvPayment(pubkey, campaignInBlockheight)
+
+    const quote = await UnisatService.getQuote(
+      teamAddress,
+      tickerOut,
+      'sats',
+      '1',
+      'exactIn',
+    )
+    let serviceFee = Math.max(serviceFeeFix, amt * quote * (serviceFeeVariable / 100) * (100000000 / 70000))
+    if (serviceFee >= 10 * serviceFeeFix) {
+      serviceFee = 10 * serviceFeeFix
+    }
+
+    console.log(`serviceFee: ${serviceFee}`)
+
+    const btcUtxo = await UnisatService.findBtcUtxo(
+      walletAddress,
+      networkFee + serviceFee,
+    )
+    if (btcUtxo === undefined) {
+      throw new Error('BTC UTXO not found')
+    }
+
+    const inscriptionUtxo = await UnisatService.findInscriptionUtxo(
+      campaignOutCltvPayment.address!,
+      inscriptionTxid,
+      inscriptionVout,
+    )
+    if (inscriptionUtxo === undefined) {
+      throw new Error('Inscription UTXO not found')
+    }
+
+    const psbt = new bitcoin.Psbt({ network })
+      .addInput({
+        hash: inscriptionTxid,
+        index: inscriptionVout,
+        sequence: 0,
+        witnessUtxo: {
+          value: inscriptionUtxo.satoshi,
+          script: campaignOutCltvPayment.output!,
+        },
+        tapInternalKey: internalPubkey,
+      })
+      .addInput({
+        hash: btcUtxo.txid,
+        index: btcUtxo.vout,
+        sequence: 0,
+        witnessUtxo: { value: btcUtxo.satoshi, script: stakerPayment.output! },
+        tapInternalKey: internalPubkey,
+      })
+      .addOutput({
+        value: inscriptionUtxo.satoshi,
+        address: campaignInCltvPayment.address!,
+      })
+      .addOutput({
+        value: serviceFee,
+        address: teamAddress,
+      })
+      .addOutput({
+        value: btcUtxo.satoshi - serviceFee - networkFee,
+        address: stakerPayment.address!,
+      })
+
+    return psbt
+  }
+
   private static getStakerPayment(internalPubkey: Buffer): Payment {
     const stakerPayment = bitcoin.payments.p2tr({
       internalPubkey,
@@ -366,6 +526,7 @@ export class PsbtService {
       input: bitcoin.script.compile([input.partialSig![0].signature]),
       output: script,
     }
+    console.log(`payment.address: ${payment.address!}`)
     if (isP2WSH && isSegwit)
       payment = bitcoin.payments.p2wsh({
         network,

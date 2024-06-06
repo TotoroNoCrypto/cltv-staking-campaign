@@ -75,4 +75,45 @@ export class CampaignController {
       return res.status(500).json({ message: 'Internal Error' })
     }
   }
+
+  public static async restake(req: Request, res: Response): Promise<Response> {
+    try {
+      const { taproot, pubKey, txid, vout, tickOut, tickIn, amt } = req.body
+
+      const psbt = await PsbtService.restake(taproot, pubKey, txid, vout, tickOut, tickIn, amt)
+
+      return res.json(psbt)
+    } catch (error) {
+      if (error instanceof Error) {
+        return res.status(500).json({ message: error.message })
+      }
+      return res.status(500).json({ message: 'Internal Error' })
+    }
+  }
+
+  public static async finalizeRestake(
+    req: Request,
+    res: Response,
+  ): Promise<Response> {
+    try {
+      const { taproot, pubKey, txid, vout, tick, amt, psbtHex } = req.body
+
+      const psbt = await PsbtService.finalizeRestake(
+        taproot,
+        pubKey,
+        txid,
+        vout,
+        tick,
+        amt,
+        psbtHex,
+      )
+
+      return res.json(psbt)
+    } catch (error) {
+      if (error instanceof Error) {
+        return res.status(500).json({ message: error.message })
+      }
+      return res.status(500).json({ message: 'Internal Error' })
+    }
+  }
 }
