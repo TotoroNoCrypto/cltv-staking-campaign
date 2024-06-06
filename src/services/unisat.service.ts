@@ -24,7 +24,7 @@ export class UnisatService {
     let utxos = []
     let utxo = undefined
     let cursor = 0
-    const size = 16
+    const size = 50
     let resultSize = 0
 
     do {
@@ -52,7 +52,7 @@ export class UnisatService {
     let utxos = []
     let utxo = undefined
     let cursor = 0
-    const size = 16
+    const size = 50
     let resultSize = 0
 
     do {
@@ -80,7 +80,7 @@ export class UnisatService {
   ): Promise<Array<{ txid: string; vout: number; satoshi: number }>> {
     let utxos: Array<{ txid: string; vout: number; satoshi: number }> = []
     let cursor = 0
-    const size = 16
+    const size = 50
     let resultSize = 0
 
     do {
@@ -102,7 +102,7 @@ export class UnisatService {
   ): Promise<Array<{ txid: string; vout: number; satoshi: number }>> {
     let utxos: Array<{ txid: string; vout: number; satoshi: number }> = []
     let cursor = 0
-    const size = 16
+    const size = 50
     let resultSize = 0
 
     do {
@@ -141,7 +141,7 @@ export class UnisatService {
     let utxos = []
     let utxo = undefined
     let cursor = 0
-    const size = 16
+    const size = 50
     let resultSize = 0
 
     do {
