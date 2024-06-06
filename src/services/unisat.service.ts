@@ -174,6 +174,42 @@ export class UnisatService {
       : undefined
   }
 
+  public static async findConfirmedBTC(
+    address: string,
+    amount: number,
+  ): Promise<number | undefined> {
+    let utxos = []
+    let utxo = undefined
+    let cursor = 0
+    const size = 50
+    let resultSize = 0
+
+    do {
+      const result = await this.unisatConnector.general.getBtcUtxo(
+        address,
+        cursor * size,
+        size,
+      )
+      utxos = result.data.utxo
+      resultSize = utxos.length
+      utxo = utxos.find(
+        (u: {
+          txid: string
+          vout: number
+          satoshi: number
+        }) =>
+          u.satoshi === amount,
+      )
+      cursor++
+    } while (resultSize === size && utxo === undefined)
+
+    return utxo != undefined
+      ? utxo.height < 900000
+        ? utxo.height
+        : await this.getBlockchainHeight() - 1
+      : undefined
+  }
+
   public static async getQuote(
     address: string,
     tickIn: string,

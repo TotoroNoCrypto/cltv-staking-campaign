@@ -19,6 +19,22 @@ export class BackgroundService {
     })
   }
 
+
+  public static async recordUnconfirmedBTCStakings(): Promise<void> {
+    console.log('Checking for unconfirmed BTC stakings')
+
+    const stakings = await StakingRepository.findUnconfirmedStakings()
+    stakings.forEach(async staking => {
+      const blockheight = await UnisatService.findConfirmedBTC(
+        staking.scriptAddress,
+        staking.quantity,
+      )
+      if (blockheight !== undefined) {
+        await StakingRepository.updateStaking(staking.id, blockheight)
+      }
+    })
+  }
+
   public static async refreshRewards(): Promise<void> {
     console.log('Refreshing rewards')
 
