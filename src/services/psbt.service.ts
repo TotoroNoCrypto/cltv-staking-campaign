@@ -372,16 +372,12 @@ export class PsbtService {
         value: amt,
         address: cltvPayment.address!,
       })
-      // .addOutput({
-      //   value: serviceFee,
-      //   address: teamAddress,
-      // })
-      // .addOutput({
-      //   value: btcUtxo.satoshi - amt - serviceFee - networkFee,
-      //   address: stakerPayment.address!,
-      // })
       .addOutput({
-        value: btcUtxo.satoshi - amt - networkFee,
+        value: serviceFee,
+        address: teamAddress,
+      })
+      .addOutput({
+        value: btcUtxo.satoshi - amt - serviceFee - networkFee,
         address: stakerPayment.address!,
       })
 
