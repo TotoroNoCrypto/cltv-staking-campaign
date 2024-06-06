@@ -206,21 +206,58 @@ export class UnisatService {
       : undefined
   }
 
-  public static async getQuote(
-    address: string,
-    tickIn: string,
-    tickOut: string,
-    amount: string,
-    exactType: string,
-  ): Promise<number> {
-    const result = await this.unisatConnector.brc20.getQuoteSwap(
-      address,
-      tickIn,
-      tickOut,
-      amount,
-      exactType,
-    )
+  public static async findBRC20Market(
+    ticker: string
+  ): Promise<{ satoshi: number, BTCPrice: number } | undefined> {
+    let markets = []
+    let market = undefined
+    let cursor = 0
+    const size = 50
+    let resultSize = 0
+    let BTCPrice = 0
 
-    return result.data.amountUSD
+    do {
+      const result = await this.unisatConnector.market.getBRC20Types(
+        ticker,
+        cursor * size,
+        size,
+      )
+      BTCPrice = result.data.BTCPrice
+      markets = result.data.list
+      resultSize = markets.length
+      market = markets.find((m: { tick: string }) => m.tick.toUpperCase() === ticker.toUpperCase())
+      cursor++
+    } while (resultSize === size && market === undefined)
+
+    return market != undefined
+      ? { satoshi: market.curPrice, BTCPrice: BTCPrice }
+      : undefined
+  }
+
+  public static async findRunesMarket(
+    ticker: string
+  ): Promise<{ satoshi: number, BTCPrice: number } | undefined> {
+    let markets = []
+    let market = undefined
+    let cursor = 0
+    const size = 50
+    let resultSize = 0
+    let BTCPrice = 0
+
+    do {
+      const result = await this.unisatConnector.market.getRuneTypes(
+        cursor * size,
+        size,
+      )
+      BTCPrice = result.data.BTCPrice
+      markets = result.data.list
+      resultSize = markets.length
+      market = markets.find((m: { tick: string }) => m.tick.toUpperCase() === ticker.toUpperCase())
+      cursor++
+    } while (resultSize === size && market === undefined)
+
+    return market != undefined
+      ? { satoshi: market.curPrice, BTCPrice: BTCPrice }
+      : undefined
   }
 }

@@ -5,6 +5,7 @@ export class CampaignRepository {
     const campaigns = await Campaign.findAll({
       attributes: [
         'id',
+        'type',
         'name',
         'quantity',
         'blockStart',
@@ -16,6 +17,7 @@ export class CampaignRepository {
   }
 
   public static async createCampaign(
+    type: string,
     name: string,
     quantity: number,
     blockStart: number,
@@ -23,13 +25,14 @@ export class CampaignRepository {
   ): Promise<CampaignModel> {
     const newCampaign = await Campaign.create(
       {
+        type,
         name,
         quantity,
         blockStart,
         blockEnd,
       },
       {
-        fields: ['name', 'quantity', 'blockStart', 'blockEnd'],
+        fields: ['type', 'name', 'quantity', 'blockStart', 'blockEnd'],
       },
     )
     return newCampaign
@@ -57,6 +60,7 @@ export class CampaignRepository {
 
   public static async updateCampaign(
     id: number,
+    type: string,
     name: string,
     quantity: number,
     blockStart: number,
@@ -68,6 +72,7 @@ export class CampaignRepository {
       throw new Error('Model not found')
     }
 
+    campaign.type = type
     campaign.name = name
     campaign.quantity = quantity
     campaign.blockStart = blockStart

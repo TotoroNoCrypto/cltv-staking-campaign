@@ -121,20 +121,48 @@ export class StakingRepository {
       const campaign = await CampaignRepository.getCampaign(
         staking.dataValues.campaignId,
       )
-      const quote = await UnisatService.getQuote(
-        teamAddress,
-        campaign!.name,
-        'sats',
-        '1',
-        'exactIn',
-      )
-      const tvl = Math.floor(staking.dataValues.total * quote)
-      campaignTVL = campaignTVL.concat({
-        name: campaign!.name,
-        total: staking.dataValues.total,
-        tvl: tvl,
-      })
-      totalTVL += tvl
+
+      switch (campaign!.type) {
+        case 'BRC20':
+          const brc20Market = await UnisatService.findBRC20Market(campaign!.name)
+          if (brc20Market != undefined) {
+            const tvl = Math.floor(staking.dataValues.total * brc20Market.satoshi! * (brc20Market.BTCPrice / 100000000))
+            campaignTVL = campaignTVL.concat({
+              name: campaign!.name,
+              total: staking.dataValues.total,
+              tvl: tvl,
+            })
+            totalTVL += tvl
+          }
+
+          break
+
+        case 'Rune':
+          const runesMarket = await UnisatService.findRunesMarket(campaign!.name)
+          if (runesMarket != undefined) {
+            const tvl = Math.floor(staking.dataValues.total * runesMarket.satoshi! * (runesMarket.BTCPrice / 100000000))
+            campaignTVL = campaignTVL.concat({
+              name: campaign!.name,
+              total: staking.dataValues.total,
+              tvl: tvl,
+            })
+            totalTVL += tvl
+          }
+
+          break
+
+        default:
+          const oshiMarket = await UnisatService.findBRC20Market('OSHI')
+          const tvl = Math.floor(staking.dataValues.total * (oshiMarket!.BTCPrice / 100000000))
+            campaignTVL = campaignTVL.concat({
+              name: campaign!.name,
+              total: staking.dataValues.total,
+              tvl: tvl,
+            })
+            totalTVL += tvl
+
+          break
+      }
     }
 
     return { campaigns: campaignTVL, tvl: totalTVL }

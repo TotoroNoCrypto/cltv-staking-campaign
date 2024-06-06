@@ -62,6 +62,24 @@ export class PsbtService {
     return psbt.toHex()
   }
 
+  public static async stakeRune(
+    walletAddress: string,
+    pubkeyHex: string,
+    runeId: string,
+    amt: number,
+  ): Promise<string> {
+    const fastestFee = await getFastestFee()
+    const networkFee = stakeBTCSize * fastestFee
+    const psbt = await this.getStakeBTCPsbt(
+      walletAddress,
+      pubkeyHex,
+      amt,
+      networkFee,
+    )
+
+    return psbt.toHex()
+  }
+
   public static async finalizeStake(
     walletAddress: string,
     pubkeyHex: string,
@@ -273,16 +291,10 @@ export class PsbtService {
     const blockheight = campaign.blockEnd
     const cltvPayment = this.getCltvPayment(pubkey, blockheight)
 
-    const quote = await UnisatService.getQuote(
-      teamAddress,
-      ticker,
-      'sats',
-      '1',
-      'exactIn',
-    )
+    const market = await UnisatService.findBRC20Market(ticker)
     let serviceFee = Math.max(
       serviceFeeFix,
-      amt * quote * (serviceFeeVariable / 100) * (100000000 / 70000),
+      amt * market!.satoshi! * (serviceFeeVariable / 100),
     )
     if (serviceFee >= 10 * serviceFeeFix) {
       serviceFee = 10 * serviceFeeFix
@@ -416,16 +428,10 @@ export class PsbtService {
     if (ticker === 'BTC') {
       serviceFee = Math.max(serviceFeeFix, amt * (serviceFeeVariable / 100))
     } else {
-      const quote = await UnisatService.getQuote(
-        teamAddress,
-        ticker,
-        'sats',
-        '1',
-        'exactIn',
-      )
+      const market = await UnisatService.findBRC20Market(ticker)
       serviceFee = Math.max(
         serviceFeeFix,
-        amt * quote * (serviceFeeVariable / 100) * (100000000 / 70000),
+        amt * market!.satoshi! * (serviceFeeVariable / 100),
       )
     }
 
@@ -527,22 +533,14 @@ export class PsbtService {
       campaignInBlockheight,
     )
 
-    const quote = await UnisatService.getQuote(
-      teamAddress,
-      tickerOut,
-      'sats',
-      '1',
-      'exactIn',
-    )
+    const market = await UnisatService.findBRC20Market(tickerOut)
     let serviceFee = Math.max(
       serviceFeeFix,
-      amt * quote * (serviceFeeVariable / 100) * (100000000 / 70000),
+      amt * market!.satoshi! * (serviceFeeVariable / 100),
     )
     if (serviceFee >= 10 * serviceFeeFix) {
       serviceFee = 10 * serviceFeeFix
     }
-
-    console.log(`serviceFee: ${serviceFee}`)
 
     const btcUtxo = await UnisatService.findBtcUtxo(
       walletAddress,

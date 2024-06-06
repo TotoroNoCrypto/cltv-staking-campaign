@@ -5,6 +5,7 @@ import { Reward } from './reward.model'
 
 export interface CampaignModel extends Model {
   id: number
+  type: string
   name: string
   quantity: number
   blockStart: number
@@ -17,6 +18,9 @@ export const Campaign = sequelize.define<CampaignModel>('campaigns', {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true,
+  },
+  type: {
+    type: DataTypes.STRING,
   },
   name: {
     type: DataTypes.STRING,

@@ -49,6 +49,17 @@ Content-Type: application/json
     "amt": 1000
 }
 
+### Stake Rune
+POST {{api}}/stakeRune
+Content-Type: application/json
+
+{
+    "taproot": "bc1plvqwcy5chr9ja359rm4zkhyfyxacn2tj4rvjtfk40w5ctzagssnszte0m6",
+    "pubKey": "02dde3a8a673f9cba281b28077dd6928af5a4aff475af0c031df7afc5d65920b67",
+    "runeid": "1:0",
+    "amt": 1
+}
+
 ### Finalize Stake
 POST {{api}}/finalizeStake
 Content-Type: application/json
