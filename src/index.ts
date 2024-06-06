@@ -3,7 +3,9 @@ import { sequelize } from './database/database'
 import { BackgroundService } from './services/background.service'
 import config from 'config'
 
-const backgroundServiceInterval = config.get<number>('backgroundServiceInterval')
+const backgroundServiceInterval = config.get<number>(
+  'backgroundServiceInterval',
+)
 
 async function main() {
   await sequelize.sync({ force: false })

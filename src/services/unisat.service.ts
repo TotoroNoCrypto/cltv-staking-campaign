@@ -170,7 +170,7 @@ export class UnisatService {
     return utxo != undefined
       ? utxo.height < 900000
         ? utxo.height
-        : await this.getBlockchainHeight() - 1
+        : (await this.getBlockchainHeight()) - 1
       : undefined
   }
 
@@ -193,11 +193,7 @@ export class UnisatService {
       utxos = result.data.utxo
       resultSize = utxos.length
       utxo = utxos.find(
-        (u: {
-          txid: string
-          vout: number
-          satoshi: number
-        }) =>
+        (u: { txid: string; vout: number; satoshi: number }) =>
           u.satoshi === amount,
       )
       cursor++
@@ -206,7 +202,7 @@ export class UnisatService {
     return utxo != undefined
       ? utxo.height < 900000
         ? utxo.height
-        : await this.getBlockchainHeight() - 1
+        : (await this.getBlockchainHeight()) - 1
       : undefined
   }
 

@@ -6,7 +6,14 @@ export class CampaignController {
     try {
       const { taproot, pubKey, txid, vout, tick, amt } = req.body
 
-      const psbt = await PsbtService.stake(taproot, pubKey, txid, vout, tick, amt)
+      const psbt = await PsbtService.stake(
+        taproot,
+        pubKey,
+        txid,
+        vout,
+        tick,
+        amt,
+      )
 
       return res.json(psbt)
     } catch (error) {
@@ -118,7 +125,15 @@ export class CampaignController {
     try {
       const { taproot, pubKey, txid, vout, tickOut, tickIn, amt } = req.body
 
-      const psbt = await PsbtService.restake(taproot, pubKey, txid, vout, tickOut, tickIn, amt)
+      const psbt = await PsbtService.restake(
+        taproot,
+        pubKey,
+        txid,
+        vout,
+        tickOut,
+        tickIn,
+        amt,
+      )
 
       return res.json(psbt)
     } catch (error) {

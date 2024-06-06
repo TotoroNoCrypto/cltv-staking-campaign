@@ -28,7 +28,7 @@ export class PsbtService {
     inscriptionTxid: string,
     inscriptionVout: number,
     ticker: string,
-    amt: number
+    amt: number,
   ): Promise<string> {
     const fastestFee = await getFastestFee()
     const networkFee = stakeSize * fastestFee
@@ -48,7 +48,7 @@ export class PsbtService {
   public static async stakeBTC(
     walletAddress: string,
     pubkeyHex: string,
-    amt: number
+    amt: number,
   ): Promise<string> {
     const fastestFee = await getFastestFee()
     const networkFee = stakeBTCSize * fastestFee
@@ -143,7 +143,13 @@ export class PsbtService {
   ): Promise<string> {
     const fastestFee = await getFastestFee()
     const networkFee = claimSize * fastestFee
-    const psbt = await this.getClaimPsbt(walletAddress, pubkeyHex, ticker, amt, networkFee)
+    const psbt = await this.getClaimPsbt(
+      walletAddress,
+      pubkeyHex,
+      ticker,
+      amt,
+      networkFee,
+    )
 
     return psbt.toHex()
   }
@@ -181,7 +187,7 @@ export class PsbtService {
     inscriptionVout: number,
     tickerIn: string,
     tickerOut: string,
-    amt: number
+    amt: number,
   ): Promise<string> {
     const fastestFee = await getFastestFee()
     const networkFee = stakeSize * fastestFee
@@ -274,7 +280,10 @@ export class PsbtService {
       '1',
       'exactIn',
     )
-    let serviceFee = Math.max(serviceFeeFix, amt * quote * (serviceFeeVariable / 100) * (100000000 / 70000))
+    let serviceFee = Math.max(
+      serviceFeeFix,
+      amt * quote * (serviceFeeVariable / 100) * (100000000 / 70000),
+    )
     if (serviceFee >= 10 * serviceFeeFix) {
       serviceFee = 10 * serviceFeeFix
     }
@@ -414,14 +423,20 @@ export class PsbtService {
         '1',
         'exactIn',
       )
-      serviceFee = Math.max(serviceFeeFix, amt * quote * (serviceFeeVariable / 100) * (100000000 / 70000))
+      serviceFee = Math.max(
+        serviceFeeFix,
+        amt * quote * (serviceFeeVariable / 100) * (100000000 / 70000),
+      )
     }
-    
+
     if (serviceFee >= 10 * serviceFeeFix) {
       serviceFee = 10 * serviceFeeFix
     }
 
-    const btcUtxo = await UnisatService.findBtcUtxo(walletAddress, networkFee + serviceFee)
+    const btcUtxo = await UnisatService.findBtcUtxo(
+      walletAddress,
+      networkFee + serviceFee,
+    )
     if (btcUtxo === undefined) {
       throw new Error('BTC UTXO not found')
     }
@@ -501,10 +516,16 @@ export class PsbtService {
     }
 
     const campaignOutBlockheight = campaignOut.blockEnd
-    const campaignOutCltvPayment = this.getCltvPayment(pubkey, campaignOutBlockheight)
+    const campaignOutCltvPayment = this.getCltvPayment(
+      pubkey,
+      campaignOutBlockheight,
+    )
 
     const campaignInBlockheight = campaignIn.blockEnd
-    const campaignInCltvPayment = this.getCltvPayment(pubkey, campaignInBlockheight)
+    const campaignInCltvPayment = this.getCltvPayment(
+      pubkey,
+      campaignInBlockheight,
+    )
 
     const quote = await UnisatService.getQuote(
       teamAddress,
@@ -513,7 +534,10 @@ export class PsbtService {
       '1',
       'exactIn',
     )
-    let serviceFee = Math.max(serviceFeeFix, amt * quote * (serviceFeeVariable / 100) * (100000000 / 70000))
+    let serviceFee = Math.max(
+      serviceFeeFix,
+      amt * quote * (serviceFeeVariable / 100) * (100000000 / 70000),
+    )
     if (serviceFee >= 10 * serviceFeeFix) {
       serviceFee = 10 * serviceFeeFix
     }
