@@ -280,7 +280,7 @@ export class PsbtService {
       const txInput = psbt.txInputs[index]
       // Wallet input
       if (txInput.sequence === 0) {
-        psbt.finalizeInput(index, this.getFinalScripts)
+        psbt.finalizeInput(index)
       }
       // Script input
       else {
@@ -688,45 +688,59 @@ export class PsbtService {
       throw new Error('BTC UTXO not found')
     }
 
-    const inscriptionUtxo = await UnisatService.findInscriptionUtxo(
+    let scriptInscriptionUtxos = await UnisatService.getInscriptionUtxos(
       campaignOutCltvPayment.address!,
-      inscriptionTxid,
-      inscriptionVout,
     )
-    if (inscriptionUtxo === undefined) {
-      throw new Error('Inscription UTXO not found')
+    const scriptBtcUtxos = await UnisatService.getBtcUtxos(
+      campaignOutCltvPayment.address!,
+    )
+    const scriptUtxos = scriptInscriptionUtxos.concat(scriptBtcUtxos)
+
+    if (scriptUtxos.length === 0) {
+      throw new Error('No UTXO found on script')
     }
 
-    const psbt = new bitcoin.Psbt({ network })
-      .addInput({
-        hash: inscriptionTxid,
-        index: inscriptionVout,
-        sequence: 0,
-        witnessUtxo: {
-          value: inscriptionUtxo.satoshi,
-          script: campaignOutCltvPayment.output!,
-        },
-        tapInternalKey: internalPubkey,
+    const lockTime = this.getLocktime(campaignInBlockheight)
+
+    const psbt = new Psbt({ network }).setLocktime(lockTime)
+
+    for (let index = 0; index < scriptUtxos.length; index++) {
+      const utxo = scriptUtxos[index]
+      const txHex = await getTxHex(utxo.txid)
+      psbt.addInput({
+        hash: utxo.txid,
+        index: utxo.vout,
+        sequence: 0xfffffffe,
+        nonWitnessUtxo: Buffer.from(txHex, 'hex'),
+        redeemScript: campaignOutCltvPayment.redeem!.output!,
       })
-      .addInput({
-        hash: btcUtxo.txid,
-        index: btcUtxo.vout,
-        sequence: 0,
-        witnessUtxo: { value: btcUtxo.satoshi, script: stakerPayment.output! },
-        tapInternalKey: internalPubkey,
+    }
+
+    psbt.addInput({
+      hash: btcUtxo.txid,
+      index: btcUtxo.vout,
+      sequence: 0,
+      witnessUtxo: { value: btcUtxo.satoshi, script: stakerPayment.output! },
+      tapInternalKey: internalPubkey,
+    })
+
+    for (let index = 0; index < scriptUtxos.length; index++) {
+      const utxo = scriptUtxos[index]
+      psbt.addOutput({
+        script: campaignInCltvPayment.output!,
+        value: utxo.satoshi,
       })
-      .addOutput({
-        value: inscriptionUtxo.satoshi,
-        address: campaignInCltvPayment.address!,
-      })
-      .addOutput({
-        value: serviceFee,
-        address: teamAddress,
-      })
-      .addOutput({
-        value: btcUtxo.satoshi - serviceFee - networkFee,
-        address: stakerPayment.address!,
-      })
+    }
+
+    psbt.addOutput({
+      value: serviceFee,
+      address: teamAddress,
+    })
+
+    psbt.addOutput({
+      script: stakerPayment.output!,
+      value: btcUtxo.satoshi - serviceFee - networkFee,
+    })
 
     return psbt
   }
@@ -795,14 +809,11 @@ export class PsbtService {
     finalScriptSig: Buffer | undefined
     finalScriptWitness: Buffer | undefined
   } {
-    console.log('---> input')
-    console.dir(input)
     let payment: bitcoin.Payment = {
       network,
       input: bitcoin.script.compile([input.partialSig![0].signature]),
       output: script,
     }
-    console.log(`payment.address: ${payment.address!}`)
     if (isP2WSH && isSegwit)
       payment = bitcoin.payments.p2wsh({
         network,
