@@ -39,6 +39,20 @@ Content-Type: application/json
     "amt": 1
 }
 
+### Stake Rune
+POST {{api}}/stakeRune
+Content-Type: application/json
+
+{
+    "taproot": "bc1plvqwcy5chr9ja359rm4zkhyfyxacn2tj4rvjtfk40w5ctzagssnszte0m6",
+    "pubKey": "02dde3a8a673f9cba281b28077dd6928af5a4aff475af0c031df7afc5d65920b67",
+    "txid": "65933281a9cd94a0981066d21d7f127f56508c2b624e261378b47611ad6888e2",
+    "vout": 1,
+    "tick": "UNCOMMON•GOODS",
+    "runeid": "1:0",
+    "amt": 1
+}
+
 ### Stake BTC
 POST {{api}}/stakeBTC
 Content-Type: application/json
@@ -47,17 +61,6 @@ Content-Type: application/json
     "taproot": "bc1plvqwcy5chr9ja359rm4zkhyfyxacn2tj4rvjtfk40w5ctzagssnszte0m6",
     "pubKey": "02dde3a8a673f9cba281b28077dd6928af5a4aff475af0c031df7afc5d65920b67",
     "amt": 1000
-}
-
-### Stake Rune
-POST {{api}}/stakeRune
-Content-Type: application/json
-
-{
-    "taproot": "bc1plvqwcy5chr9ja359rm4zkhyfyxacn2tj4rvjtfk40w5ctzagssnszte0m6",
-    "pubKey": "02dde3a8a673f9cba281b28077dd6928af5a4aff475af0c031df7afc5d65920b67",
-    "runeid": "1:0",
-    "amt": 1
 }
 
 ### Finalize Stake
@@ -72,6 +75,21 @@ Content-Type: application/json
     "tick": "OSHI",
     "amt": 1,
     "psbtHex": "70736274ff0100d202000000025ac13e09dc9a86f8f616cf5506703761628421fe8d84bd27628c5a84f967129d000000000000000000e41e42eec253e68b0843571d5e4ca7de87c789c1d17ca4a581e343f07b87108601000000000000000003220200000000000017a91476e96cfac04a91d03a0268f79f6d4ab1b825cd47874006000000000000225120277f89f412b052c6ecb8e31c6a37586df2332dc6500f8d161f102b675ac8c406482b000000000000225120fb00ec1298b8cb2ec6851eea2b5c8921bb89a972a8d925a6d57ba9858ba88427000000000001012b2202000000000000225120fb00ec1298b8cb2ec6851eea2b5c8921bb89a972a8d925a6d57ba9858ba88427011340be924c9ab0ba742e8910f62435d3f424913528554590d0850546141b0b4364c22dd16a0d088c3b7e6b6dee8503a4aacda0313b3bbdc430b05c8a4ba89a944402011720dde3a8a673f9cba281b28077dd6928af5a4aff475af0c031df7afc5d65920b670001012b4d48000000000000225120fb00ec1298b8cb2ec6851eea2b5c8921bb89a972a8d925a6d57ba9858ba88427011340040ffbfd76f71d3f4ae4493a29afbfbcfb5ea9f0aa68d24cebd4211e895cae411a3aa940d22c0ea062a2ce8ed5a1de0a26a5f25b1a50e4541839c6894fd6e28d011720dde3a8a673f9cba281b28077dd6928af5a4aff475af0c031df7afc5d65920b6700000000"
+}
+
+### Finalize Stake Rune
+POST {{api}}/finalizeStakeRune
+Content-Type: application/json
+
+{
+    "taproot": "bc1plvqwcy5chr9ja359rm4zkhyfyxacn2tj4rvjtfk40w5ctzagssnszte0m6",
+    "pubKey": "02dde3a8a673f9cba281b28077dd6928af5a4aff475af0c031df7afc5d65920b67",
+    "txid": "65933281a9cd94a0981066d21d7f127f56508c2b624e261378b47611ad6888e2",
+    "vout": 1,
+    "tick": "UNCOMMON•GOODS",
+    "runeid": "1:0",
+    "amt": 1,
+    "psbtHex": "70736274ff0100d20200000002e28868ad1176b47813264e622b8c50567f127f1dd2661098a094cda9813293650100000000000000008478208f2efedd3ce766ce99b6b7d7d7eb9e5ea477bf43768d8d244a12bec4cf02000000000000000003220200000000000017a914c1a45da7db41ce6c31c6a989019996a41ce94d32874006000000000000225120277f89f412b052c6ecb8e31c6a37586df2332dc6500f8d161f102b675ac8c406727c000000000000225120fb00ec1298b8cb2ec6851eea2b5c8921bb89a972a8d925a6d57ba9858ba88427000000000001012b2202000000000000225120fb00ec1298b8cb2ec6851eea2b5c8921bb89a972a8d925a6d57ba9858ba884270113401882e9dd0f48d4abf9b48f2066d42cab4befee187edcc94158e69381f42888145058436daccab2019199b8ea10e8e39062a0a4471a580d4acfc9faa717fd5936011720dde3a8a673f9cba281b28077dd6928af5a4aff475af0c031df7afc5d65920b670001012b5d97000000000000225120fb00ec1298b8cb2ec6851eea2b5c8921bb89a972a8d925a6d57ba9858ba8842701134019b6fbb78e803c60ab2f115ab3807b0f6757f910eb40413924022f2d79a81aadf1703dfdedb53d643f4aac94aea6ec56020ee0228fc15e3b512f2ae4d42a0c69011720dde3a8a673f9cba281b28077dd6928af5a4aff475af0c031df7afc5d65920b6700000000"
 }
 
 ### Finalize Stake BTC
@@ -92,8 +110,7 @@ Content-Type: application/json
 {
     "taproot": "tb1plfn5y8lh4jdw4c5xhxgv9ln8y44ts8duqactuuhrnz0kz2eyk49scr99xq",
     "pubKey": "02f4a8fdc9e48808e0db8d9e1bb18b1eea68625a1a2a03ab4385a52bf847a70132",
-    "tick": "OSHI",
-    "amt": 1
+    "tick": "OSHI"
 }
 
 ### Claim M3rl1n
@@ -103,8 +120,7 @@ Content-Type: application/json
 {
     "taproot": "bc1pafup76rku5y3h689hpvesfgzdq28wkn6uuagepehdj9a2elzsnxqqmh9n3",
     "pubKey": "02c2b18c95e7b93daf55de2d8155f6b0620426ccc4a6de0533e3cb959caadb1354",
-    "tick": "OSHI",
-    "amt": 1
+    "tick": "OSHI"
 }
 
 ### Claim Totoro
@@ -114,8 +130,17 @@ Content-Type: application/json
 {
     "taproot": "bc1plvqwcy5chr9ja359rm4zkhyfyxacn2tj4rvjtfk40w5ctzagssnszte0m6",
     "pubKey": "02dde3a8a673f9cba281b28077dd6928af5a4aff475af0c031df7afc5d65920b67",
-    "tick": "OSHI",
-    "amt": 1
+    "tick": "OSHI"
+}
+
+### Claim Rune
+POST {{api}}/claim
+Content-Type: application/json
+
+{
+    "taproot": "bc1plvqwcy5chr9ja359rm4zkhyfyxacn2tj4rvjtfk40w5ctzagssnszte0m6",
+    "pubKey": "02dde3a8a673f9cba281b28077dd6928af5a4aff475af0c031df7afc5d65920b67",
+    "tick": "UNCOMMON•GOODS"
 }
 
 ### Claim BTC
@@ -125,8 +150,7 @@ Content-Type: application/json
 {
     "taproot": "bc1plvqwcy5chr9ja359rm4zkhyfyxacn2tj4rvjtfk40w5ctzagssnszte0m6",
     "pubKey": "02dde3a8a673f9cba281b28077dd6928af5a4aff475af0c031df7afc5d65920b67",
-    "tick": "BTC",
-    "amt": 1000
+    "tick": "BTC"
 }
 
 ### Finalize Claim

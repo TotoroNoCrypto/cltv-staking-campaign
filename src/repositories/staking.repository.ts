@@ -101,6 +101,20 @@ export class StakingRepository {
     return stakings
   }
 
+  public static async totalOnStaking(campaignId: number, walletAddress: string): Promise<number> {
+    const staking = await Staking.findOne({
+        group: 'scriptAddress',
+        where: {
+          campaignId,
+          walletAddress,
+          block: { [Op.not]: null },
+        },
+        attributes: [[fn('SUM', col('quantity')), 'total']],
+      })
+  
+      return staking?.dataValues.total
+  }
+
   public static async getTVL(): Promise<{
     campaigns: { name: string; total: number; tvl: number }[]
     tvl: number
@@ -138,9 +152,9 @@ export class StakingRepository {
           break
 
         case 'Rune':
-          const runesMarket = await UnisatService.findRunesMarket(campaign!.name)
-          if (runesMarket != undefined) {
-            const tvl = Math.floor(staking.dataValues.total * runesMarket.satoshi! * (runesMarket.BTCPrice / 100000000))
+          const runeMarket = await UnisatService.findRuneMarket(campaign!.name)
+          if (runeMarket != undefined) {
+            const tvl = Math.floor(staking.dataValues.total * runeMarket.satoshi! * (runeMarket.BTCPrice / 100000000))
             campaignTVL = campaignTVL.concat({
               name: campaign!.name,
               total: staking.dataValues.total,

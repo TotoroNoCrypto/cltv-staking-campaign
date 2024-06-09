@@ -24,6 +24,29 @@ export class CampaignController {
     }
   }
 
+  public static async stakeRune(req: Request, res: Response): Promise<Response> {
+    try {
+      const { taproot, pubKey, txid, vout, tick, runeid, amt } = req.body
+
+      const psbt = await PsbtService.stakeRune(
+        taproot,
+        pubKey,
+        txid,
+        vout,
+        tick,
+        runeid,
+        amt,
+      )
+
+      return res.json(psbt)
+    } catch (error) {
+      if (error instanceof Error) {
+        return res.status(500).json({ message: error.message })
+      }
+      return res.status(500).json({ message: 'Internal Error' })
+    }
+  }
+
   public static async stakeBTC(req: Request, res: Response): Promise<Response> {
     try {
       const { taproot, pubKey, amt } = req.body
@@ -47,6 +70,32 @@ export class CampaignController {
       const { taproot, pubKey, txid, vout, tick, amt, psbtHex } = req.body
 
       const psbt = await PsbtService.finalizeStake(
+        taproot,
+        pubKey,
+        txid,
+        vout,
+        tick,
+        amt,
+        psbtHex,
+      )
+
+      return res.json(psbt)
+    } catch (error) {
+      if (error instanceof Error) {
+        return res.status(500).json({ message: error.message })
+      }
+      return res.status(500).json({ message: 'Internal Error' })
+    }
+  }
+
+  public static async finalizeStakeRune(
+    req: Request,
+    res: Response,
+  ): Promise<Response> {
+    try {
+      const { taproot, pubKey, txid, vout, tick, amt, psbtHex } = req.body
+
+      const psbt = await PsbtService.finalizeStakeRune(
         taproot,
         pubKey,
         txid,
@@ -90,9 +139,9 @@ export class CampaignController {
 
   public static async claim(req: Request, res: Response): Promise<Response> {
     try {
-      const { taproot, pubKey, tick, amt } = req.body
+      const { taproot, pubKey, tick } = req.body
 
-      const psbt = await PsbtService.claim(taproot, pubKey, tick, amt)
+      const psbt = await PsbtService.claim(taproot, pubKey, tick)
 
       return res.json(psbt)
     } catch (error) {

@@ -51,7 +51,7 @@ Content-Type: application/json
 }
 
 ### Get staking
-GET {{api}}/1
+GET {{api}}/5
 
 ### Get TVL
 GET {{api}}/tvl

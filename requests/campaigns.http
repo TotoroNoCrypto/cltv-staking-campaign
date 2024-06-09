@@ -8,6 +8,7 @@ POST {{api}}
 Content-Type: application/json
 
 {
+  "type": "BRC20",
   "name": "FCDP",
   "quantity": 45316458,
   "blockStart": 845675,
@@ -19,6 +20,7 @@ POST {{api}}
 Content-Type: application/json
 
 {
+  "type": "BRC20",
   "name": "OSHI",
   "quantity": 25895119,
   "blockStart": 845675,
@@ -30,6 +32,7 @@ POST {{api}}
 Content-Type: application/json
 
 {
+  "type": "BRC20",
   "name": "CLTV",
   "quantity": 10000000,
   "blockStart": 847484,
@@ -42,6 +45,18 @@ Content-Type: application/json
 
 {
   "name": "BTC",
+  "quantity": 10000000,
+  "blockStart": 846730,
+  "blockEnd": 846735
+}
+
+### Create UNCOMMON•GOODS campaign
+POST {{api}}
+Content-Type: application/json
+
+{
+  "type": "Rune",
+  "name": "UNCOMMON•GOODS",
   "quantity": 10000000,
   "blockStart": 846730,
   "blockEnd": 846735

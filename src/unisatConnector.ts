@@ -225,6 +225,20 @@ class BRC20 extends ApiClient {
   }
 }
 
+class Rune extends ApiClient {
+  constructor(client: { baseUrl: string; token: string }) {
+    super(client.baseUrl, client.token)
+  }
+
+  getRuneUtxo(address: string, runeId: string, cursor: number, size: number) {
+    const params = `?cursor=${cursor}&size=${size}`
+    return this.makeRequest(
+      'GET',
+      `/v1/indexer/address/${address}/runes/${runeId}/utxo${params}`,
+    )
+  }
+}
+
 class Market extends ApiClient {
   constructor(client: { baseUrl: string; token: string }) {
     super(client.baseUrl, client.token)
@@ -266,11 +280,13 @@ class Market extends ApiClient {
 export class UnisatConnector {
   general: General
   brc20: BRC20
+  rune: Rune
   market: Market
 
   constructor(baseUrl: string, token: string) {
     this.general = new General({ baseUrl, token })
     this.brc20 = new BRC20({ baseUrl, token })
+    this.rune = new Rune({ baseUrl, token })
     this.market = new Market({ baseUrl, token })
   }
 }

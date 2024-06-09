@@ -75,6 +75,39 @@ export class UnisatService {
       : undefined
   }
 
+  public static async findRuneUtxo(
+    address: string,
+    runeTxid: string,
+    runeVout: number,
+    runeId: string,
+  ): Promise<{ txid: string; vout: number; satoshi: number } | undefined> {
+    let utxos = []
+    let utxo = undefined
+    let cursor = 0
+    const size = 50
+    let resultSize = 0
+
+    do {
+      const result = await this.unisatConnector.rune.getRuneUtxo(
+        address,
+        runeId,
+        cursor * size,
+        size,
+      )
+      utxos = result.data.utxo
+      resultSize = utxos.length
+      utxo = utxos.find(
+        (u: { txid: string; vout: number }) =>
+          u.txid === runeTxid && u.vout === runeVout,
+      )
+      cursor++
+    } while (resultSize === size && utxo === undefined)
+
+    return utxo != undefined
+      ? { txid: utxo.txid, vout: utxo.vout, satoshi: utxo.satoshi }
+      : undefined
+  }
+
   public static async getBtcUtxos(
     address: string,
   ): Promise<Array<{ txid: string; vout: number; satoshi: number }>> {
@@ -174,6 +207,46 @@ export class UnisatService {
       : undefined
   }
 
+  public static async findConfirmedRune(
+    address: string,
+    runeId: string,
+  ): Promise<number | undefined> {
+    let utxos = []
+    let utxo = undefined
+    let cursor = 0
+    const size = 50
+    let resultSize = 0
+
+    do {
+      const result = await this.unisatConnector.rune.getRuneUtxo(
+        address,
+        runeId,
+        cursor * size,
+        size,
+      )
+      utxos = result.data.utxo
+      resultSize = utxos.length
+      utxo = utxos.find(
+        (u: {
+          txid: string
+          vout: number
+          runes: { runeid: string; }[]
+        }) =>
+          u.runes.find(
+            (i: { runeid: string; }) =>
+              i.runeid === runeId
+          ) !== undefined,
+      )
+      cursor++
+    } while (resultSize === size && utxo === undefined)
+
+    return utxo != undefined
+      ? utxo.height < 900000
+        ? utxo.height
+        : (await this.getBlockchainHeight()) - 1
+      : undefined
+  }
+
   public static async findConfirmedBTC(
     address: string,
     amount: number,
@@ -219,9 +292,11 @@ export class UnisatService {
     do {
       const result = await this.unisatConnector.market.getBRC20Types(
         ticker,
-        cursor * size,
-        size,
+        0, // Take all
+        0, // Take all
       )
+      console.log(`---> result`)
+      console.dir(result)
       BTCPrice = result.data.BTCPrice
       markets = result.data.list
       resultSize = markets.length
@@ -234,7 +309,7 @@ export class UnisatService {
       : undefined
   }
 
-  public static async findRunesMarket(
+  public static async findRuneMarket(
     ticker: string
   ): Promise<{ satoshi: number, BTCPrice: number } | undefined> {
     let markets = []

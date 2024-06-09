@@ -19,6 +19,12 @@ export class BackgroundService {
     })
   }
 
+  public static async recordUnconfirmedRuneStakings(): Promise<void> {
+    console.log('Checking for unconfirmed rune stakings')
+
+   //TODO
+  }
+
   public static async recordUnconfirmedBTCStakings(): Promise<void> {
     console.log('Checking for unconfirmed BTC stakings')
     

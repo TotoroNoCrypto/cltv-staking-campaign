@@ -45,16 +45,24 @@ export class PsbtService {
     return psbt.toHex()
   }
 
-  public static async stakeBTC(
+  public static async stakeRune(
     walletAddress: string,
     pubkeyHex: string,
+    txid: string,
+    vout: number,
+    ticker: string,
+    runeId: string,
     amt: number,
   ): Promise<string> {
     const fastestFee = await getFastestFee()
     const networkFee = stakeBTCSize * fastestFee
-    const psbt = await this.getStakeBTCPsbt(
+    const psbt = await this.getStakeRunePsbt(
       walletAddress,
       pubkeyHex,
+      txid,
+      vout,
+      ticker,
+      runeId,
       amt,
       networkFee,
     )
@@ -62,10 +70,9 @@ export class PsbtService {
     return psbt.toHex()
   }
 
-  public static async stakeRune(
+  public static async stakeBTC(
     walletAddress: string,
     pubkeyHex: string,
-    runeId: string,
     amt: number,
   ): Promise<string> {
     const fastestFee = await getFastestFee()
@@ -118,6 +125,44 @@ export class PsbtService {
     }
   }
 
+  public static async finalizeStakeRune(
+    walletAddress: string,
+    pubkeyHex: string,
+    runeTxId: string,
+    runeVout: number,
+    ticker: string,
+    quantity: number,
+    psbtHex: string,
+  ): Promise<{ txSize: number; psbtHex: string; txHex: string }> {
+    const psbt = Psbt.fromHex(psbtHex)
+    psbt.finalizeAllInputs()
+    const tx = psbt.extractTransaction(true)
+
+    const campaign = await CampaignRepository.getCampaignByName(ticker)
+    if (campaign === null) {
+      throw new Error('Campaign not found')
+    }
+
+    const pubkey = this.getPubkey(pubkeyHex)
+    const blockheight = campaign.blockEnd
+    const cltvPayment = this.getCltvPayment(pubkey, blockheight)
+    const scriptAddress = cltvPayment.address!
+    await StakingRepository.createStaking(
+      campaign.id,
+      walletAddress,
+      scriptAddress,
+      runeTxId,
+      runeVout,
+      quantity,
+    )
+
+    return {
+      txSize: tx.virtualSize(),
+      psbtHex: psbt.toHex(),
+      txHex: tx.toHex(),
+    }
+  }
+
   public static async finalizeStakeBTC(
     walletAddress: string,
     pubkeyHex: string,
@@ -156,8 +201,7 @@ export class PsbtService {
   public static async claim(
     walletAddress: string,
     pubkeyHex: string,
-    ticker: string,
-    amt: number,
+    ticker: string
   ): Promise<string> {
     const fastestFee = await getFastestFee()
     const networkFee = claimSize * fastestFee
@@ -165,7 +209,6 @@ export class PsbtService {
       walletAddress,
       pubkeyHex,
       ticker,
-      amt,
       networkFee,
     )
 
@@ -351,6 +394,88 @@ export class PsbtService {
     return psbt
   }
 
+  private static async getStakeRunePsbt(
+    walletAddress: string,
+    pubkeyHex: string,
+    txid: string,
+    vout: number,
+    ticker: string,
+    runeId: string,
+    amt: number,
+    networkFee: number,
+  ): Promise<Psbt> {
+    const pubkey = this.getPubkey(pubkeyHex)
+    const internalPubkey = this.getInternalPubkey(pubkey)
+    const stakerPayment = this.getStakerPayment(internalPubkey)
+    const campaign = await CampaignRepository.getCampaignByName(ticker)
+    if (campaign === null) {
+      throw new Error('Campaign not found')
+    }
+
+    const blockheight = campaign.blockEnd
+    const cltvPayment = this.getCltvPayment(pubkey, blockheight)
+
+    const market = await UnisatService.findRuneMarket(ticker)
+    let serviceFee = Math.max(
+      serviceFeeFix,
+      amt * market!.satoshi! * (serviceFeeVariable / 100),
+    )
+    if (serviceFee >= 10 * serviceFeeFix) {
+      serviceFee = 10 * serviceFeeFix
+    }
+
+    const btcUtxo = await UnisatService.findBtcUtxo(
+      walletAddress,
+      networkFee + serviceFee,
+    )
+    if (btcUtxo === undefined) {
+      throw new Error('BTC UTXO not found')
+    }
+
+    const runeUtxo = await UnisatService.findRuneUtxo(
+      walletAddress,
+      txid,
+      vout,
+      runeId,
+    )
+    if (runeUtxo === undefined) {
+      throw new Error('Rune UTXO not found')
+    }
+
+    const psbt = new bitcoin.Psbt({ network })
+      .addInput({
+        hash: runeUtxo.txid,
+        index: runeUtxo.vout,
+        sequence: 0,
+        witnessUtxo: {
+          value: runeUtxo.satoshi,
+          script: stakerPayment.output!,
+        },
+        tapInternalKey: internalPubkey,
+      })
+      .addInput({
+        hash: btcUtxo.txid,
+        index: btcUtxo.vout,
+        sequence: 0,
+        witnessUtxo: { value: btcUtxo.satoshi, script: stakerPayment.output! },
+        tapInternalKey: internalPubkey,
+      })
+      .addOutput({
+        value: runeUtxo.satoshi,
+        address: cltvPayment.address!,
+      })
+      .addOutput({
+        value: serviceFee,
+        address: teamAddress,
+      })
+      .addOutput({
+        value: btcUtxo.satoshi - serviceFee - networkFee,
+        address: stakerPayment.address!,
+      })
+
+    return psbt
+  }
+
   private static async getStakeBTCPsbt(
     walletAddress: string,
     pubkeyHex: string,
@@ -409,7 +534,6 @@ export class PsbtService {
     walletAddress: string,
     pubkeyHex: string,
     ticker: string,
-    amt: number,
     networkFee: number,
   ): Promise<Psbt> {
     const pubkey = this.getPubkey(pubkeyHex)
@@ -420,19 +544,30 @@ export class PsbtService {
       throw new Error('Campaign not found')
     }
 
+    const total = await StakingRepository.totalOnStaking(campaign.id, walletAddress)
+    if (total === undefined) {
+      throw new Error('Staking not found')
+    }
+
     const blockheight = campaign.blockEnd
     const cltvPayment = this.getCltvPayment(pubkey, blockheight)
 
     let serviceFee = 0
 
-    if (ticker === 'BTC') {
-      serviceFee = Math.max(serviceFeeFix, amt * (serviceFeeVariable / 100))
-    } else {
-      const market = await UnisatService.findBRC20Market(ticker)
-      serviceFee = Math.max(
-        serviceFeeFix,
-        amt * market!.satoshi! * (serviceFeeVariable / 100),
-      )
+    switch (campaign!.type) {
+      case 'BRC20':
+        const market = await UnisatService.findBRC20Market(ticker)
+        serviceFee = Math.max(
+          serviceFeeFix,
+          total * market!.satoshi! * (serviceFeeVariable / 100),
+        )
+
+        break
+
+      default:
+        serviceFee = Math.max(serviceFeeFix, total * (serviceFeeVariable / 100))
+
+        break
     }
 
     if (serviceFee >= 10 * serviceFeeFix) {
