@@ -39,6 +39,18 @@ Content-Type: application/json
   "blockEnd": 852524
 }
 
+### Create OSHI 2 campaign
+POST {{api}}
+Content-Type: application/json
+
+{
+  "type": "BRC20",
+  "name": "OSHI",
+  "quantity": 10000000,
+  "blockStart": 846730,
+  "blockEnd": 846735
+}
+
 ### Create BTC campaign
 POST {{api}}
 Content-Type: application/json

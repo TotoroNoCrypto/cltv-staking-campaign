@@ -24,7 +24,6 @@ export const Campaign = sequelize.define<CampaignModel>('campaigns', {
   },
   name: {
     type: DataTypes.STRING,
-    unique: true,
   },
   quantity: {
     type: DataTypes.INTEGER,

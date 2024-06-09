@@ -4,14 +4,14 @@ import { PsbtService } from '../services/psbt.service'
 export class CampaignController {
   public static async stake(req: Request, res: Response): Promise<Response> {
     try {
-      const { taproot, pubKey, txid, vout, tick, amt } = req.body
+      const { taproot, pubKey, txid, vout, campaignid, amt } = req.body
 
       const psbt = await PsbtService.stake(
         taproot,
         pubKey,
         txid,
         vout,
-        tick,
+        campaignid,
         amt,
       )
 
@@ -29,14 +29,14 @@ export class CampaignController {
     res: Response,
   ): Promise<Response> {
     try {
-      const { taproot, pubKey, txid, vout, tick, runeid, amt } = req.body
+      const { taproot, pubKey, txid, vout, campaignid, runeid, amt } = req.body
 
       const psbt = await PsbtService.stakeRune(
         taproot,
         pubKey,
         txid,
         vout,
-        tick,
+        campaignid,
         runeid,
         amt,
       )
@@ -70,14 +70,14 @@ export class CampaignController {
     res: Response,
   ): Promise<Response> {
     try {
-      const { taproot, pubKey, txid, vout, tick, amt, psbtHex } = req.body
+      const { taproot, pubKey, txid, vout, campaignid, amt, psbtHex } = req.body
 
       const psbt = await PsbtService.finalizeStake(
         taproot,
         pubKey,
         txid,
         vout,
-        tick,
+        campaignid,
         amt,
         psbtHex,
       )
@@ -96,14 +96,14 @@ export class CampaignController {
     res: Response,
   ): Promise<Response> {
     try {
-      const { taproot, pubKey, txid, vout, tick, amt, psbtHex } = req.body
+      const { taproot, pubKey, txid, vout, campaignid, amt, psbtHex } = req.body
 
       const psbt = await PsbtService.finalizeStakeRune(
         taproot,
         pubKey,
         txid,
         vout,
-        tick,
+        campaignid,
         amt,
         psbtHex,
       )
@@ -122,7 +122,7 @@ export class CampaignController {
     res: Response,
   ): Promise<Response> {
     try {
-      const { taproot, pubKey, txid, vout, tick, amt, psbtHex } = req.body
+      const { taproot, pubKey, amt, psbtHex } = req.body
 
       const psbt = await PsbtService.finalizeStakeBTC(
         taproot,
@@ -142,9 +142,9 @@ export class CampaignController {
 
   public static async claim(req: Request, res: Response): Promise<Response> {
     try {
-      const { taproot, pubKey, tick } = req.body
+      const { taproot, pubKey, campaignid } = req.body
 
-      const psbt = await PsbtService.claim(taproot, pubKey, tick)
+      const psbt = await PsbtService.claim(taproot, pubKey, campaignid)
 
       return res.json(psbt)
     } catch (error) {
@@ -175,15 +175,13 @@ export class CampaignController {
 
   public static async restake(req: Request, res: Response): Promise<Response> {
     try {
-      const { taproot, pubKey, txid, vout, tickOut, tickIn, amt } = req.body
+      const { taproot, pubKey, fromcampaignid, tocampaignid, amt } = req.body
 
       const psbt = await PsbtService.restake(
         taproot,
         pubKey,
-        txid,
-        vout,
-        tickOut,
-        tickIn,
+        fromcampaignid,
+        tocampaignid,
         amt,
       )
 
@@ -201,14 +199,12 @@ export class CampaignController {
     res: Response,
   ): Promise<Response> {
     try {
-      const { taproot, pubKey, txid, vout, tick, amt, psbtHex } = req.body
+      const { taproot, pubKey, campaignid, amt, psbtHex } = req.body
 
       const psbt = await PsbtService.finalizeRestake(
         taproot,
         pubKey,
-        txid,
-        vout,
-        tick,
+        campaignid,
         amt,
         psbtHex,
       )

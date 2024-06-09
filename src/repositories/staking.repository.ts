@@ -81,6 +81,31 @@ export class StakingRepository {
     return staking
   }
 
+  public static async getStakingsByWalletAddress(
+    campaignId: number,
+    walletAddress: string,
+  ): Promise<StakingModel[]> {
+    const stakings = await Staking.findAll({
+      where: {
+        campaignId,
+        walletAddress,
+        block: { [Op.not]: null },
+      },
+      attributes: [
+        'id',
+        'campaignId',
+        'walletAddress',
+        'scriptAddress',
+        'inscriptionTxId',
+        'inscriptionVout',
+        'quantity',
+        'block',
+      ],
+    })
+
+    return stakings
+  }
+
   public static async findUnconfirmedStakings(): Promise<StakingModel[]> {
     const stakings = await Staking.findAll({
       where: {

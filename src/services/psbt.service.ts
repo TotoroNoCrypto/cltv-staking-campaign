@@ -27,7 +27,7 @@ export class PsbtService {
     pubkeyHex: string,
     inscriptionTxid: string,
     inscriptionVout: number,
-    ticker: string,
+    campaignId: number,
     amt: number,
   ): Promise<string> {
     const fastestFee = await getFastestFee()
@@ -37,7 +37,7 @@ export class PsbtService {
       pubkeyHex,
       inscriptionTxid,
       inscriptionVout,
-      ticker,
+      campaignId,
       amt,
       networkFee,
     )
@@ -50,7 +50,7 @@ export class PsbtService {
     pubkeyHex: string,
     txid: string,
     vout: number,
-    ticker: string,
+    campaignId: number,
     runeId: string,
     amt: number,
   ): Promise<string> {
@@ -61,7 +61,7 @@ export class PsbtService {
       pubkeyHex,
       txid,
       vout,
-      ticker,
+      campaignId,
       runeId,
       amt,
       networkFee,
@@ -92,7 +92,7 @@ export class PsbtService {
     pubkeyHex: string,
     inscriptionTxId: string,
     inscriptionVout: number,
-    ticker: string,
+    campaignId: number,
     quantity: number,
     psbtHex: string,
   ): Promise<{ txSize: number; psbtHex: string; txHex: string }> {
@@ -100,7 +100,7 @@ export class PsbtService {
     psbt.finalizeAllInputs()
     const tx = psbt.extractTransaction(true)
 
-    const campaign = await CampaignRepository.getCampaignByName(ticker)
+    const campaign = await CampaignRepository.getCampaign(campaignId)
     if (campaign === null) {
       throw new Error('Campaign not found')
     }
@@ -130,7 +130,7 @@ export class PsbtService {
     pubkeyHex: string,
     runeTxId: string,
     runeVout: number,
-    ticker: string,
+    campaignId: number,
     quantity: number,
     psbtHex: string,
   ): Promise<{ txSize: number; psbtHex: string; txHex: string }> {
@@ -138,7 +138,7 @@ export class PsbtService {
     psbt.finalizeAllInputs()
     const tx = psbt.extractTransaction(true)
 
-    const campaign = await CampaignRepository.getCampaignByName(ticker)
+    const campaign = await CampaignRepository.getCampaign(campaignId)
     if (campaign === null) {
       throw new Error('Campaign not found')
     }
@@ -201,14 +201,14 @@ export class PsbtService {
   public static async claim(
     walletAddress: string,
     pubkeyHex: string,
-    ticker: string,
+    campaignId: number,
   ): Promise<string> {
     const fastestFee = await getFastestFee()
     const networkFee = claimSize * fastestFee
     const psbt = await this.getClaimPsbt(
       walletAddress,
       pubkeyHex,
-      ticker,
+      campaignId,
       networkFee,
     )
 
@@ -244,10 +244,8 @@ export class PsbtService {
   public static async restake(
     walletAddress: string,
     pubkeyHex: string,
-    inscriptionTxid: string,
-    inscriptionVout: number,
-    tickerIn: string,
-    tickerOut: string,
+    fromCampaignId: number,
+    toCampaignId: number,
     amt: number,
   ): Promise<string> {
     const fastestFee = await getFastestFee()
@@ -255,10 +253,8 @@ export class PsbtService {
     const psbt = await this.getRestakePsbt(
       walletAddress,
       pubkeyHex,
-      inscriptionTxid,
-      inscriptionVout,
-      tickerIn,
-      tickerOut,
+      fromCampaignId,
+      toCampaignId,
       amt,
       networkFee,
     )
@@ -269,9 +265,7 @@ export class PsbtService {
   public static async finalizeRestake(
     walletAddress: string,
     pubkeyHex: string,
-    inscriptionTxId: string,
-    inscriptionVout: number,
-    ticker: string,
+    campaignId: number,
     quantity: number,
     psbtHex: string,
   ): Promise<{ txSize: number; psbtHex: string; txHex: string }> {
@@ -289,23 +283,24 @@ export class PsbtService {
     }
     const tx = psbt.extractTransaction(true)
 
-    const campaign = await CampaignRepository.getCampaignByName(ticker)
+    const campaign = await CampaignRepository.getCampaign(campaignId)
     if (campaign === null) {
       throw new Error('Campaign not found')
     }
 
-    const pubkey = this.getPubkey(pubkeyHex)
-    const blockheight = campaign.blockEnd
-    const cltvPayment = this.getCltvPayment(pubkey, blockheight)
-    const scriptAddress = cltvPayment.address!
-    await StakingRepository.createStaking(
-      campaign.id,
-      walletAddress,
-      scriptAddress,
-      inscriptionTxId,
-      inscriptionVout,
-      quantity,
-    )
+    //TODO
+    // const pubkey = this.getPubkey(pubkeyHex)
+    // const blockheight = campaign.blockEnd
+    // const cltvPayment = this.getCltvPayment(pubkey, blockheight)
+    // const scriptAddress = cltvPayment.address!
+    // await StakingRepository.createStaking(
+    //   campaign.id,
+    //   walletAddress,
+    //   scriptAddress,
+    //   inscriptionTxId,
+    //   inscriptionVout,
+    //   quantity,
+    // )
 
     return {
       txSize: tx.virtualSize(),
@@ -319,14 +314,14 @@ export class PsbtService {
     pubkeyHex: string,
     inscriptionTxid: string,
     inscriptionVout: number,
-    ticker: string,
+    campaignId: number,
     amt: number,
     networkFee: number,
   ): Promise<Psbt> {
     const pubkey = this.getPubkey(pubkeyHex)
     const internalPubkey = this.getInternalPubkey(pubkey)
     const stakerPayment = this.getStakerPayment(internalPubkey)
-    const campaign = await CampaignRepository.getCampaignByName(ticker)
+    const campaign = await CampaignRepository.getCampaign(campaignId)
     if (campaign === null) {
       throw new Error('Campaign not found')
     }
@@ -334,7 +329,7 @@ export class PsbtService {
     const blockheight = campaign.blockEnd
     const cltvPayment = this.getCltvPayment(pubkey, blockheight)
 
-    const market = await UnisatService.findBRC20Market(ticker)
+    const market = await UnisatService.findBRC20Market(campaign.name)
     let serviceFee = Math.max(
       serviceFeeFix,
       amt * market!.satoshi! * (serviceFeeVariable / 100),
@@ -399,7 +394,7 @@ export class PsbtService {
     pubkeyHex: string,
     txid: string,
     vout: number,
-    ticker: string,
+    campaignId: number,
     runeId: string,
     amt: number,
     networkFee: number,
@@ -407,7 +402,7 @@ export class PsbtService {
     const pubkey = this.getPubkey(pubkeyHex)
     const internalPubkey = this.getInternalPubkey(pubkey)
     const stakerPayment = this.getStakerPayment(internalPubkey)
-    const campaign = await CampaignRepository.getCampaignByName(ticker)
+    const campaign = await CampaignRepository.getCampaign(campaignId)
     if (campaign === null) {
       throw new Error('Campaign not found')
     }
@@ -415,7 +410,7 @@ export class PsbtService {
     const blockheight = campaign.blockEnd
     const cltvPayment = this.getCltvPayment(pubkey, blockheight)
 
-    const market = await UnisatService.findRuneMarket(ticker)
+    const market = await UnisatService.findRuneMarket(campaign.name)
     let serviceFee = Math.max(
       serviceFeeFix,
       amt * market!.satoshi! * (serviceFeeVariable / 100),
@@ -533,13 +528,13 @@ export class PsbtService {
   private static async getClaimPsbt(
     walletAddress: string,
     pubkeyHex: string,
-    ticker: string,
+    campaignId: number,
     networkFee: number,
   ): Promise<Psbt> {
     const pubkey = this.getPubkey(pubkeyHex)
     const internalPubkey = this.getInternalPubkey(pubkey)
     const stakerPayment = this.getStakerPayment(internalPubkey)
-    const campaign = await CampaignRepository.getCampaignByName(ticker)
+    const campaign = await CampaignRepository.getCampaign(campaignId)
     if (campaign === null) {
       throw new Error('Campaign not found')
     }
@@ -559,7 +554,7 @@ export class PsbtService {
 
     switch (campaign!.type) {
       case 'BRC20':
-        const market = await UnisatService.findBRC20Market(ticker)
+        const market = await UnisatService.findBRC20Market(campaign.name)
         serviceFee = Math.max(
           serviceFeeFix,
           total * market!.satoshi! * (serviceFeeVariable / 100),
@@ -643,18 +638,16 @@ export class PsbtService {
   private static async getRestakePsbt(
     walletAddress: string,
     pubkeyHex: string,
-    inscriptionTxid: string,
-    inscriptionVout: number,
-    tickerOut: string,
-    tickerIn: string,
+    fromCampaignId: number,
+    toCampaignId: number,
     amt: number,
     networkFee: number,
   ): Promise<Psbt> {
     const pubkey = this.getPubkey(pubkeyHex)
     const internalPubkey = this.getInternalPubkey(pubkey)
     const stakerPayment = this.getStakerPayment(internalPubkey)
-    const campaignOut = await CampaignRepository.getCampaignByName(tickerOut)
-    const campaignIn = await CampaignRepository.getCampaignByName(tickerIn)
+    const campaignOut = await CampaignRepository.getCampaign(fromCampaignId)
+    const campaignIn = await CampaignRepository.getCampaign(toCampaignId)
     if (campaignOut === null || campaignIn === null) {
       throw new Error('Campaign not found')
     }
@@ -671,7 +664,7 @@ export class PsbtService {
       campaignInBlockheight,
     )
 
-    const market = await UnisatService.findBRC20Market(tickerOut)
+    const market = await UnisatService.findBRC20Market(campaignOut.name)
     let serviceFee = Math.max(
       serviceFeeFix,
       amt * market!.satoshi! * (serviceFeeVariable / 100),
