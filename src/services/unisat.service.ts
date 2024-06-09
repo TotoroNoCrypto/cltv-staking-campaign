@@ -295,8 +295,6 @@ export class UnisatService {
         0, // Take all
         0, // Take all
       )
-      console.log(`---> result`)
-      console.dir(result)
       BTCPrice = result.data.BTCPrice
       markets = result.data.list
       resultSize = markets.length
