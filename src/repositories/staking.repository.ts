@@ -101,18 +101,21 @@ export class StakingRepository {
     return stakings
   }
 
-  public static async totalOnStaking(campaignId: number, walletAddress: string): Promise<number> {
+  public static async totalOnStaking(
+    campaignId: number,
+    walletAddress: string,
+  ): Promise<number> {
     const staking = await Staking.findOne({
-        group: 'scriptAddress',
-        where: {
-          campaignId,
-          walletAddress,
-          block: { [Op.not]: null },
-        },
-        attributes: [[fn('SUM', col('quantity')), 'total']],
-      })
-  
-      return staking?.dataValues.total
+      group: 'scriptAddress',
+      where: {
+        campaignId,
+        walletAddress,
+        block: { [Op.not]: null },
+      },
+      attributes: [[fn('SUM', col('quantity')), 'total']],
+    })
+
+    return staking?.dataValues.total
   }
 
   public static async getTVL(): Promise<{
@@ -138,9 +141,15 @@ export class StakingRepository {
 
       switch (campaign!.type) {
         case 'BRC20':
-          const brc20Market = await UnisatService.findBRC20Market(campaign!.name)
+          const brc20Market = await UnisatService.findBRC20Market(
+            campaign!.name,
+          )
           if (brc20Market != undefined) {
-            const tvl = Math.floor(staking.dataValues.total * brc20Market.satoshi! * (brc20Market.BTCPrice / 100000000))
+            const tvl = Math.floor(
+              staking.dataValues.total *
+                brc20Market.satoshi! *
+                (brc20Market.BTCPrice / 100000000),
+            )
             campaignTVL = campaignTVL.concat({
               name: campaign!.name,
               total: staking.dataValues.total,
@@ -154,7 +163,11 @@ export class StakingRepository {
         case 'Rune':
           const runeMarket = await UnisatService.findRuneMarket(campaign!.name)
           if (runeMarket != undefined) {
-            const tvl = Math.floor(staking.dataValues.total * runeMarket.satoshi! * (runeMarket.BTCPrice / 100000000))
+            const tvl = Math.floor(
+              staking.dataValues.total *
+                runeMarket.satoshi! *
+                (runeMarket.BTCPrice / 100000000),
+            )
             campaignTVL = campaignTVL.concat({
               name: campaign!.name,
               total: staking.dataValues.total,
@@ -167,13 +180,15 @@ export class StakingRepository {
 
         default:
           const oshiMarket = await UnisatService.findBRC20Market('OSHI')
-          const tvl = Math.floor(staking.dataValues.total * (oshiMarket!.BTCPrice / 100000000))
-            campaignTVL = campaignTVL.concat({
-              name: campaign!.name,
-              total: staking.dataValues.total,
-              tvl: tvl,
-            })
-            totalTVL += tvl
+          const tvl = Math.floor(
+            staking.dataValues.total * (oshiMarket!.BTCPrice / 100000000),
+          )
+          campaignTVL = campaignTVL.concat({
+            name: campaign!.name,
+            total: staking.dataValues.total,
+            tvl: tvl,
+          })
+          totalTVL += tvl
 
           break
       }

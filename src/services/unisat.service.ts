@@ -227,15 +227,9 @@ export class UnisatService {
       utxos = result.data.utxo
       resultSize = utxos.length
       utxo = utxos.find(
-        (u: {
-          txid: string
-          vout: number
-          runes: { runeid: string; }[]
-        }) =>
-          u.runes.find(
-            (i: { runeid: string; }) =>
-              i.runeid === runeId
-          ) !== undefined,
+        (u: { txid: string; vout: number; runes: { runeid: string }[] }) =>
+          u.runes.find((i: { runeid: string }) => i.runeid === runeId) !==
+          undefined,
       )
       cursor++
     } while (resultSize === size && utxo === undefined)
@@ -280,8 +274,8 @@ export class UnisatService {
   }
 
   public static async findBRC20Market(
-    ticker: string
-  ): Promise<{ satoshi: number, BTCPrice: number } | undefined> {
+    ticker: string,
+  ): Promise<{ satoshi: number; BTCPrice: number } | undefined> {
     let markets = []
     let market = undefined
     let cursor = 0
@@ -298,7 +292,9 @@ export class UnisatService {
       BTCPrice = result.data.BTCPrice
       markets = result.data.list
       resultSize = markets.length
-      market = markets.find((m: { tick: string }) => m.tick.toUpperCase() === ticker.toUpperCase())
+      market = markets.find(
+        (m: { tick: string }) => m.tick.toUpperCase() === ticker.toUpperCase(),
+      )
       cursor++
     } while (resultSize === size && market === undefined)
 
@@ -308,8 +304,8 @@ export class UnisatService {
   }
 
   public static async findRuneMarket(
-    ticker: string
-  ): Promise<{ satoshi: number, BTCPrice: number } | undefined> {
+    ticker: string,
+  ): Promise<{ satoshi: number; BTCPrice: number } | undefined> {
     let markets = []
     let market = undefined
     let cursor = 0
@@ -325,7 +321,9 @@ export class UnisatService {
       BTCPrice = result.data.BTCPrice
       markets = result.data.list
       resultSize = markets.length
-      market = markets.find((m: { tick: string }) => m.tick.toUpperCase() === ticker.toUpperCase())
+      market = markets.find(
+        (m: { tick: string }) => m.tick.toUpperCase() === ticker.toUpperCase(),
+      )
       cursor++
     } while (resultSize === size && market === undefined)
 

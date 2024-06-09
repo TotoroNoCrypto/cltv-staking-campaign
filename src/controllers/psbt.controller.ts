@@ -24,7 +24,10 @@ export class CampaignController {
     }
   }
 
-  public static async stakeRune(req: Request, res: Response): Promise<Response> {
+  public static async stakeRune(
+    req: Request,
+    res: Response,
+  ): Promise<Response> {
     try {
       const { taproot, pubKey, txid, vout, tick, runeid, amt } = req.body
 

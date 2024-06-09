@@ -244,36 +244,19 @@ class Market extends ApiClient {
     super(client.baseUrl, client.token)
   }
 
-  getBRC20Types(
-    ticker: string,
-    start: number,
-    limit: number,
-  ) {
-    return this.makeRequest(
-      'POST',
-      '/v3/market/brc20/auction/brc20_types',
-      {
-        "ticks": [
-          ticker
-        ],
-        "start": start,
-        "limit": limit
-      },
-    )
+  getBRC20Types(ticker: string, start: number, limit: number) {
+    return this.makeRequest('POST', '/v3/market/brc20/auction/brc20_types', {
+      ticks: [ticker],
+      start: start,
+      limit: limit,
+    })
   }
 
-  getRuneTypes(
-    start: number,
-    limit: number,
-  ) {
-    return this.makeRequest(
-      'POST',
-      '/v3/market/runes/auction/runes_types',
-      {
-        "start": start,
-        "limit": limit
-      },
-    )
+  getRuneTypes(start: number, limit: number) {
+    return this.makeRequest('POST', '/v3/market/runes/auction/runes_types', {
+      start: start,
+      limit: limit,
+    })
   }
 }
 

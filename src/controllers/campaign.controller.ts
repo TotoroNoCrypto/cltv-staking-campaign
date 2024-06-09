@@ -46,7 +46,8 @@ export class CampaignController {
   public static async updateCampaign(req: Request, res: Response) {
     try {
       const { id } = req.params
-      const { type, name, quantity, blockStart, blockEnd, lastBlockReward } = req.body
+      const { type, name, quantity, blockStart, blockEnd, lastBlockReward } =
+        req.body
 
       const campaign = await CampaignRepository.updateCampaign(
         Number(id),

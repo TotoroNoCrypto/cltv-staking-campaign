@@ -201,7 +201,7 @@ export class PsbtService {
   public static async claim(
     walletAddress: string,
     pubkeyHex: string,
-    ticker: string
+    ticker: string,
   ): Promise<string> {
     const fastestFee = await getFastestFee()
     const networkFee = claimSize * fastestFee
@@ -280,7 +280,7 @@ export class PsbtService {
       const txInput = psbt.txInputs[index]
       // Wallet input
       if (txInput.sequence === 0) {
-        psbt.finalizeInput(index)
+        psbt.finalizeInput(index, this.getFinalScripts)
       }
       // Script input
       else {
@@ -339,8 +339,8 @@ export class PsbtService {
       serviceFeeFix,
       amt * market!.satoshi! * (serviceFeeVariable / 100),
     )
-    if (serviceFee >= 10 * serviceFeeFix) {
-      serviceFee = 10 * serviceFeeFix
+    if (serviceFee >= 5 * serviceFeeFix) {
+      serviceFee = 5 * serviceFeeFix
     }
 
     const btcUtxo = await UnisatService.findBtcUtxo(
@@ -420,8 +420,8 @@ export class PsbtService {
       serviceFeeFix,
       amt * market!.satoshi! * (serviceFeeVariable / 100),
     )
-    if (serviceFee >= 10 * serviceFeeFix) {
-      serviceFee = 10 * serviceFeeFix
+    if (serviceFee >= 5 * serviceFeeFix) {
+      serviceFee = 5 * serviceFeeFix
     }
 
     const btcUtxo = await UnisatService.findBtcUtxo(
@@ -494,8 +494,8 @@ export class PsbtService {
     const cltvPayment = this.getCltvPayment(pubkey, blockheight)
 
     let serviceFee = Math.max(serviceFeeFix, amt * (serviceFeeVariable / 100))
-    if (serviceFee >= 10 * serviceFeeFix) {
-      serviceFee = 10 * serviceFeeFix
+    if (serviceFee >= 5 * serviceFeeFix) {
+      serviceFee = 5 * serviceFeeFix
     }
 
     const btcUtxo = await UnisatService.findBtcUtxo(
@@ -544,7 +544,10 @@ export class PsbtService {
       throw new Error('Campaign not found')
     }
 
-    const total = await StakingRepository.totalOnStaking(campaign.id, walletAddress)
+    const total = await StakingRepository.totalOnStaking(
+      campaign.id,
+      walletAddress,
+    )
     if (total === undefined) {
       throw new Error('Staking not found')
     }
@@ -570,8 +573,8 @@ export class PsbtService {
         break
     }
 
-    if (serviceFee >= 10 * serviceFeeFix) {
-      serviceFee = 10 * serviceFeeFix
+    if (serviceFee >= 5 * serviceFeeFix) {
+      serviceFee = 5 * serviceFeeFix
     }
 
     const btcUtxo = await UnisatService.findBtcUtxo(
@@ -673,8 +676,8 @@ export class PsbtService {
       serviceFeeFix,
       amt * market!.satoshi! * (serviceFeeVariable / 100),
     )
-    if (serviceFee >= 10 * serviceFeeFix) {
-      serviceFee = 10 * serviceFeeFix
+    if (serviceFee >= 5 * serviceFeeFix) {
+      serviceFee = 5 * serviceFeeFix
     }
 
     const btcUtxo = await UnisatService.findBtcUtxo(
@@ -792,6 +795,8 @@ export class PsbtService {
     finalScriptSig: Buffer | undefined
     finalScriptWitness: Buffer | undefined
   } {
+    console.log('---> input')
+    console.dir(input)
     let payment: bitcoin.Payment = {
       network,
       input: bitcoin.script.compile([input.partialSig![0].signature]),
