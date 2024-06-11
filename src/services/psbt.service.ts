@@ -288,25 +288,96 @@ export class PsbtService {
       throw new Error('Campaign not found')
     }
 
-    //TODO
-    // const pubkey = this.getPubkey(pubkeyHex)
-    // const blockheight = campaign.blockEnd
-    // const cltvPayment = this.getCltvPayment(pubkey, blockheight)
-    // const scriptAddress = cltvPayment.address!
-    // await StakingRepository.createStaking(
-    //   campaign.id,
-    //   walletAddress,
-    //   scriptAddress,
-    //   inscriptionTxId,
-    //   inscriptionVout,
-    //   quantity,
-    // )
+    const pubkey = this.getPubkey(pubkeyHex)
+    const blockheight = campaign.blockEnd
+    const cltvPayment = this.getCltvPayment(pubkey, blockheight)
+    const scriptAddress = cltvPayment.address!
+
+    const stakings =
+      await StakingRepository.getStakingsByWalletAddress(walletAddress)
+    stakings.forEach(async staking => {
+      const newCampaignId = staking.campaignId === 1 ? 6 : (staking.campaignId === 2 ? 7 : -1)
+      if (newCampaignId !== -1) {
+        await StakingRepository.createStaking(
+          newCampaignId,
+          walletAddress,
+          scriptAddress,
+          staking.inscriptionTxId,
+          staking.inscriptionVout,
+          quantity,
+        )
+      }
+    })
 
     return {
       txSize: tx.virtualSize(),
       psbtHex: psbt.toHex(),
       txHex: tx.toHex(),
     }
+  }
+
+  public static async generateAirdrop(
+    walletAddress: string,
+    pubkeyHex: string,
+  ): Promise<string> {
+    const pubkey = this.getPubkey(pubkeyHex)
+    const internalPubkey = this.getInternalPubkey(pubkey)
+    const stakerPayment = this.getStakerPayment(internalPubkey)
+
+    const btcUtxo = await UnisatService.findBtcUtxo(
+      walletAddress,
+      100000,
+    )
+    if (btcUtxo === undefined) {
+      throw new Error('BTC UTXO not found')
+    }
+
+    let totalSatoshi: number = 0
+    const airdrops: Array<{ txid: string; vout: number; address: string; satoshi: number; }> = [
+      { address: '', txid: '', vout: 0, satoshi: 546 },
+
+    ]
+    const fee: number = 10000
+
+    const psbt = new bitcoin.Psbt({ network });
+
+    for (let index = 0; index < airdrops.length; index++) {
+      const airdrop = airdrops[index];
+      psbt
+        .addInput({
+          hash: airdrop.txid,
+          index: airdrop.vout,
+          sequence: 0,
+          witnessUtxo: {
+            value: airdrop.satoshi,
+            script: stakerPayment.output!,
+          },
+          tapInternalKey: internalPubkey,
+        })
+        .addOutput({
+          value: airdrop.satoshi,
+          address: airdrop.address,
+        })
+        totalSatoshi += airdrop.satoshi
+    }
+
+    psbt
+      .addInput({
+        hash: btcUtxo.txid,
+        index: btcUtxo.vout,
+        sequence: 0,
+        witnessUtxo: {
+          value: btcUtxo.satoshi,
+          script: stakerPayment.output!,
+        },
+        tapInternalKey: internalPubkey,
+      })
+      .addOutput({
+        value: btcUtxo.satoshi - totalSatoshi - fee,
+        address: walletAddress,
+      })
+
+    return psbt.toHex()
   }
 
   private static async getStakePsbt(
@@ -617,8 +688,8 @@ export class PsbtService {
     for (let index = 0; index < scriptUtxos.length; index++) {
       const utxo = scriptUtxos[index]
       psbt.addOutput({
-        script: stakerPayment.output!,
         value: utxo.satoshi,
+        address: stakerPayment.address!,
       })
     }
 
@@ -628,8 +699,8 @@ export class PsbtService {
     })
 
     psbt.addOutput({
-      script: stakerPayment.output!,
       value: btcUtxo.satoshi - serviceFee - networkFee,
+      address: stakerPayment.address!,
     })
 
     return psbt

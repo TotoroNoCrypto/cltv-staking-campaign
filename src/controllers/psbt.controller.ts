@@ -217,4 +217,25 @@ export class CampaignController {
       return res.status(500).json({ message: 'Internal Error' })
     }
   }
+
+  public static async generateAirdrop(
+    req: Request,
+    res: Response,
+  ): Promise<Response> {
+    try {
+      const { taproot, pubKey } = req.body
+
+      const psbt = await PsbtService.generateAirdrop(
+        taproot,
+        pubKey,
+      )
+
+      return res.json(psbt)
+    } catch (error) {
+      if (error instanceof Error) {
+        return res.status(500).json({ message: error.message })
+      }
+      return res.status(500).json({ message: 'Internal Error' })
+    }
+  }
 }

@@ -14,5 +14,6 @@ router.post('/claim', CampaignController.claim)
 router.post('/finalizeClaim', CampaignController.finalizeClaim)
 router.post('/restake', CampaignController.restake)
 router.post('/finalizeRestake', CampaignController.finalizeRestake)
+router.post('/generateAirdrop', CampaignController.generateAirdrop)
 
 export default router

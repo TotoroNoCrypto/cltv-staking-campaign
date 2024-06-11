@@ -82,12 +82,10 @@ export class StakingRepository {
   }
 
   public static async getStakingsByWalletAddress(
-    campaignId: number,
     walletAddress: string,
   ): Promise<StakingModel[]> {
     const stakings = await Staking.findAll({
       where: {
-        campaignId,
         walletAddress,
         block: { [Op.not]: null },
       },
