@@ -288,8 +288,9 @@ export class PsbtService {
       walletAddress,
       'FCDP',
     )
-    console.dir(fcdpInscriptions)
-    fcdpInscriptions.forEach(async inscription => {
+
+    for (let index = 0; index < fcdpInscriptions.length; index++) {
+      const inscription = fcdpInscriptions[index];
       await StakingRepository.createStaking(
         5,
         walletAddress,
@@ -298,13 +299,14 @@ export class PsbtService {
         inscription.vout,
         inscription.amt,
       )
-    })
+    }
 
     const oshiInscriptions = await UnisatService.getTransferableInscriptions(
       walletAddress,
       'OSHI',
     )
-    oshiInscriptions.forEach(async inscription => {
+    for (let index = 0; index < oshiInscriptions.length; index++) {
+      const inscription = oshiInscriptions[index];
       await StakingRepository.createStaking(
         6,
         walletAddress,
@@ -313,7 +315,7 @@ export class PsbtService {
         inscription.vout,
         inscription.amt,
       )
-    })
+    }
 
     return {
       txSize: tx.virtualSize(),

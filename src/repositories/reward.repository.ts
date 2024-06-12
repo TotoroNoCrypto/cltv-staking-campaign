@@ -89,7 +89,8 @@ export class RewardRepository {
       ],
     })
 
-    campaigns.forEach(async campaign => {
+    for (let index = 0; index < campaigns.length; index++) {
+      const campaign = campaigns[index];
       const rewardPerBlock =
         campaign.quantity / (campaign.blockEnd - campaign.blockStart)
 
@@ -104,7 +105,8 @@ export class RewardRepository {
         let share = totalQuantities > 0 ? rewardPerBlock / totalQuantities : 0
         share = Math.round(share * 10 ** 8) / 10 ** 8
 
-        stakings.forEach(async staking => {
+        for (let index = 0; index < stakings.length; index++) {
+          const staking = stakings[index];
           if (staking.campaignId === campaign.id) {
             if (staking.block < block) {
               if (!stakerRewards.has(staking.walletAddress)) {
@@ -125,7 +127,7 @@ export class RewardRepository {
               totalQuantities += staking.quantity
             }
           }
-        })
+        }
       }
 
       stakerRewards.forEach(async (value, key) => {
@@ -141,6 +143,6 @@ export class RewardRepository {
 
       campaign.lastBlockReward = blockid
       await campaign.save()
-    })
+    }
   }
 }
