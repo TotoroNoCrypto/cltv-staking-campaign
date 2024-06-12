@@ -225,10 +225,7 @@ export class CampaignController {
     try {
       const { taproot, pubKey } = req.body
 
-      const psbt = await PsbtService.generateAirdrop(
-        taproot,
-        pubKey,
-      )
+      const psbt = await PsbtService.generateAirdrop(taproot, pubKey)
 
       return res.json(psbt)
     } catch (error) {

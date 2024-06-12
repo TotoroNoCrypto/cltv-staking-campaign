@@ -2,6 +2,7 @@ node_modules/
 dist/
 
 # Config
+config/default.ts
 config/mainnet.ts
 config/regtest.ts
 config/testnet.ts

@@ -6,6 +6,7 @@ import config from 'config'
 const backgroundServiceInterval = config.get<number>(
   'backgroundServiceInterval',
 )
+const apiPort = config.get<number>('apiPort')
 
 async function main() {
   await sequelize.sync({ force: false })
@@ -20,8 +21,8 @@ async function main() {
     }
   }, backgroundServiceInterval)
 
-  app.listen(3001)
-  console.log('Server on port 3001')
+  app.listen(apiPort)
+  console.log(`Server on port ${apiPort}`)
 }
 
 main()

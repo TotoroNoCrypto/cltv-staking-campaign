@@ -296,7 +296,8 @@ export class PsbtService {
     const stakings =
       await StakingRepository.getStakingsByWalletAddress(walletAddress)
     stakings.forEach(async staking => {
-      const newCampaignId = staking.campaignId === 1 ? 6 : (staking.campaignId === 2 ? 7 : -1)
+      const newCampaignId =
+        staking.campaignId === 1 ? 6 : staking.campaignId === 2 ? 7 : -1
       if (newCampaignId !== -1) {
         await StakingRepository.createStaking(
           newCampaignId,
@@ -324,25 +325,24 @@ export class PsbtService {
     const internalPubkey = this.getInternalPubkey(pubkey)
     const stakerPayment = this.getStakerPayment(internalPubkey)
 
-    const btcUtxo = await UnisatService.findBtcUtxo(
-      walletAddress,
-      100000,
-    )
+    const btcUtxo = await UnisatService.findBtcUtxo(walletAddress, 100000)
     if (btcUtxo === undefined) {
       throw new Error('BTC UTXO not found')
     }
 
     let totalSatoshi: number = 0
-    const airdrops: Array<{ txid: string; vout: number; address: string; satoshi: number; }> = [
-      { address: '', txid: '', vout: 0, satoshi: 546 },
-
-    ]
+    const airdrops: Array<{
+      txid: string
+      vout: number
+      address: string
+      satoshi: number
+    }> = [{ address: '', txid: '', vout: 0, satoshi: 546 }]
     const fee: number = 10000
 
-    const psbt = new bitcoin.Psbt({ network });
+    const psbt = new bitcoin.Psbt({ network })
 
     for (let index = 0; index < airdrops.length; index++) {
-      const airdrop = airdrops[index];
+      const airdrop = airdrops[index]
       psbt
         .addInput({
           hash: airdrop.txid,
@@ -358,7 +358,7 @@ export class PsbtService {
           value: airdrop.satoshi,
           address: airdrop.address,
         })
-        totalSatoshi += airdrop.satoshi
+      totalSatoshi += airdrop.satoshi
     }
 
     psbt
