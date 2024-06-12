@@ -7,16 +7,21 @@ export class BackgroundService {
     console.log('Checking for unconfirmed stakings')
 
     const stakings = await StakingRepository.findUnconfirmedStakings()
-    stakings.forEach(async staking => {
+    for (let index = 0; index < stakings.length; index++) {
+      const staking = stakings[index];
       const blockheight = await UnisatService.findConfirmedInscription(
         staking.scriptAddress,
         `${staking.inscriptionTxId}i0`,
         staking.inscriptionVout,
       )
+
       if (blockheight !== undefined) {
         await StakingRepository.updateStaking(staking.id, blockheight)
       }
-    })
+
+      const sleep = (delay: number) => new Promise((resolve) => setTimeout(resolve, delay))
+      await sleep(500);
+    }
   }
 
   public static async recordUnconfirmedRuneStakings(): Promise<void> {
@@ -29,15 +34,20 @@ export class BackgroundService {
     console.log('Checking for unconfirmed BTC stakings')
 
     const stakings = await StakingRepository.findUnconfirmedStakings()
-    stakings.forEach(async staking => {
+    for (let index = 0; index < stakings.length; index++) {
+      const staking = stakings[index];
       const blockheight = await UnisatService.findConfirmedBTC(
         staking.scriptAddress,
         staking.quantity,
       )
+
       if (blockheight !== undefined) {
         await StakingRepository.updateStaking(staking.id, blockheight)
       }
-    })
+
+      const sleep = (delay: number) => new Promise((resolve) => setTimeout(resolve, delay))
+      await sleep(500);
+    }
   }
 
   public static async refreshRewards(): Promise<void> {

@@ -244,18 +244,16 @@ export class PsbtService {
   public static async restake(
     walletAddress: string,
     pubkeyHex: string,
-    fromCampaignId: number,
-    toCampaignId: number,
-    amt: number,
+    fromBlockheight: number,
+    toBlockheight: number,
   ): Promise<string> {
     const fastestFee = await getFastestFee()
     const networkFee = stakeSize * fastestFee
     const psbt = await this.getRestakePsbt(
       walletAddress,
       pubkeyHex,
-      fromCampaignId,
-      toCampaignId,
-      amt,
+      fromBlockheight,
+      toBlockheight,
       networkFee,
     )
 
@@ -716,40 +714,63 @@ export class PsbtService {
   private static async getRestakePsbt(
     walletAddress: string,
     pubkeyHex: string,
-    fromCampaignId: number,
-    toCampaignId: number,
-    amt: number,
+    fromBlockheight: number,
+    toBlockheight: number,
     networkFee: number,
   ): Promise<Psbt> {
     const pubkey = this.getPubkey(pubkeyHex)
     const internalPubkey = this.getInternalPubkey(pubkey)
     const stakerPayment = this.getStakerPayment(internalPubkey)
-    const campaignOut = await CampaignRepository.getCampaign(fromCampaignId)
-    const campaignIn = await CampaignRepository.getCampaign(toCampaignId)
-    if (campaignOut === null || campaignIn === null) {
-      throw new Error('Campaign not found')
-    }
 
-    const campaignOutBlockheight = campaignOut.blockEnd
     const campaignOutCltvPayment = this.getCltvPayment(
       pubkey,
-      campaignOutBlockheight,
+      fromBlockheight,
     )
 
-    const campaignInBlockheight = campaignIn.blockEnd
     const campaignInCltvPayment = this.getCltvPayment(
       pubkey,
-      campaignInBlockheight,
+      toBlockheight,
     )
 
-    const market = await UnisatService.findBRC20Market(campaignOut.name)
-    let serviceFee = Math.max(
-      serviceFeeFix,
-      amt * market!.satoshi! * (serviceFeeVariable / 100),
+    const fcdpInscriptions = await UnisatService.getTransferableInscriptions(
+      walletAddress,
+      'FCDP',
     )
-    if (serviceFee >= 5 * serviceFeeFix) {
-      serviceFee = 5 * serviceFeeFix
+    let fcdpAmount = 0
+    for (let index = 0; index < fcdpInscriptions.length; index++) {
+      const fcdpInscription = fcdpInscriptions[index];
+      fcdpAmount += fcdpInscription.amt
+      
     }
+    const fcdpMarket = await UnisatService.findBRC20Market('FCDP')
+    let fcdpServiceFee = Math.max(
+      serviceFeeFix,
+      fcdpAmount * fcdpMarket!.satoshi! * (serviceFeeVariable / 100),
+    )
+    if (fcdpServiceFee >= 5 * serviceFeeFix) {
+      fcdpServiceFee = 5 * serviceFeeFix
+    }
+
+    const oshiInscriptions = await UnisatService.getTransferableInscriptions(
+      walletAddress,
+      'OSHI',
+    )
+    let oshiAmount = 0
+    for (let index = 0; index < oshiInscriptions.length; index++) {
+      const oshiInscription = oshiInscriptions[index];
+      oshiAmount += oshiInscription.amt
+      
+    }
+    const oshiMarket = await UnisatService.findBRC20Market('FCDP')
+    let oshiServiceFee = Math.max(
+      serviceFeeFix,
+      oshiAmount * oshiMarket!.satoshi! * (serviceFeeVariable / 100),
+    )
+    if (oshiServiceFee >= 5 * serviceFeeFix) {
+      oshiServiceFee = 5 * serviceFeeFix
+    }
+
+    const serviceFee = fcdpServiceFee + oshiServiceFee
 
     const btcUtxo = await UnisatService.findBtcUtxo(
       walletAddress,
@@ -771,7 +792,7 @@ export class PsbtService {
       throw new Error('No UTXO found on script')
     }
 
-    const lockTime = this.getLocktime(campaignInBlockheight)
+    const lockTime = this.getLocktime(toBlockheight)
 
     const psbt = new Psbt({ network }).setLocktime(lockTime)
 

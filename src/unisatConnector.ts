@@ -33,6 +33,7 @@ class ApiClient {
       console.log(
         `Response received: ${response.status} ${response.statusText}`,
       )
+
       return response.data
     } catch (error) {
       if (error instanceof AxiosError) {
