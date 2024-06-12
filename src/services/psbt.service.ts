@@ -265,8 +265,7 @@ export class PsbtService {
   public static async finalizeRestake(
     walletAddress: string,
     pubkeyHex: string,
-    campaignId: number,
-    quantity: number,
+    blockheight: number,
     psbtHex: string,
   ): Promise<{ txSize: number; psbtHex: string; txHex: string }> {
     const psbt = Psbt.fromHex(psbtHex)
@@ -283,31 +282,33 @@ export class PsbtService {
     }
     const tx = psbt.extractTransaction(true)
 
-    const campaign = await CampaignRepository.getCampaign(campaignId)
-    if (campaign === null) {
-      throw new Error('Campaign not found')
-    }
-
     const pubkey = this.getPubkey(pubkeyHex)
-    const blockheight = campaign.blockEnd
     const cltvPayment = this.getCltvPayment(pubkey, blockheight)
     const scriptAddress = cltvPayment.address!
 
-    const stakings =
-      await StakingRepository.getStakingsByWalletAddress(walletAddress)
-    stakings.forEach(async staking => {
-      const newCampaignId =
-        staking.campaignId === 1 ? 6 : staking.campaignId === 2 ? 7 : -1
-      if (newCampaignId !== -1) {
-        await StakingRepository.createStaking(
-          newCampaignId,
-          walletAddress,
-          scriptAddress,
-          staking.inscriptionTxId,
-          staking.inscriptionVout,
-          quantity,
-        )
-      }
+    const fcdpInscriptions = await UnisatService.getTransferableInscriptions(walletAddress, 'FCDP')
+    console.dir(fcdpInscriptions)
+    fcdpInscriptions.forEach(async inscription => {
+      await StakingRepository.createStaking(
+        5,
+        walletAddress,
+        scriptAddress,
+        inscription.txid,
+        inscription.vout,
+        inscription.amt,
+      )
+    })
+
+    const oshiInscriptions = await UnisatService.getTransferableInscriptions(walletAddress, 'OSHI')
+    oshiInscriptions.forEach(async inscription => {
+      await StakingRepository.createStaking(
+        6,
+        walletAddress,
+        scriptAddress,
+        inscription.txid,
+        inscription.vout,
+        inscription.amt,
+      )
     })
 
     return {

@@ -199,13 +199,12 @@ export class CampaignController {
     res: Response,
   ): Promise<Response> {
     try {
-      const { taproot, pubKey, campaignid, amt, psbtHex } = req.body
+      const { taproot, pubKey, blockheight, psbtHex } = req.body
 
       const psbt = await PsbtService.finalizeRestake(
         taproot,
         pubKey,
-        campaignid,
-        amt,
+        blockheight,
         psbtHex,
       )
 
