@@ -210,31 +210,43 @@ export class UnisatService {
   public static async getTransferableInscriptions(
     address: string,
     ticker: string,
-  ) : Promise<Array<{ txid: string; vout: number; satoshi: number; amt: number }>> {
-    let inscriptions: Array<{ txid: string; vout: number; satoshi: number; amt: number }> = []
+  ): Promise<
+    Array<{ txid: string; vout: number; satoshi: number; amt: number }>
+  > {
+    let inscriptions: Array<{
+      txid: string
+      vout: number
+      satoshi: number
+      amt: number
+    }> = []
     let cursor = 0
     const size = 50
     let resultSize = 0
 
     do {
-      const result = await this.unisatConnector.brc20.getTransferableInscription(
-        address,
-        ticker,
-        cursor * size,
-        size,
-      )
+      const result =
+        await this.unisatConnector.brc20.getTransferableInscription(
+          address,
+          ticker,
+          cursor * size,
+          size,
+        )
       resultSize = result.data.detail.length
-      const filteredDetails: Array<{ data: { op: string; tick: string; amt: number }, inscriptionId: string, satoshi: number }>  = result.data.detail.filter(
+      const filteredDetails: Array<{
+        data: { op: string; tick: string; amt: number }
+        inscriptionId: string
+        satoshi: number
+      }> = result.data.detail.filter(
         (d: { data: { op: string; tick: string } }) =>
-          d.data.op === 'transfer' && d.data.tick === ticker
+          d.data.op === 'transfer' && d.data.tick === ticker,
       )
-      
+
       if (filteredDetails.length === 0) {
         break
       }
 
       filteredDetails.map(
-        (detail) =>
+        detail =>
           (inscriptions = inscriptions.concat({
             txid: detail.inscriptionId.slice(0, -2),
             vout: 0,

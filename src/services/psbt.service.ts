@@ -286,7 +286,10 @@ export class PsbtService {
     const cltvPayment = this.getCltvPayment(pubkey, blockheight)
     const scriptAddress = cltvPayment.address!
 
-    const fcdpInscriptions = await UnisatService.getTransferableInscriptions(walletAddress, 'FCDP')
+    const fcdpInscriptions = await UnisatService.getTransferableInscriptions(
+      walletAddress,
+      'FCDP',
+    )
     console.dir(fcdpInscriptions)
     fcdpInscriptions.forEach(async inscription => {
       await StakingRepository.createStaking(
@@ -299,7 +302,10 @@ export class PsbtService {
       )
     })
 
-    const oshiInscriptions = await UnisatService.getTransferableInscriptions(walletAddress, 'OSHI')
+    const oshiInscriptions = await UnisatService.getTransferableInscriptions(
+      walletAddress,
+      'OSHI',
+    )
     oshiInscriptions.forEach(async inscription => {
       await StakingRepository.createStaking(
         6,
