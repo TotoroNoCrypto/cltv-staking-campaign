@@ -75,14 +75,16 @@ export class PsbtService {
   public static async stakeBTC(
     walletAddress: string,
     pubkeyHex: string,
-    amt: number,
+    txid: string,
+    vout: number,
   ): Promise<string> {
     const fastestFee = await getFastestFee()
     const networkFee = stakeBTCSize * fastestFee
     const psbt = await this.getStakeBTCPsbt(
       walletAddress,
       pubkeyHex,
-      amt,
+      txid,
+      vout,
       networkFee,
     )
 
@@ -568,7 +570,8 @@ export class PsbtService {
   private static async getStakeBTCPsbt(
     walletAddress: string,
     pubkeyHex: string,
-    amt: number,
+    txid: string,
+    vout: number,
     networkFee: number,
   ): Promise<Psbt> {
     const pubkey = this.getPubkey(pubkeyHex)
@@ -582,14 +585,23 @@ export class PsbtService {
     const blockheight = campaign.blockEnd
     const cltvPayment = this.getCltvPayment(pubkey, blockheight)
 
-    let serviceFee = Math.max(serviceFeeFix, amt * (serviceFeeVariable / 100))
+    const matchingBtcUtxo = await UnisatService.findMatchingBtcUtxo(
+      walletAddress,
+      txid,
+      vout,
+    )
+
+    let serviceFee = Math.max(
+      serviceFeeFix,
+      matchingBtcUtxo!.satoshi * (serviceFeeVariable / 100),
+    )
     if (serviceFee >= 5 * serviceFeeFix) {
       serviceFee = 5 * serviceFeeFix
     }
 
     const btcUtxo = await UnisatService.findBtcUtxo(
       walletAddress,
-      amt + networkFee + serviceFee,
+      networkFee + serviceFee,
     )
     if (btcUtxo === undefined) {
       throw new Error('BTC UTXO not found')
@@ -604,7 +616,7 @@ export class PsbtService {
         tapInternalKey: internalPubkey,
       })
       .addOutput({
-        value: amt,
+        value: matchingBtcUtxo!.satoshi,
         address: cltvPayment.address!,
       })
       .addOutput({
@@ -612,7 +624,8 @@ export class PsbtService {
         address: teamAddress,
       })
       .addOutput({
-        value: btcUtxo.satoshi - amt - serviceFee - networkFee,
+        value:
+          btcUtxo.satoshi - matchingBtcUtxo!.satoshi - serviceFee - networkFee,
         address: stakerPayment.address!,
       })
 

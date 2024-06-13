@@ -52,9 +52,9 @@ export class CampaignController {
 
   public static async stakeBTC(req: Request, res: Response): Promise<Response> {
     try {
-      const { taproot, pubKey, amt } = req.body
+      const { taproot, pubKey, txid, vout } = req.body
 
-      const psbt = await PsbtService.stakeBTC(taproot, pubKey, amt)
+      const psbt = await PsbtService.stakeBTC(taproot, pubKey, txid, vout)
 
       return res.json(psbt)
     } catch (error) {

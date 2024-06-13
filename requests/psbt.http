@@ -60,7 +60,8 @@ Content-Type: application/json
 {
     "taproot": "bc1plvqwcy5chr9ja359rm4zkhyfyxacn2tj4rvjtfk40w5ctzagssnszte0m6",
     "pubKey": "02dde3a8a673f9cba281b28077dd6928af5a4aff475af0c031df7afc5d65920b67",
-    "amt": 1000
+    "txid": "1ed156631444f0ec865a20d603cf35140387bdb7f109c532bf4a5c68e682b92b",
+    "vout": 3,
 }
 
 ### Finalize Stake
