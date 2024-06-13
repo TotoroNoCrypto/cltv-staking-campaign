@@ -207,7 +207,7 @@ export class UnisatService {
     let resultSize = 0
 
     do {
-      const result = await this.unisatConnector.general.getRuneUtxo(
+      const result = await this.unisatConnector.rune.getRuneUtxo(
         address,
         runeId,
         cursor * size,
