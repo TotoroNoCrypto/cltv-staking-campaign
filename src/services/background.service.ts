@@ -8,7 +8,7 @@ export class BackgroundService {
 
     const stakings = await StakingRepository.findUnconfirmedStakings()
     for (let index = 0; index < stakings.length; index++) {
-      const staking = stakings[index];
+      const staking = stakings[index]
       const blockheight = await UnisatService.findConfirmedInscription(
         staking.scriptAddress,
         `${staking.inscriptionTxId}i0`,
@@ -19,8 +19,9 @@ export class BackgroundService {
         await StakingRepository.updateStaking(staking.id, blockheight)
       }
 
-      const sleep = (delay: number) => new Promise((resolve) => setTimeout(resolve, delay))
-      await sleep(500);
+      const sleep = (delay: number) =>
+        new Promise(resolve => setTimeout(resolve, delay))
+      await sleep(500)
     }
   }
 
@@ -35,7 +36,7 @@ export class BackgroundService {
 
     const stakings = await StakingRepository.findUnconfirmedStakings()
     for (let index = 0; index < stakings.length; index++) {
-      const staking = stakings[index];
+      const staking = stakings[index]
       const blockheight = await UnisatService.findConfirmedBTC(
         staking.scriptAddress,
         staking.quantity,
@@ -45,8 +46,9 @@ export class BackgroundService {
         await StakingRepository.updateStaking(staking.id, blockheight)
       }
 
-      const sleep = (delay: number) => new Promise((resolve) => setTimeout(resolve, delay))
-      await sleep(500);
+      const sleep = (delay: number) =>
+        new Promise(resolve => setTimeout(resolve, delay))
+      await sleep(500)
     }
   }
 

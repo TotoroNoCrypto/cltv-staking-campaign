@@ -4,6 +4,7 @@ import { Network } from 'bitcoinjs-lib/src/networks'
 import { Payment } from 'bitcoinjs-lib/src/payments'
 import { Psbt } from 'bitcoinjs-lib/src/psbt'
 import { PsbtInput } from 'bip174/src/lib/interfaces'
+import { Runestone, Edict, RuneId, some, none } from 'runelib'
 import config from 'config'
 const bip65 = require('bip65')
 const varuint = require('varuint-bitcoin')
@@ -18,6 +19,7 @@ const teamAddress = config.get<string>('cltv.teamAddress')
 const serviceFeeFix = config.get<number>('cltv.serviceFeeFix')
 const serviceFeeVariable = config.get<number>('cltv.serviceFeeVariable')
 const stakeSize = config.get<number>('stakeSize')
+const stakeRuneSize = config.get<number>('stakeRuneSize')
 const stakeBTCSize = config.get<number>('stakeBTCSize')
 const claimSize = config.get<number>('claimSize')
 
@@ -55,7 +57,7 @@ export class PsbtService {
     amt: number,
   ): Promise<string> {
     const fastestFee = await getFastestFee()
-    const networkFee = stakeBTCSize * fastestFee
+    const networkFee = stakeRuneSize * fastestFee
     const psbt = await this.getStakeRunePsbt(
       walletAddress,
       pubkeyHex,
@@ -290,7 +292,7 @@ export class PsbtService {
     )
 
     for (let index = 0; index < fcdpInscriptions.length; index++) {
-      const inscription = fcdpInscriptions[index];
+      const inscription = fcdpInscriptions[index]
       await StakingRepository.createStaking(
         5,
         walletAddress,
@@ -306,7 +308,7 @@ export class PsbtService {
       'OSHI',
     )
     for (let index = 0; index < oshiInscriptions.length; index++) {
-      const inscription = oshiInscriptions[index];
+      const inscription = oshiInscriptions[index]
       await StakingRepository.createStaking(
         6,
         walletAddress,
@@ -515,6 +517,16 @@ export class PsbtService {
       throw new Error('Rune UTXO not found')
     }
 
+    const splitRuneId = runeId.split(':')
+    const myRuneId = new RuneId(Number(splitRuneId[0]), Number(splitRuneId[1]))
+    const amount = BigInt(amt)
+    const outputIndex = 0
+
+    const edict = new Edict(myRuneId, amount, outputIndex)
+    const runestone = new Runestone([edict], none(), none(), none())
+
+    const encodedRunestone = runestone.encipher()
+
     const psbt = new bitcoin.Psbt({ network })
       .addInput({
         hash: runeUtxo.txid,
@@ -532,6 +544,10 @@ export class PsbtService {
         sequence: 0,
         witnessUtxo: { value: btcUtxo.satoshi, script: stakerPayment.output! },
         tapInternalKey: internalPubkey,
+      })
+      .addOutput({
+        script: encodedRunestone,
+        value: 0,
       })
       .addOutput({
         value: runeUtxo.satoshi,
@@ -632,10 +648,20 @@ export class PsbtService {
 
     switch (campaign!.type) {
       case 'BRC20':
-        const market = await UnisatService.findBRC20Market(campaign.name)
+        const brc20Market = await UnisatService.findBRC20Market(campaign.name)
         serviceFee = Math.max(
           serviceFeeFix,
-          total * market!.satoshi! * (serviceFeeVariable / 100),
+          total * brc20Market!.satoshi! * (serviceFeeVariable / 100),
+        )
+
+        break
+
+      case 'Rune':
+        const runeMarket = await UnisatService.findRuneMarket(campaign.name)
+        console.log(`---> runeMarket: ${runeMarket}`)
+        serviceFee = Math.max(
+          serviceFeeFix,
+          total * runeMarket!.satoshi! * (serviceFeeVariable / 100),
         )
 
         break
@@ -661,8 +687,25 @@ export class PsbtService {
     let scriptInscriptionUtxos = await UnisatService.getInscriptionUtxos(
       cltvPayment.address!,
     )
+    let scriptUncommonGoodsUtxos = await UnisatService.getRuneUtxos(
+      cltvPayment.address!,
+      '1:0',
+    )
+    let scriptDogGoToTheMoonUtxos = await UnisatService.getRuneUtxos(
+      cltvPayment.address!,
+      '840015:535',
+    )
+    let scriptDotSwapDotSwapUtxos = await UnisatService.getRuneUtxos(
+      cltvPayment.address!,
+      '840456:5478',
+    )
+    const scriptRuneUtxos = scriptUncommonGoodsUtxos
+      .concat(scriptDogGoToTheMoonUtxos)
+      .concat(scriptDotSwapDotSwapUtxos)
     const scriptBtcUtxos = await UnisatService.getBtcUtxos(cltvPayment.address!)
-    const scriptUtxos = scriptInscriptionUtxos.concat(scriptBtcUtxos)
+    const scriptUtxos = scriptInscriptionUtxos
+      .concat(scriptRuneUtxos)
+      .concat(scriptBtcUtxos)
 
     if (scriptUtxos.length === 0) {
       throw new Error('No UTXO found on script')
@@ -724,15 +767,9 @@ export class PsbtService {
     const internalPubkey = this.getInternalPubkey(pubkey)
     const stakerPayment = this.getStakerPayment(internalPubkey)
 
-    const campaignOutCltvPayment = this.getCltvPayment(
-      pubkey,
-      fromBlockheight,
-    )
+    const campaignOutCltvPayment = this.getCltvPayment(pubkey, fromBlockheight)
 
-    const campaignInCltvPayment = this.getCltvPayment(
-      pubkey,
-      toBlockheight,
-    )
+    const campaignInCltvPayment = this.getCltvPayment(pubkey, toBlockheight)
 
     const fcdpInscriptions = await UnisatService.getTransferableInscriptions(
       walletAddress,
@@ -740,9 +777,8 @@ export class PsbtService {
     )
     let fcdpAmount = 0
     for (let index = 0; index < fcdpInscriptions.length; index++) {
-      const fcdpInscription = fcdpInscriptions[index];
+      const fcdpInscription = fcdpInscriptions[index]
       fcdpAmount += fcdpInscription.amt
-      
     }
     const fcdpMarket = await UnisatService.findBRC20Market('FCDP')
     let fcdpServiceFee = Math.max(
@@ -759,9 +795,8 @@ export class PsbtService {
     )
     let oshiAmount = 0
     for (let index = 0; index < oshiInscriptions.length; index++) {
-      const oshiInscription = oshiInscriptions[index];
+      const oshiInscription = oshiInscriptions[index]
       oshiAmount += oshiInscription.amt
-      
     }
     const oshiMarket = await UnisatService.findBRC20Market('FCDP')
     let oshiServiceFee = Math.max(

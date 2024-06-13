@@ -34,6 +34,11 @@ class ApiClient {
         `Response received: ${response.status} ${response.statusText}`,
       )
 
+      // To prevent throttling
+      const sleep = (delay: number) =>
+        new Promise(resolve => setTimeout(resolve, delay))
+      await sleep(200)
+
       return response.data
     } catch (error) {
       if (error instanceof AxiosError) {

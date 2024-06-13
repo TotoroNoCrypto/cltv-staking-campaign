@@ -24,7 +24,7 @@ export class UnisatService {
     let utxos = []
     let utxo = undefined
     let cursor = 0
-  const size = 1024
+    const size = 1024
     let resultSize = 0
 
     do {
@@ -52,7 +52,7 @@ export class UnisatService {
     let utxos = []
     let utxo = undefined
     let cursor = 0
-  const size = 1024
+    const size = 1024
     let resultSize = 0
 
     do {
@@ -84,7 +84,7 @@ export class UnisatService {
     let utxos = []
     let utxo = undefined
     let cursor = 0
-  const size = 1024
+    const size = 1024
     let resultSize = 0
 
     do {
@@ -113,7 +113,7 @@ export class UnisatService {
   ): Promise<Array<{ txid: string; vout: number; satoshi: number }>> {
     let utxos: Array<{ txid: string; vout: number; satoshi: number }> = []
     let cursor = 0
-  const size = 1024
+    const size = 1024
     let resultSize = 0
 
     do {
@@ -135,12 +135,50 @@ export class UnisatService {
   ): Promise<Array<{ txid: string; vout: number; satoshi: number }>> {
     let utxos: Array<{ txid: string; vout: number; satoshi: number }> = []
     let cursor = 0
-  const size = 1024
+    const size = 1024
     let resultSize = 0
 
     do {
       const result = await this.unisatConnector.general.getInscriptionUtxo(
         address,
+        cursor * size,
+        size,
+      )
+      resultSize = result.data.utxo.length
+      const filteredUtxos = result.data.utxo.filter(
+        (u: {
+          txid: string
+          vout: number
+          inscriptions: { moved: boolean }[]
+        }) =>
+          u.inscriptions.find((i: { moved: boolean }) => !i.moved) !==
+          undefined,
+      )
+
+      if (filteredUtxos.length === 0) {
+        break
+      }
+
+      utxos = utxos.concat(filteredUtxos)
+      cursor++
+    } while (resultSize === size)
+
+    return utxos
+  }
+
+  public static async getRuneUtxos(
+    address: string,
+    runeId: string,
+  ): Promise<Array<{ txid: string; vout: number; satoshi: number }>> {
+    let utxos: Array<{ txid: string; vout: number; satoshi: number }> = []
+    let cursor = 0
+    const size = 1024
+    let resultSize = 0
+
+    do {
+      const result = await this.unisatConnector.general.getRuneUtxo(
+        address,
+        runeId,
         cursor * size,
         size,
       )
@@ -174,7 +212,7 @@ export class UnisatService {
     let utxos = []
     let utxo = undefined
     let cursor = 0
-  const size = 1024
+    const size = 1024
     let resultSize = 0
 
     do {
@@ -220,7 +258,7 @@ export class UnisatService {
       amt: number
     }> = []
     let cursor = 0
-  const size = 1024
+    const size = 1024
     let resultSize = 0
 
     do {
@@ -267,7 +305,7 @@ export class UnisatService {
     let utxos = []
     let utxo = undefined
     let cursor = 0
-  const size = 1024
+    const size = 1024
     let resultSize = 0
 
     do {
@@ -301,7 +339,7 @@ export class UnisatService {
     let utxos = []
     let utxo = undefined
     let cursor = 0
-  const size = 1024
+    const size = 1024
     let resultSize = 0
 
     do {
@@ -332,7 +370,7 @@ export class UnisatService {
     let markets = []
     let market = undefined
     let cursor = 0
-  const size = 1024
+    const size = 1024
     let resultSize = 0
     let BTCPrice = 0
 
@@ -362,7 +400,7 @@ export class UnisatService {
     let markets = []
     let market = undefined
     let cursor = 0
-  const size = 1024
+    const size = 1024
     let resultSize = 0
     let BTCPrice = 0
 

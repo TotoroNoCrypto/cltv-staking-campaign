@@ -175,7 +175,7 @@ export class CampaignController {
 
   public static async restake(req: Request, res: Response): Promise<Response> {
     try {
-      const { taproot, pubKey, fromBlockheight, toBlockheight,  } = req.body
+      const { taproot, pubKey, fromBlockheight, toBlockheight } = req.body
 
       const psbt = await PsbtService.restake(
         taproot,

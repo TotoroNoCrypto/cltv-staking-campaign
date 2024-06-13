@@ -90,7 +90,7 @@ export class RewardRepository {
     })
 
     for (let index = 0; index < campaigns.length; index++) {
-      const campaign = campaigns[index];
+      const campaign = campaigns[index]
       const rewardPerBlock =
         campaign.quantity / (campaign.blockEnd - campaign.blockStart)
 
@@ -106,7 +106,7 @@ export class RewardRepository {
         share = Math.round(share * 10 ** 8) / 10 ** 8
 
         for (let index = 0; index < stakings.length; index++) {
-          const staking = stakings[index];
+          const staking = stakings[index]
           if (staking.campaignId === campaign.id) {
             if (staking.block < block) {
               if (!stakerRewards.has(staking.walletAddress)) {
