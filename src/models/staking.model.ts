@@ -30,6 +30,9 @@ export const Staking = sequelize.define<StakingModel>('stakings', {
   inscriptionVout: {
     type: DataTypes.INTEGER,
   },
+  runeId: {
+    type: DataTypes.STRING,
+  },
   quantity: {
     type: DataTypes.INTEGER,
   },

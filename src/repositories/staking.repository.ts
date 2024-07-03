@@ -16,6 +16,7 @@ export class StakingRepository {
         'scriptAddress',
         'inscriptionTxId',
         'inscriptionVout',
+        'runeId',
         'quantity',
         'block',
       ],
@@ -30,6 +31,7 @@ export class StakingRepository {
     scriptAddress: string,
     inscriptionTxId: string | null,
     inscriptionVout: number | null,
+    runeId: string | null,
     quantity: number,
   ): Promise<StakingModel> {
     const newStaking = await Staking.create(
@@ -39,6 +41,7 @@ export class StakingRepository {
         scriptAddress,
         inscriptionTxId,
         inscriptionVout,
+        runeId,
         quantity,
       },
       {
@@ -48,6 +51,7 @@ export class StakingRepository {
           'scriptAddress',
           'inscriptionTxId',
           'inscriptionVout',
+          'runeId',
           'quantity',
         ],
       },
@@ -96,6 +100,7 @@ export class StakingRepository {
         'scriptAddress',
         'inscriptionTxId',
         'inscriptionVout',
+        'runeId',
         'quantity',
         'block',
       ],
@@ -116,6 +121,7 @@ export class StakingRepository {
         'scriptAddress',
         'inscriptionTxId',
         'inscriptionVout',
+        'runeId',
         'quantity',
         'block',
       ],

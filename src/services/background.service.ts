@@ -28,7 +28,23 @@ export class BackgroundService {
   public static async recordUnconfirmedRuneStakings(): Promise<void> {
     console.log('Checking for unconfirmed rune stakings')
 
-    //TODO
+    // const stakings = await StakingRepository.findUnconfirmedStakings()
+    // for (let index = 0; index < stakings.length; index++) {
+    //   const staking = stakings[index]
+    //   const blockheight = await UnisatService.findConfirmedRune(
+    //     staking.scriptAddress,
+    //     staking.inscriptionTxId,
+    //     staking.inscriptionVout,
+    //   )
+
+    //   if (blockheight !== undefined) {
+    //     await StakingRepository.updateStaking(staking.id, blockheight)
+    //   }
+
+    //   const sleep = (delay: number) =>
+    //     new Promise(resolve => setTimeout(resolve, delay))
+    //   await sleep(500)
+    // }
   }
 
   public static async recordUnconfirmedBTCStakings(): Promise<void> {

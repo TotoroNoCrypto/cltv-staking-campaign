@@ -119,6 +119,7 @@ export class PsbtService {
       scriptAddress,
       inscriptionTxId,
       inscriptionVout,
+      null,
       quantity,
     )
 
@@ -134,6 +135,7 @@ export class PsbtService {
     pubkeyHex: string,
     runeTxId: string,
     runeVout: number,
+    runeId: string,
     campaignId: number,
     quantity: number,
     psbtHex: string,
@@ -157,6 +159,7 @@ export class PsbtService {
       scriptAddress,
       runeTxId,
       runeVout,
+      runeId,
       quantity,
     )
 
@@ -190,6 +193,7 @@ export class PsbtService {
       campaign.id,
       walletAddress,
       scriptAddress,
+      null,
       null,
       null,
       quantity,
@@ -301,6 +305,7 @@ export class PsbtService {
         scriptAddress,
         inscription.txid,
         inscription.vout,
+        null,
         inscription.amt,
       )
     }
@@ -317,6 +322,7 @@ export class PsbtService {
         scriptAddress,
         inscription.txid,
         inscription.vout,
+        null,
         inscription.amt,
       )
     }

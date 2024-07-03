@@ -6,7 +6,7 @@ Content-Type: application/json
 
 {
     "pubKey": "02dde3a8a673f9cba281b28077dd6928af5a4aff475af0c031df7afc5d65920b67",
-    "blockheight": 847244
+    "blockheight": 751940
 }
 
 ### Get Reward

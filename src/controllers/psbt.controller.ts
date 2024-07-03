@@ -96,13 +96,15 @@ export class CampaignController {
     res: Response,
   ): Promise<Response> {
     try {
-      const { taproot, pubKey, txid, vout, campaignid, amt, psbtHex } = req.body
+      const { taproot, pubKey, txid, vout, runeId, campaignid, amt, psbtHex } =
+        req.body
 
       const psbt = await PsbtService.finalizeStakeRune(
         taproot,
         pubKey,
         txid,
         vout,
+        runeId,
         campaignid,
         amt,
         psbtHex,

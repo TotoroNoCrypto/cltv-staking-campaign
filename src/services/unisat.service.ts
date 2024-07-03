@@ -276,6 +276,40 @@ export class UnisatService {
       : undefined
   }
 
+  public static async findConfirmedRune(
+    address: string,
+    runeId: string,
+  ): Promise<number | undefined> {
+    let utxos = []
+    let utxo = undefined
+    let cursor = 0
+    const size = 1024
+    let resultSize = 0
+
+    do {
+      const result = await this.unisatConnector.rune.getRuneUtxo(
+        address,
+        runeId,
+        cursor * size,
+        size,
+      )
+      utxos = result.data.utxo
+      resultSize = utxos.length
+      utxo = utxos.find(
+        (u: { txid: string; vout: number; runes: { runeId: string }[] }) =>
+          u.runes.find((r: { runeId: string }) => r.runeId === runeId) !==
+          undefined,
+      )
+      cursor++
+    } while (resultSize === size && utxo === undefined)
+
+    return utxo != undefined
+      ? utxo.height < 900000
+        ? utxo.height
+        : (await this.getBlockchainHeight()) - 1
+      : undefined
+  }
+
   public static async getTransferableInscriptions(
     address: string,
     ticker: string,
@@ -327,40 +361,6 @@ export class UnisatService {
     } while (resultSize === size)
 
     return inscriptions
-  }
-
-  public static async findConfirmedRune(
-    address: string,
-    runeId: string,
-  ): Promise<number | undefined> {
-    let utxos = []
-    let utxo = undefined
-    let cursor = 0
-    const size = 1024
-    let resultSize = 0
-
-    do {
-      const result = await this.unisatConnector.rune.getRuneUtxo(
-        address,
-        runeId,
-        cursor * size,
-        size,
-      )
-      utxos = result.data.utxo
-      resultSize = utxos.length
-      utxo = utxos.find(
-        (u: { txid: string; vout: number; runes: { runeid: string }[] }) =>
-          u.runes.find((i: { runeid: string }) => i.runeid === runeId) !==
-          undefined,
-      )
-      cursor++
-    } while (resultSize === size && utxo === undefined)
-
-    return utxo != undefined
-      ? utxo.height < 900000
-        ? utxo.height
-        : (await this.getBlockchainHeight()) - 1
-      : undefined
   }
 
   public static async findConfirmedBTC(

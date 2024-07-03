@@ -15,13 +15,15 @@ export class StakingController {
 
   public static async createStaking(req: Request, res: Response) {
     try {
-      const { campaignId, taproot, script, txid, vout, quantity } = req.body
+      const { campaignId, taproot, script, txid, vout, runeId, quantity } =
+        req.body
       const newStaking = await StakingRepository.createStaking(
         campaignId,
         taproot,
         script,
         txid,
         vout,
+        runeId,
         quantity,
       )
       return res.json(newStaking)
