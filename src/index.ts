@@ -14,6 +14,7 @@ async function main() {
   setInterval(async () => {
     try {
       await BackgroundService.recordUnconfirmedStakings()
+      await BackgroundService.recordUnconfirmedRuneStakings()
       await BackgroundService.recordUnconfirmedBTCStakings()
       await BackgroundService.refreshRewards()
     } catch (error) {

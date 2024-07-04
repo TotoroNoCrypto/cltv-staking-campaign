@@ -8,6 +8,7 @@ export interface StakingModel extends Model {
   scriptAddress: string
   inscriptionTxId: string
   inscriptionVout: number
+  runeId: string
   quantity: number
   block: number
 }

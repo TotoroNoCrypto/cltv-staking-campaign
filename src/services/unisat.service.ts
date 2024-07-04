@@ -296,8 +296,8 @@ export class UnisatService {
       utxos = result.data.utxo
       resultSize = utxos.length
       utxo = utxos.find(
-        (u: { txid: string; vout: number; runes: { runeId: string }[] }) =>
-          u.runes.find((r: { runeId: string }) => r.runeId === runeId) !==
+        (u: { txid: string; vout: number; runes: { runeid: string }[] }) =>
+          u.runes.find((r: { runeid: string }) => r.runeid === runeId) !==
           undefined,
       )
       cursor++

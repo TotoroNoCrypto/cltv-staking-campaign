@@ -18,8 +18,9 @@ const network = config.get<Network>('bitcoin.network')
 const teamAddress = config.get<string>('cltv.teamAddress')
 const serviceFeeFix = config.get<number>('cltv.serviceFeeFix')
 const serviceFeeVariable = config.get<number>('cltv.serviceFeeVariable')
+const utxoSize = config.get<number>('utxoSize')
 const stakeSize = config.get<number>('stakeSize')
-const stakeRuneSize = config.get<number>('stakeRuneSize')
+// const stakeRuneSize = config.get<number>('stakeRuneSize')
 const stakeBTCSize = config.get<number>('stakeBTCSize')
 const claimSize = config.get<number>('claimSize')
 
@@ -56,8 +57,6 @@ export class PsbtService {
     runeId: string,
     amt: number,
   ): Promise<string> {
-    const fastestFee = await getFastestFee()
-    const networkFee = stakeRuneSize * fastestFee
     const psbt = await this.getStakeRunePsbt(
       walletAddress,
       pubkeyHex,
@@ -66,7 +65,6 @@ export class PsbtService {
       campaignId,
       runeId,
       amt,
-      networkFee,
     )
 
     return psbt.toHex()
@@ -485,7 +483,6 @@ export class PsbtService {
     campaignId: number,
     runeId: string,
     amt: number,
-    networkFee: number,
   ): Promise<Psbt> {
     const pubkey = this.getPubkey(pubkeyHex)
     const internalPubkey = this.getInternalPubkey(pubkey)
@@ -506,7 +503,8 @@ export class PsbtService {
     if (serviceFee >= 5 * serviceFeeFix) {
       serviceFee = 5 * serviceFeeFix
     }
-
+    
+    const networkFee = await this.getNetworkFee(6)
     const btcUtxo = await UnisatService.findBtcUtxo(
       walletAddress,
       networkFee + serviceFee,
@@ -554,10 +552,6 @@ export class PsbtService {
         tapInternalKey: internalPubkey,
       })
       .addOutput({
-        script: encodedRunestone,
-        value: 0,
-      })
-      .addOutput({
         value: runeUtxo.satoshi,
         address: cltvPayment.address!,
       })
@@ -568,6 +562,10 @@ export class PsbtService {
       .addOutput({
         value: btcUtxo.satoshi - serviceFee - networkFee,
         address: stakerPayment.address!,
+      })
+      .addOutput({
+        script: encodedRunestone,
+        value: 0,
       })
 
     return psbt
@@ -1010,5 +1008,12 @@ export class PsbtService {
           ? witnessStackToScriptWitness(payment.witness)
           : undefined,
     }
+  }
+
+  private static async getNetworkFee(nbUtxo: number): Promise<number> {
+    const fastestFee = await getFastestFee()
+    const networkFee = nbUtxo * utxoSize * fastestFee
+
+    return networkFee
   }
 }
