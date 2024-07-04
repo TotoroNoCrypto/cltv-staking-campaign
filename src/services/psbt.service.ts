@@ -777,13 +777,12 @@ export class PsbtService {
     const internalPubkey = this.getInternalPubkey(pubkey)
     const stakerPayment = this.getStakerPayment(internalPubkey)
 
-    const campaignOutCltvPayment = this.getCltvPayment(pubkey, fromBlockheight)
+    const campaignFromCltvPayment = this.getCltvPayment(pubkey, fromBlockheight)
 
-    const campaignInCltvPayment = this.getCltvPayment(pubkey, toBlockheight)
+    const campaignToCltvPayment = this.getCltvPayment(pubkey, toBlockheight)
     
-    console.log('---> 0')
     const fcdpInscriptions = await UnisatService.getTransferableInscriptions(
-      walletAddress,
+      campaignFromCltvPayment.address!,
       'FCDP',
     )
     let fcdpAmount = 0
@@ -791,9 +790,7 @@ export class PsbtService {
       const fcdpInscription = fcdpInscriptions[index]
       fcdpAmount += fcdpInscription.amt
     }
-    console.log('---> 1')
     const fcdpMarket = await UnisatService.findBRC20Market('FCDP')
-    console.log('---> 2')
     let fcdpServiceFee = Math.max(
       serviceFeeFix,
       fcdpAmount * fcdpMarket!.satoshi! * (serviceFeeVariable / 100),
@@ -806,14 +803,12 @@ export class PsbtService {
       walletAddress,
       'OSHI',
     )
-    console.log('---> 3')
     let oshiAmount = 0
     for (let index = 0; index < oshiInscriptions.length; index++) {
       const oshiInscription = oshiInscriptions[index]
       oshiAmount += oshiInscription.amt
     }
     const oshiMarket = await UnisatService.findBRC20Market('FCDP')
-    console.log('---> 4')
     let oshiServiceFee = Math.max(
       serviceFeeFix,
       oshiAmount * oshiMarket!.satoshi! * (serviceFeeVariable / 100),
@@ -825,13 +820,11 @@ export class PsbtService {
     const serviceFee = fcdpServiceFee + oshiServiceFee
 
     let scriptInscriptionUtxos = await UnisatService.getInscriptionUtxos(
-      campaignOutCltvPayment.address!,
+      campaignFromCltvPayment.address!,
     )
-    console.log('---> 5')
     const scriptBtcUtxos = await UnisatService.getBtcUtxos(
-      campaignOutCltvPayment.address!,
+      campaignFromCltvPayment.address!,
     )
-    console.log('---> 6')
     const scriptUtxos = scriptInscriptionUtxos.concat(scriptBtcUtxos)
 
     if (scriptUtxos.length === 0) {
@@ -842,13 +835,11 @@ export class PsbtService {
       scriptUtxos.length + 3,
       scriptUtxos.length,
     )
-    console.log('---> 7')
 
     const btcUtxo = await UnisatService.findBtcUtxo(
       walletAddress,
       networkFee + serviceFee,
     )
-    console.log('---> 8')
     if (btcUtxo === undefined) {
       throw new Error('BTC UTXO not found')
     }
@@ -865,7 +856,7 @@ export class PsbtService {
         index: utxo.vout,
         sequence: 0xfffffffe,
         nonWitnessUtxo: Buffer.from(txHex, 'hex'),
-        redeemScript: campaignOutCltvPayment.redeem!.output!,
+        redeemScript: campaignFromCltvPayment.redeem!.output!,
       })
     }
 
@@ -880,7 +871,7 @@ export class PsbtService {
     for (let index = 0; index < scriptUtxos.length; index++) {
       const utxo = scriptUtxos[index]
       psbt.addOutput({
-        script: campaignInCltvPayment.output!,
+        script: campaignToCltvPayment.output!,
         value: utxo.satoshi,
       })
     }
