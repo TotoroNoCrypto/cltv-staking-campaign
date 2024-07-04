@@ -19,6 +19,7 @@ const teamAddress = config.get<string>('cltv.teamAddress')
 const serviceFeeFix = config.get<number>('cltv.serviceFeeFix')
 const serviceFeeVariable = config.get<number>('cltv.serviceFeeVariable')
 const utxoSize = config.get<number>('utxoSize')
+const runeUtxoSize = config.get<number>('runeUtxoSize')
 const stakeSize = config.get<number>('stakeSize')
 // const stakeRuneSize = config.get<number>('stakeRuneSize')
 const stakeBTCSize = config.get<number>('stakeBTCSize')
@@ -209,14 +210,7 @@ export class PsbtService {
     pubkeyHex: string,
     campaignId: number,
   ): Promise<string> {
-    const fastestFee = await getFastestFee()
-    const networkFee = claimSize * fastestFee
-    const psbt = await this.getClaimPsbt(
-      walletAddress,
-      pubkeyHex,
-      campaignId,
-      networkFee,
-    )
+    const psbt = await this.getClaimPsbt(walletAddress, pubkeyHex, campaignId)
 
     return psbt.toHex()
   }
@@ -253,14 +247,11 @@ export class PsbtService {
     fromBlockheight: number,
     toBlockheight: number,
   ): Promise<string> {
-    const fastestFee = await getFastestFee()
-    const networkFee = stakeSize * fastestFee
     const psbt = await this.getRestakePsbt(
       walletAddress,
       pubkeyHex,
       fromBlockheight,
       toBlockheight,
-      networkFee,
     )
 
     return psbt.toHex()
@@ -503,7 +494,7 @@ export class PsbtService {
     if (serviceFee >= 5 * serviceFeeFix) {
       serviceFee = 5 * serviceFeeFix
     }
-    
+
     const networkFee = await this.getNetworkFee(6)
     const btcUtxo = await UnisatService.findBtcUtxo(
       walletAddress,
@@ -640,7 +631,6 @@ export class PsbtService {
     walletAddress: string,
     pubkeyHex: string,
     campaignId: number,
-    networkFee: number,
   ): Promise<Psbt> {
     const pubkey = this.getPubkey(pubkeyHex)
     const internalPubkey = this.getInternalPubkey(pubkey)
@@ -675,7 +665,6 @@ export class PsbtService {
 
       case 'Rune':
         const runeMarket = await UnisatService.findRuneMarket(campaign.name)
-        console.log(`---> runeMarket: ${runeMarket}`)
         serviceFee = Math.max(
           serviceFeeFix,
           total * runeMarket!.satoshi! * (serviceFeeVariable / 100),
@@ -693,28 +682,20 @@ export class PsbtService {
       serviceFee = 5 * serviceFeeFix
     }
 
-    const btcUtxo = await UnisatService.findBtcUtxo(
-      walletAddress,
-      networkFee + serviceFee,
-    )
-    if (btcUtxo === undefined) {
-      throw new Error('BTC UTXO not found')
-    }
-
     let scriptInscriptionUtxos = await UnisatService.getInscriptionUtxos(
       cltvPayment.address!,
     )
     let scriptUncommonGoodsUtxos = await UnisatService.getRuneUtxos(
       cltvPayment.address!,
-      '1:0',
+      encodeURI('1:0'),
     )
     let scriptDogGoToTheMoonUtxos = await UnisatService.getRuneUtxos(
       cltvPayment.address!,
-      '840015:535',
+      encodeURI('840015:535'),
     )
     let scriptDotSwapDotSwapUtxos = await UnisatService.getRuneUtxos(
       cltvPayment.address!,
-      '840456:5478',
+      encodeURI('840456:5478'),
     )
     const scriptRuneUtxos = scriptUncommonGoodsUtxos
       .concat(scriptDogGoToTheMoonUtxos)
@@ -726,6 +707,19 @@ export class PsbtService {
 
     if (scriptUtxos.length === 0) {
       throw new Error('No UTXO found on script')
+    }
+
+    const networkFee = await this.getNetworkFee(
+      scriptUtxos.length + 3,
+      scriptUtxos.length,
+    )
+
+    const btcUtxo = await UnisatService.findBtcUtxo(
+      walletAddress,
+      networkFee + serviceFee,
+    )
+    if (btcUtxo === undefined) {
+      throw new Error('BTC UTXO not found')
     }
 
     const lockTime = this.getLocktime(blockheight)
@@ -778,7 +772,6 @@ export class PsbtService {
     pubkeyHex: string,
     fromBlockheight: number,
     toBlockheight: number,
-    networkFee: number,
   ): Promise<Psbt> {
     const pubkey = this.getPubkey(pubkeyHex)
     const internalPubkey = this.getInternalPubkey(pubkey)
@@ -787,7 +780,8 @@ export class PsbtService {
     const campaignOutCltvPayment = this.getCltvPayment(pubkey, fromBlockheight)
 
     const campaignInCltvPayment = this.getCltvPayment(pubkey, toBlockheight)
-
+    
+    console.log('---> 0')
     const fcdpInscriptions = await UnisatService.getTransferableInscriptions(
       walletAddress,
       'FCDP',
@@ -797,7 +791,9 @@ export class PsbtService {
       const fcdpInscription = fcdpInscriptions[index]
       fcdpAmount += fcdpInscription.amt
     }
+    console.log('---> 1')
     const fcdpMarket = await UnisatService.findBRC20Market('FCDP')
+    console.log('---> 2')
     let fcdpServiceFee = Math.max(
       serviceFeeFix,
       fcdpAmount * fcdpMarket!.satoshi! * (serviceFeeVariable / 100),
@@ -810,12 +806,14 @@ export class PsbtService {
       walletAddress,
       'OSHI',
     )
+    console.log('---> 3')
     let oshiAmount = 0
     for (let index = 0; index < oshiInscriptions.length; index++) {
       const oshiInscription = oshiInscriptions[index]
       oshiAmount += oshiInscription.amt
     }
     const oshiMarket = await UnisatService.findBRC20Market('FCDP')
+    console.log('---> 4')
     let oshiServiceFee = Math.max(
       serviceFeeFix,
       oshiAmount * oshiMarket!.satoshi! * (serviceFeeVariable / 100),
@@ -826,24 +824,33 @@ export class PsbtService {
 
     const serviceFee = fcdpServiceFee + oshiServiceFee
 
-    const btcUtxo = await UnisatService.findBtcUtxo(
-      walletAddress,
-      networkFee + serviceFee,
-    )
-    if (btcUtxo === undefined) {
-      throw new Error('BTC UTXO not found')
-    }
-
     let scriptInscriptionUtxos = await UnisatService.getInscriptionUtxos(
       campaignOutCltvPayment.address!,
     )
+    console.log('---> 5')
     const scriptBtcUtxos = await UnisatService.getBtcUtxos(
       campaignOutCltvPayment.address!,
     )
+    console.log('---> 6')
     const scriptUtxos = scriptInscriptionUtxos.concat(scriptBtcUtxos)
 
     if (scriptUtxos.length === 0) {
       throw new Error('No UTXO found on script')
+    }
+
+    const networkFee = await this.getNetworkFee(
+      scriptUtxos.length + 3,
+      scriptUtxos.length,
+    )
+    console.log('---> 7')
+
+    const btcUtxo = await UnisatService.findBtcUtxo(
+      walletAddress,
+      networkFee + serviceFee,
+    )
+    console.log('---> 8')
+    if (btcUtxo === undefined) {
+      throw new Error('BTC UTXO not found')
     }
 
     const lockTime = this.getLocktime(toBlockheight)
@@ -1010,9 +1017,13 @@ export class PsbtService {
     }
   }
 
-  private static async getNetworkFee(nbUtxo: number): Promise<number> {
+  private static async getNetworkFee(
+    nbUtxo: number,
+    nbRuneUtxo: number = 0,
+  ): Promise<number> {
     const fastestFee = await getFastestFee()
-    const networkFee = nbUtxo * utxoSize * fastestFee
+    const networkFee =
+      nbUtxo * utxoSize * fastestFee + nbRuneUtxo * runeUtxoSize * fastestFee
 
     return networkFee
   }

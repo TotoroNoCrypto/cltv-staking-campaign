@@ -215,12 +215,8 @@ export class UnisatService {
       )
       resultSize = result.data.utxo.length
       const filteredUtxos = result.data.utxo.filter(
-        (u: {
-          txid: string
-          vout: number
-          inscriptions: { moved: boolean }[]
-        }) =>
-          u.inscriptions.find((i: { moved: boolean }) => !i.moved) !==
+        (u: { txid: string; vout: number; runes: { runeid: string }[] }) =>
+          u.runes.find((r: { runeid: string }) => r.runeid === runeId) !==
           undefined,
       )
 
