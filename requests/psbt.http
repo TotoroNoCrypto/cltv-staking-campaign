@@ -189,6 +189,17 @@ Content-Type: application/json
     "toBlockheight": 751940
 }
 
+### Restake M3rl1n
+POST {{api}}/restake
+Content-Type: application/json
+
+{
+    "taproot": "bc1pnkw2f057pq3lk88kauezgchmdksc2y8vupv85zafd69y68xfn3jsskkraj",
+    "pubKey": "03b0a480da7a611dce56c10fe3bedb27cb21c452a8974bc949c4b7fcd8feb60316",
+    "fromBlockheight": 847244,
+    "toBlockheight": 851940
+}
+
 ### Finalize Restake
 POST {{api}}/finalizeRestake
 Content-Type: application/json

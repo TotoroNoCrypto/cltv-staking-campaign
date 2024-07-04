@@ -24,7 +24,7 @@ export class UnisatService {
     let utxos = []
     let utxo = undefined
     let cursor = 0
-    const size = 1024
+    const size = 128
     let resultSize = 0
 
     do {
@@ -52,7 +52,7 @@ export class UnisatService {
     let utxos = []
     let utxo = undefined
     let cursor = 0
-    const size = 1024
+    const size = 128
     let resultSize = 0
 
     do {
@@ -83,7 +83,7 @@ export class UnisatService {
     let utxos = []
     let utxo = undefined
     let cursor = 0
-    const size = 1024
+    const size = 128
     let resultSize = 0
 
     do {
@@ -115,7 +115,7 @@ export class UnisatService {
     let utxos = []
     let utxo = undefined
     let cursor = 0
-    const size = 1024
+    const size = 128
     let resultSize = 0
 
     do {
@@ -144,7 +144,7 @@ export class UnisatService {
   ): Promise<Array<{ txid: string; vout: number; satoshi: number }>> {
     let utxos: Array<{ txid: string; vout: number; satoshi: number }> = []
     let cursor = 0
-    const size = 1024
+    const size = 128
     let resultSize = 0
 
     do {
@@ -166,7 +166,7 @@ export class UnisatService {
   ): Promise<Array<{ txid: string; vout: number; satoshi: number }>> {
     let utxos: Array<{ txid: string; vout: number; satoshi: number }> = []
     let cursor = 0
-    const size = 1024
+    const size = 128
     let resultSize = 0
 
     do {
@@ -203,7 +203,7 @@ export class UnisatService {
   ): Promise<Array<{ txid: string; vout: number; satoshi: number }>> {
     let utxos: Array<{ txid: string; vout: number; satoshi: number }> = []
     let cursor = 0
-    const size = 1024
+    const size = 128
     let resultSize = 0
 
     do {
@@ -239,7 +239,7 @@ export class UnisatService {
     let utxos = []
     let utxo = undefined
     let cursor = 0
-    const size = 1024
+    const size = 128
     let resultSize = 0
 
     do {
@@ -279,7 +279,7 @@ export class UnisatService {
     let utxos = []
     let utxo = undefined
     let cursor = 0
-    const size = 1024
+    const size = 128
     let resultSize = 0
 
     do {
@@ -319,7 +319,7 @@ export class UnisatService {
       amt: number
     }> = []
     let cursor = 0
-    const size = 1024
+    const size = 128
     let resultSize = 0
 
     do {
@@ -366,7 +366,7 @@ export class UnisatService {
     let utxos = []
     let utxo = undefined
     let cursor = 0
-    const size = 1024
+    const size = 128
     let resultSize = 0
 
     do {
@@ -394,27 +394,26 @@ export class UnisatService {
   public static async findBRC20Market(
     ticker: string,
   ): Promise<{ satoshi: number; BTCPrice: number } | undefined> {
-    let markets = []
     let market = undefined
     let cursor = 0
-    const size = 1024
-    let resultSize = 0
+    const size = 128
     let BTCPrice = 0
 
     do {
-      const result = await this.unisatConnector.market.getBRC20Types(
+      const result = await this.unisatConnector.market.getBRC20TypesSpecified(
         ticker,
         0, // Take all
         0, // Take all
       )
-      BTCPrice = result.data.BTCPrice
-      markets = result.data.list
-      resultSize = markets.length
-      market = markets.find(
-        (m: { tick: string }) => m.tick.toUpperCase() === ticker.toUpperCase(),
+      const result2 = await this.unisatConnector.market.getBRC20Types(
+        ticker,
+        0, // Take all
+        0, // Take all
       )
+      BTCPrice = result2.data.BTCPrice
+      market = result.data
       cursor++
-    } while (resultSize === size && market === undefined)
+    } while (market === undefined)
 
     return market != undefined
       ? { satoshi: market.curPrice, BTCPrice: BTCPrice }
@@ -427,7 +426,7 @@ export class UnisatService {
     let markets = []
     let market = undefined
     let cursor = 0
-    const size = 1024
+    const size = 128
     let resultSize = 0
     let BTCPrice = 0
 

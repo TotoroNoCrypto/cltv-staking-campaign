@@ -808,7 +808,7 @@ export class PsbtService {
       const oshiInscription = oshiInscriptions[index]
       oshiAmount += oshiInscription.amt
     }
-    const oshiMarket = await UnisatService.findBRC20Market('FCDP')
+    const oshiMarket = await UnisatService.findBRC20Market('OSHI')
     let oshiServiceFee = Math.max(
       serviceFeeFix,
       oshiAmount * oshiMarket!.satoshi! * (serviceFeeVariable / 100),
