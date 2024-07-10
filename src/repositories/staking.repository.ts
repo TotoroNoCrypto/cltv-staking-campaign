@@ -155,6 +155,7 @@ export class StakingRepository {
       group: 'campaignId',
       where: {
         block: { [Op.not]: null },
+        campaignId: { [Op.gt]: 2 },
       },
       attributes: ['campaignId', [fn('SUM', col('quantity')), 'total']],
     })
