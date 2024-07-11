@@ -337,7 +337,7 @@ export class UnisatService {
         satoshi: number
       }> = result.data.detail.filter(
         (d: { data: { op: string; tick: string } }) =>
-          d.data.op === 'transfer' && d.data.tick === ticker,
+          d.data.op === 'transfer' && d.data.tick.toUpperCase() === ticker.toUpperCase(),
       )
 
       if (filteredDetails.length === 0) {
