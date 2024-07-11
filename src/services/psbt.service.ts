@@ -260,7 +260,8 @@ export class PsbtService {
   public static async finalizeRestake(
     walletAddress: string,
     pubkeyHex: string,
-    blockheight: number,
+    fromBlockheight: number,
+    toBlockheight: number,
     psbtHex: string,
   ): Promise<{ txSize: number; psbtHex: string; txHex: string }> {
     const psbt = Psbt.fromHex(psbtHex)
@@ -278,11 +279,15 @@ export class PsbtService {
     const tx = psbt.extractTransaction(true)
 
     const pubkey = this.getPubkey(pubkeyHex)
-    const cltvPayment = this.getCltvPayment(pubkey, blockheight)
-    const scriptAddress = cltvPayment.address!
+
+    const campaignFromCltvPayment = this.getCltvPayment(pubkey, fromBlockheight)
+
+    const campaignToCltvPayment = this.getCltvPayment(pubkey, toBlockheight)
+
+    const scriptAddress = campaignToCltvPayment.address!
 
     const fcdpInscriptions = await UnisatService.getTransferableInscriptions(
-      walletAddress,
+      campaignFromCltvPayment.address!,
       'FCDP',
     )
 
@@ -300,9 +305,10 @@ export class PsbtService {
     }
 
     const oshiInscriptions = await UnisatService.getTransferableInscriptions(
-      walletAddress,
+      campaignFromCltvPayment.address!,
       'OSHI',
     )
+    
     for (let index = 0; index < oshiInscriptions.length; index++) {
       const inscription = oshiInscriptions[index]
       await StakingRepository.createStaking(
