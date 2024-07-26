@@ -200,7 +200,8 @@ export class CampaignController {
     res: Response,
   ): Promise<Response> {
     try {
-      const { taproot, pubKey, fromBlockheight, toBlockheight, psbtHex } = req.body
+      const { taproot, pubKey, fromBlockheight, toBlockheight, psbtHex } =
+        req.body
 
       const psbt = await PsbtService.finalizeRestake(
         taproot,

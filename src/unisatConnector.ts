@@ -260,10 +260,14 @@ class Market extends ApiClient {
   }
 
   getBRC20TypesSpecified(ticker: string, start: number, limit: number) {
-    return this.makeRequest('POST', '/v3/market/brc20/auction/brc20_types_specified', {
-      timeType: 'day30',
-      tick: ticker,
-    })
+    return this.makeRequest(
+      'POST',
+      '/v3/market/brc20/auction/brc20_types_specified',
+      {
+        timeType: 'day30',
+        tick: ticker,
+      },
+    )
   }
 
   getRuneTypes(start: number, limit: number) {

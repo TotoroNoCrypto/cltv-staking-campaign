@@ -193,11 +193,16 @@ export class StakingRepository {
         case 'Rune':
           const runeMarket = await UnisatService.findRuneMarket(campaign!.name)
           if (runeMarket != undefined) {
-            const tvl = Math.floor(
+            let tvl = Math.floor(
               staking.dataValues.total *
                 runeMarket.satoshi! *
                 (runeMarket.BTCPrice / 100000000),
             )
+            if (campaign!.name === 'DOG•GO•TO•THE•MOON') {
+              tvl /= 10000
+            } else if (campaign!.name === 'DOTSWAP•DOTSWAP') {
+              tvl /= 100
+            }
             campaignTVL = campaignTVL.concat({
               name: campaign!.name,
               total: staking.dataValues.total,

@@ -308,7 +308,7 @@ export class PsbtService {
       campaignFromCltvPayment.address!,
       'OSHI',
     )
-    
+
     for (let index = 0; index < oshiInscriptions.length; index++) {
       const inscription = oshiInscriptions[index]
       await StakingRepository.createStaking(
@@ -786,7 +786,7 @@ export class PsbtService {
     const campaignFromCltvPayment = this.getCltvPayment(pubkey, fromBlockheight)
 
     const campaignToCltvPayment = this.getCltvPayment(pubkey, toBlockheight)
-    
+
     const fcdpInscriptions = await UnisatService.getTransferableInscriptions(
       campaignFromCltvPayment.address!,
       'FCDP',
