@@ -199,9 +199,9 @@ export class StakingRepository {
                 (runeMarket.BTCPrice / 100000000),
             )
             if (campaign!.name === 'DOG•GO•TO•THE•MOON') {
-              tvl /= 10000
+              tvl = Math.floor(tvl / 10000)
             } else if (campaign!.name === 'DOTSWAP•DOTSWAP') {
-              tvl /= 100
+              tvl = Math.floor(tvl / 100)
             }
             campaignTVL = campaignTVL.concat({
               name: campaign!.name,
