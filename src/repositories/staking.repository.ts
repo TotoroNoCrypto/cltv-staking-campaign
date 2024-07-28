@@ -204,7 +204,7 @@ export class StakingRepository {
               } else {
                 tvl = Math.floor(
                   staking.dataValues.total *
-                    5000 *
+                    8000 *
                     (brc20Market.BTCPrice / 100000000),
                 )
               }
