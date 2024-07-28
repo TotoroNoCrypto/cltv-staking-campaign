@@ -189,21 +189,32 @@ export class StakingRepository {
             }
           }
           if (!this.cachedTVL.has(campaign!.name)) {
+            let total = 0
             let tvl = 0
             console.log(`Add entry for ${campaign!.name}`)
             const brc20Market = await UnisatService.findBRC20Market(
               campaign!.name,
             )
+            
             if (brc20Market != undefined) {
-              if (campaign!.name !== 'PIZZA') {
+              if (campaign!.name === 'SATS') {
+                total = staking.dataValues.total * 1000000
                 tvl = Math.floor(
-                  staking.dataValues.total *
+                  total *
+                    brc20Market.satoshi! *
+                    (brc20Market.BTCPrice / 100000000),
+                )
+              } else if (campaign!.name !== 'PIZZA') {
+                total = staking.dataValues.total
+                tvl = Math.floor(
+                  total *
                     brc20Market.satoshi! *
                     (brc20Market.BTCPrice / 100000000),
                 )
               } else {
+                total = staking.dataValues.total
                 tvl = Math.floor(
-                  staking.dataValues.total *
+                  total *
                     8000 *
                     (brc20Market.BTCPrice / 100000000),
                 )
@@ -211,7 +222,7 @@ export class StakingRepository {
             }
             this.cachedTVL.set(campaign!.name, {
               time: Date.now(),
-              total: staking.dataValues.total,
+              total: total,
               tvl: tvl,
             })
           }

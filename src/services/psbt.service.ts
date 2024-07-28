@@ -108,6 +108,10 @@ export class PsbtService {
       throw new Error('Campaign not found')
     }
 
+    if (campaign!.name === 'SATS') {
+      quantity /= 1000000
+    }
+
     const pubkey = this.getPubkey(pubkeyHex)
     const blockheight = campaign.blockEnd
     const cltvPayment = this.getCltvPayment(pubkey, blockheight)
