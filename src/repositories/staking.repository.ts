@@ -5,10 +5,13 @@ import { UnisatService } from '../services/unisat.service'
 import config from 'config'
 
 const teamAddress = config.get<string>('cltv.teamAddress')
-const tvlInterval:number = 300000
+const tvlInterval: number = 300000
 
 export class StakingRepository {
-  private static cachedTVL: Map<string, { time: number, total: number, tvl: number }>
+  private static cachedTVL: Map<
+    string,
+    { time: number; total: number; tvl: number }
+  >
 
   public static async getStakings(): Promise<StakingModel[]> {
     const stakings = await Staking.findAll({
@@ -198,7 +201,11 @@ export class StakingRepository {
                   (brc20Market.BTCPrice / 100000000),
               )
             }
-            this.cachedTVL.set(campaign!.name, { time: Date.now(), total: staking.dataValues.total, tvl: tvl})
+            this.cachedTVL.set(campaign!.name, {
+              time: Date.now(),
+              total: staking.dataValues.total,
+              tvl: tvl,
+            })
           }
 
           campaignTVL = campaignTVL.concat({
@@ -236,7 +243,11 @@ export class StakingRepository {
                 tvl = Math.floor(tvl / 100)
               }
             }
-            this.cachedTVL.set(campaign!.name, { time: Date.now(), total: staking.dataValues.total, tvl: tvl})
+            this.cachedTVL.set(campaign!.name, {
+              time: Date.now(),
+              total: staking.dataValues.total,
+              tvl: tvl,
+            })
           }
 
           campaignTVL = campaignTVL.concat({
@@ -265,7 +276,11 @@ export class StakingRepository {
                 staking.dataValues.total * (oshiMarket!.BTCPrice / 100000000),
               )
             }
-            this.cachedTVL.set(campaign!.name, { time: Date.now(), total: staking.dataValues.total, tvl: tvl})
+            this.cachedTVL.set(campaign!.name, {
+              time: Date.now(),
+              total: staking.dataValues.total,
+              tvl: tvl,
+            })
           }
 
           campaignTVL = campaignTVL.concat({
