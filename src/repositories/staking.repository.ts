@@ -5,7 +5,7 @@ import { UnisatService } from '../services/unisat.service'
 import config from 'config'
 
 const teamAddress = config.get<string>('cltv.teamAddress')
-const tvlInterval: number = 300000
+const tvlInterval: number = 1800000
 
 export class StakingRepository {
   private static cachedTVL: Map<
