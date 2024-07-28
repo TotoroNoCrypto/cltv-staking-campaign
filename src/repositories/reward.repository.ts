@@ -95,16 +95,13 @@ export class RewardRepository {
         campaign.quantity / (campaign.blockEnd - campaign.blockStart)
 
       const stakerRewards = new Map()
-      let totalQuantities = 0
+      let totalQuantities = BigInt(0)
       const start =
         campaign.lastBlockReward > campaign.blockStart
           ? campaign.lastBlockReward
           : campaign.blockStart
       const end = blockid < campaign.blockEnd ? blockid : campaign.blockEnd
       for (let block = start; block <= end; block++) {
-        let share = totalQuantities > 0 ? rewardPerBlock / totalQuantities : 0
-        share = Math.round(share * 10 ** 8) / 10 ** 8
-
         for (let index = 0; index < stakings.length; index++) {
           const staking = stakings[index]
           if (staking.campaignId === campaign.id) {
@@ -114,17 +111,20 @@ export class RewardRepository {
               }
 
               const reward = stakerRewards.get(staking.walletAddress)
-              stakerRewards.set(
-                staking.walletAddress,
-                reward + staking.quantity * share,
-              )
+
+              if (totalQuantities > 0) {
+                stakerRewards.set(
+                  staking.walletAddress,
+                  reward + Number(BigInt(staking.quantity) * BigInt(Math.floor(rewardPerBlock)) / totalQuantities),
+                )
+              }
             }
 
             if (
               staking.block === block ||
               (block === start && staking.block < start)
             ) {
-              totalQuantities += staking.quantity
+              totalQuantities += BigInt(staking.quantity)
             }
           }
         }
