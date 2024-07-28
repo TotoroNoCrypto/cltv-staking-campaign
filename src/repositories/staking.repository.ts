@@ -253,11 +253,6 @@ export class StakingRepository {
                     (runeMarket.BTCPrice / 100000000),
                 )
               }
-              if (campaign!.name === 'DOG•GO•TO•THE•MOON') {
-                tvl = Math.floor(tvl / 10000)
-              } else if (campaign!.name === 'DOTSWAP•DOTSWAP') {
-                tvl = Math.floor(tvl / 100)
-              }
             }
             this.cachedTVL.set(campaign!.name, {
               time: Date.now(),

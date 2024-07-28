@@ -148,6 +148,12 @@ export class PsbtService {
       throw new Error('Campaign not found')
     }
 
+    if (campaign!.name === 'DOG•GO•TO•THE•MOON') {
+      quantity /= 100000
+    } else if (campaign!.name === 'DOTSWAP•DOTSWAP') {
+      quantity /= 100
+    }
+
     const pubkey = this.getPubkey(pubkeyHex)
     const blockheight = campaign.blockEnd
     const cltvPayment = this.getCltvPayment(pubkey, blockheight)
