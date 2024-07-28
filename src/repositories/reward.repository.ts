@@ -136,7 +136,7 @@ export class RewardRepository {
             walletAddress: key,
           },
         })
-        reward.quantity = Math.round(Number(reward.quantity) + Number(value) * 10 ** 8) / 10 ** 8
+        reward.quantity = Number(reward.quantity) + Number(value)
         await reward.save()
       })
 
