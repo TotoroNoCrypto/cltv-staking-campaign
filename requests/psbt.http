@@ -26,6 +26,19 @@ Content-Type: application/json
     "amt": 1
 }
 
+### Stake M3rl1n 2
+POST {{api}}/stake
+Content-Type: application/json
+
+{
+    "taproot": "bc1p55kw8qwk89fv2py9ddc2ae5q5d3z70d4sdtepl8625vgwyp4edgq005hqu",
+    "pubKey": "02d190cd6826f6557ca2d767bf50e2451aa6a777b2b4e925b688a51ef6323694fc",
+    "txid": "515da199a2bb6e21ae795dde7c99ba2edaf4d369792b3f5130c81e282a7223ce",
+    "vout": 0,
+    "campaignid": 11,
+    "amt": 600
+}
+
 ### Stake Totoro
 POST {{api}}/stake
 Content-Type: application/json

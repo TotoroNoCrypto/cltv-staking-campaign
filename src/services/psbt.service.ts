@@ -413,10 +413,12 @@ export class PsbtService {
     const cltvPayment = this.getCltvPayment(pubkey, blockheight)
 
     const market = await UnisatService.findBRC20Market(campaign.name)
-    let serviceFee = Math.max(
-      serviceFeeFix,
-      amt * market!.satoshi! * (serviceFeeVariable / 100),
-    )
+    let serviceFee = market!.satoshi !== undefined
+      ? Math.max(
+        serviceFeeFix,
+        amt * market!.satoshi! * (serviceFeeVariable / 100),
+      )
+      : serviceFeeFix
     if (serviceFee >= 5 * serviceFeeFix) {
       serviceFee = 5 * serviceFeeFix
     }
