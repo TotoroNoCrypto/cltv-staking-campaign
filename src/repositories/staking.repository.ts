@@ -240,11 +240,19 @@ export class StakingRepository {
               campaign!.name,
             )
             if (runeMarket != undefined) {
-              tvl = Math.floor(
-                staking.dataValues.total *
-                  runeMarket.satoshi! *
-                  (runeMarket.BTCPrice / 100000000),
-              )
+              if (campaign!.name !== 'DOTSWAP•DOTSWAP') {
+                tvl = Math.floor(
+                  staking.dataValues.total *
+                    runeMarket.satoshi! *
+                    (runeMarket.BTCPrice / 100000000),
+                )
+              } else {
+                tvl = Math.floor(
+                  staking.dataValues.total *
+                    1000 *
+                    (runeMarket.BTCPrice / 100000000),
+                )
+              }
               if (campaign!.name === 'DOG•GO•TO•THE•MOON') {
                 tvl = Math.floor(tvl / 10000)
               } else if (campaign!.name === 'DOTSWAP•DOTSWAP') {
