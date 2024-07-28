@@ -195,11 +195,19 @@ export class StakingRepository {
               campaign!.name,
             )
             if (brc20Market != undefined) {
-              tvl = Math.floor(
-                staking.dataValues.total *
-                  brc20Market.satoshi! *
-                  (brc20Market.BTCPrice / 100000000),
-              )
+              if (campaign!.name !== 'PIZZA') {
+                tvl = Math.floor(
+                  staking.dataValues.total *
+                    brc20Market.satoshi! *
+                    (brc20Market.BTCPrice / 100000000),
+                )
+              } else {
+                tvl = Math.floor(
+                  staking.dataValues.total *
+                    5000 *
+                    (brc20Market.BTCPrice / 100000000),
+                )
+              }
             }
             this.cachedTVL.set(campaign!.name, {
               time: Date.now(),
