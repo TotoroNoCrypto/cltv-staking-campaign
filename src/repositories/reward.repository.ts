@@ -103,7 +103,6 @@ export class RewardRepository {
       const end = blockid < campaign.blockEnd ? blockid : campaign.blockEnd
       for (let block = start; block <= end; block++) {
         let share = totalQuantities > 0 ? rewardPerBlock / totalQuantities : 0
-        share = Math.round(share * 10 ** 8) / 10 ** 8
 
         for (let index = 0; index < stakings.length; index++) {
           const staking = stakings[index]
@@ -137,7 +136,7 @@ export class RewardRepository {
             walletAddress: key,
           },
         })
-        reward.quantity = Number(reward.quantity) + Number(value)
+        reward.quantity = Math.round(Number(reward.quantity) + Number(value) * 10 ** 8) / 10 ** 8
         await reward.save()
       })
 
