@@ -639,7 +639,7 @@ export class PsbtService {
       })
       .addOutput({
         value:
-          btcUtxo.satoshi - matchingBtcUtxo!.satoshi - serviceFee - networkFee,
+          btcUtxo.satoshi - serviceFee - networkFee,
         address: stakerPayment.address!,
       })
 

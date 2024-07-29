@@ -87,7 +87,18 @@ Content-Type: application/json
     "taproot": "bc1plvqwcy5chr9ja359rm4zkhyfyxacn2tj4rvjtfk40w5ctzagssnszte0m6",
     "pubKey": "02dde3a8a673f9cba281b28077dd6928af5a4aff475af0c031df7afc5d65920b67",
     "txid": "1ed156631444f0ec865a20d603cf35140387bdb7f109c532bf4a5c68e682b92b",
-    "vout": 3,
+    "vout": 3
+}
+
+### Stake BTC Debug
+POST {{api}}/stakeBTC
+Content-Type: application/json
+
+{
+    "taproot": "bc1p6756tl6cmvvxtm9gcxq8g9hp5j36y2u33j8qv0dn2x5c6p6gr4hqlymjzu",
+    "pubKey": "03f4c1d388daa820b02d044b9c3d41b497a3af96dbf8019a0446882262ee4ecf5d",
+    "txid": "c1390c8cb40a2a1f606be835db6af9d9d6d389a3499811eaabe2498ea710e305",
+    "vout": 0
 }
 
 ### Finalize Stake
