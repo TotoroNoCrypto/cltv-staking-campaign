@@ -44,6 +44,38 @@ export class UnisatService {
       : undefined
   }
 
+  public static async findBtcUtxoWithExclusion(
+    address: string,
+    fee: number,
+    txid: string,
+    vout: number,
+  ): Promise<{ txid: string; vout: number; satoshi: number } | undefined> {
+    let utxos = []
+    let utxo = undefined
+    let cursor = 0
+    const size = 128
+    let resultSize = 0
+
+    do {
+      const result = await this.unisatConnector.general.getBtcUtxo(
+        address,
+        cursor * size,
+        size,
+      )
+      utxos = result.data.utxo
+      resultSize = utxos.length
+      utxo = utxos.find(
+        (u: { txid: string; vout: number; satoshi: number }) =>
+          !(u.txid == txid && u.vout == vout) && u.satoshi >= fee,
+      )
+      cursor++
+    } while (resultSize === size && utxo === undefined)
+
+    return utxo != undefined
+      ? { txid: utxo.txid, vout: utxo.vout, satoshi: utxo.satoshi }
+      : undefined
+  }
+
   public static async findMatchingBtcUtxo(
     address: string,
     txid: string,

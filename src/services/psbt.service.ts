@@ -21,9 +21,7 @@ const serviceFeeVariable = config.get<number>('cltv.serviceFeeVariable')
 const utxoSize = config.get<number>('utxoSize')
 const runeUtxoSize = config.get<number>('runeUtxoSize')
 const stakeSize = config.get<number>('stakeSize')
-// const stakeRuneSize = config.get<number>('stakeRuneSize')
 const stakeBTCSize = config.get<number>('stakeBTCSize')
-const claimSize = config.get<number>('claimSize')
 
 export class PsbtService {
   public static async stake(
@@ -613,15 +611,27 @@ export class PsbtService {
       serviceFee = 5 * serviceFeeFix
     }
 
-    const btcUtxo = await UnisatService.findBtcUtxo(
+    const btcUtxo = await UnisatService.findBtcUtxoWithExclusion(
       walletAddress,
       networkFee + serviceFee,
+      matchingBtcUtxo!.txid,
+      matchingBtcUtxo!.vout,
     )
     if (btcUtxo === undefined) {
       throw new Error('BTC UTXO not found')
     }
 
     const psbt = new bitcoin.Psbt({ network })
+      .addInput({
+        hash: matchingBtcUtxo!.txid,
+        index: matchingBtcUtxo!.vout,
+        sequence: 0,
+        witnessUtxo: {
+          value: matchingBtcUtxo!.satoshi,
+          script: stakerPayment.output!,
+        },
+        tapInternalKey: internalPubkey,
+      })
       .addInput({
         hash: btcUtxo.txid,
         index: btcUtxo.vout,
