@@ -30,7 +30,7 @@ export class UserService {
       },
     })
 
-    return reward?.quantity!
+    return Math.round(reward?.quantity!)
   }
 
   private static getCltvPayment(pubkey: Buffer, blockheight: number): Payment {

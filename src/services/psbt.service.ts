@@ -427,13 +427,13 @@ export class PsbtService {
       market!.satoshi !== undefined
         ? Math.max(
             serviceFeeFix,
-            amt * market!.satoshi! * (serviceFeeVariable / 100),
+            Math.round(amt * market!.satoshi! * (serviceFeeVariable / 100)),
           )
         : serviceFeeFix
     if (serviceFee >= 5 * serviceFeeFix) {
       serviceFee = 5 * serviceFeeFix
     }
-
+    
     const btcUtxo = await UnisatService.findBtcUtxo(
       walletAddress,
       networkFee + serviceFee,
