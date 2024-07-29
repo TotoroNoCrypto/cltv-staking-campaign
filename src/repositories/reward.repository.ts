@@ -121,9 +121,10 @@ export class RewardRepository {
 
             if (
               staking.block === block ||
-           (block === start && staking.block < start)
+              (block === start && staking.block < start)
             ) {
-              totalQuantities = Number(totalQuantities) + Number(staking.quantity)
+              totalQuantities =
+                Number(totalQuantities) + Number(staking.quantity)
             }
           }
         }

@@ -433,7 +433,7 @@ export class PsbtService {
     if (serviceFee >= 5 * serviceFeeFix) {
       serviceFee = 5 * serviceFeeFix
     }
-    
+
     const btcUtxo = await UnisatService.findBtcUtxo(
       walletAddress,
       networkFee + serviceFee,
@@ -638,8 +638,7 @@ export class PsbtService {
         address: teamAddress,
       })
       .addOutput({
-        value:
-          btcUtxo.satoshi - serviceFee - networkFee,
+        value: btcUtxo.satoshi - serviceFee - networkFee,
         address: stakerPayment.address!,
       })
 
@@ -778,7 +777,7 @@ export class PsbtService {
         value: serviceFee,
         address: teamAddress,
       })
-  
+
       psbt.addOutput({
         value: btcUtxo.satoshi - serviceFee - networkFee,
         address: stakerPayment.address!,

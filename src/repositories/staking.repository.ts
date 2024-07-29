@@ -195,7 +195,7 @@ export class StakingRepository {
             const brc20Market = await UnisatService.findBRC20Market(
               campaign!.name,
             )
-            
+
             if (brc20Market != undefined) {
               if (campaign!.name === 'SATS') {
                 total = staking.dataValues.total * 1000000
@@ -214,9 +214,7 @@ export class StakingRepository {
               } else {
                 total = staking.dataValues.total
                 tvl = Math.floor(
-                  total *
-                    8000 *
-                    (brc20Market.BTCPrice / 100000000),
+                  total * 8000 * (brc20Market.BTCPrice / 100000000),
                 )
               }
             }
