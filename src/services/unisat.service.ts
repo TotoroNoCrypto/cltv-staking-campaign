@@ -412,7 +412,7 @@ export class UnisatService {
       resultSize = utxos.length
       utxo = utxos.find(
         (u: { txid: string; vout: number; satoshi: number }) =>
-          u.satoshi === amount,
+          u.satoshi == amount,
       )
       cursor++
     } while (resultSize === size && utxo === undefined)
