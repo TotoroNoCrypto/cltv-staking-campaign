@@ -773,15 +773,22 @@ export class PsbtService {
       })
     }
 
-    psbt.addOutput({
-      value: serviceFee,
-      address: teamAddress,
-    })
-
-    psbt.addOutput({
-      value: btcUtxo.satoshi - serviceFee - networkFee,
-      address: stakerPayment.address!,
-    })
+    if (campaignId > 2) {
+      psbt.addOutput({
+        value: serviceFee,
+        address: teamAddress,
+      })
+  
+      psbt.addOutput({
+        value: btcUtxo.satoshi - serviceFee - networkFee,
+        address: stakerPayment.address!,
+      })
+    } else {
+      psbt.addOutput({
+        value: btcUtxo.satoshi - networkFee,
+        address: stakerPayment.address!,
+      })
+    }
 
     return psbt
   }
@@ -797,7 +804,6 @@ export class PsbtService {
     const stakerPayment = this.getStakerPayment(internalPubkey)
 
     const campaignFromCltvPayment = this.getCltvPayment(pubkey, fromBlockheight)
-
     const campaignToCltvPayment = this.getCltvPayment(pubkey, toBlockheight)
 
     const fcdpInscriptions = await UnisatService.getTransferableInscriptions(
@@ -819,7 +825,7 @@ export class PsbtService {
     }
 
     const oshiInscriptions = await UnisatService.getTransferableInscriptions(
-      walletAddress,
+      campaignFromCltvPayment.address!,
       'OSHI',
     )
     let oshiAmount = 0
