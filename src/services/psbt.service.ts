@@ -121,7 +121,7 @@ export class PsbtService {
       inscriptionTxId,
       inscriptionVout,
       null,
-      quantity,
+      Math.round(quantity),
     )
 
     return {
@@ -167,7 +167,7 @@ export class PsbtService {
       runeTxId,
       runeVout,
       runeId,
-      quantity,
+      Math.round(quantity),
     )
 
     return {

@@ -65,6 +65,19 @@ Content-Type: application/json
     "amt": 1
 }
 
+### Stake Debug
+POST {{api}}/stake
+Content-Type: application/json
+
+{
+    "taproot": "bc1pz9v5qlpvstuqwy3lkrk0ajqhvp60c7m4f88tdphd79v6s8457qgs7htxvf",
+    "pubKey": "0337e2f04715abb868b673d215e4f614b29e5127574559cd53c8ad622857e0a85f",
+    "txid": "3f4fc6d1a16253e615cb5f1b28a0170acde137bd676e9797bf19447ebcdddf59",
+    "vout": 0,
+    "campaignid": 7,
+    "amt": 10086432195.123
+}
+
 ### Stake Rune
 POST {{api}}/stakeRune
 Content-Type: application/json
