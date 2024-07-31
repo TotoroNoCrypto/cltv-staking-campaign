@@ -882,7 +882,7 @@ export class PsbtService {
       throw new Error('BTC UTXO not found')
     }
 
-    const lockTime = this.getLocktime(toBlockheight)
+    const lockTime = this.getLocktime(fromBlockheight)
 
     const psbt = new Psbt({ network }).setLocktime(lockTime)
 
