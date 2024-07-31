@@ -905,8 +905,8 @@ export class PsbtService {
     for (let index = 0; index < scriptUtxos.length; index++) {
       const utxo = scriptUtxos[index]
       psbt.addOutput({
-        script: campaignToCltvPayment.output!,
         value: utxo.satoshi,
+        address: campaignToCltvPayment.address!,
       })
     }
 
@@ -916,8 +916,8 @@ export class PsbtService {
     })
 
     psbt.addOutput({
-      script: stakerPayment.output!,
       value: btcUtxo.satoshi - serviceFee - networkFee,
+      address: stakerPayment.address!,
     })
 
     return psbt
