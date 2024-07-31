@@ -825,10 +825,12 @@ export class PsbtService {
       fcdpAmount += fcdpInscription.amt
     }
     const fcdpMarket = await UnisatService.findBRC20Market('FCDP')
-    let fcdpServiceFee = Math.max(
-      serviceFeeFix,
-      fcdpAmount * fcdpMarket!.satoshi! * (serviceFeeVariable / 100),
-    )
+    let fcdpServiceFee = fcdpAmount > 0
+      ? Math.max(
+          serviceFeeFix,
+          fcdpAmount * fcdpMarket!.satoshi! * (serviceFeeVariable / 100),
+        )
+      : 0
     if (fcdpServiceFee >= 5 * serviceFeeFix) {
       fcdpServiceFee = 5 * serviceFeeFix
     }
@@ -843,10 +845,12 @@ export class PsbtService {
       oshiAmount += oshiInscription.amt
     }
     const oshiMarket = await UnisatService.findBRC20Market('OSHI')
-    let oshiServiceFee = Math.max(
-      serviceFeeFix,
-      oshiAmount * oshiMarket!.satoshi! * (serviceFeeVariable / 100),
-    )
+    let oshiServiceFee = oshiAmount > 0
+      ? Math.max(
+          serviceFeeFix,
+          oshiAmount * oshiMarket!.satoshi! * (serviceFeeVariable / 100),
+        )
+      : 0
     if (oshiServiceFee >= 5 * serviceFeeFix) {
       oshiServiceFee = 5 * serviceFeeFix
     }
