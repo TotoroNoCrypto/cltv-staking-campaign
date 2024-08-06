@@ -203,7 +203,7 @@ export class PsbtService {
       null,
       null,
       null,
-      quantity,
+      Math.round(quantity),
     )
 
     return {
@@ -308,7 +308,7 @@ export class PsbtService {
         inscription.txid,
         inscription.vout,
         null,
-        inscription.amt,
+        Math.round(inscription.amt),
       )
     }
 
@@ -326,7 +326,7 @@ export class PsbtService {
         inscription.txid,
         inscription.vout,
         null,
-        inscription.amt,
+        Math.round(inscription.amt),
       )
     }
 
