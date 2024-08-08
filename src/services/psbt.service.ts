@@ -710,8 +710,9 @@ export class PsbtService {
       serviceFee = 5 * serviceFeeFix
     }
 
-    let scriptInscriptionUtxos = await UnisatService.getInscriptionUtxos(
+    let scriptInscriptionUtxos: Array<{ txid: string; vout: number; satoshi: number}> = await UnisatService.getTransferableInscriptions(
       cltvPayment.address!,
+      campaign.name,
     )
     let scriptUncommonGoodsUtxos = await UnisatService.getRuneUtxos(
       cltvPayment.address!,
@@ -857,9 +858,15 @@ export class PsbtService {
 
     const serviceFee = fcdpServiceFee + oshiServiceFee
 
-    let scriptInscriptionUtxos = await UnisatService.getInscriptionUtxos(
+    let fcdpScriptInscriptionUtxos = await UnisatService.getTransferableInscriptions(
       campaignFromCltvPayment.address!,
+      'FCDP',
     )
+    let oshiScriptInscriptionUtxos = await UnisatService.getTransferableInscriptions(
+      campaignFromCltvPayment.address!,
+      'OSHI',
+    )
+    let scriptInscriptionUtxos: Array<{ txid: string; vout: number; satoshi: number}> = fcdpScriptInscriptionUtxos.concat(oshiScriptInscriptionUtxos)
     const scriptBtcUtxos = await UnisatService.getBtcUtxos(
       campaignFromCltvPayment.address!,
     )
