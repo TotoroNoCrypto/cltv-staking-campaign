@@ -686,7 +686,7 @@ export class PsbtService {
         const brc20Market = await UnisatService.findBRC20Market(campaign.name)
         serviceFee = Math.max(
           serviceFeeFix,
-          total * brc20Market!.satoshi! * (serviceFeeVariable / 100),
+          Math.round(total * brc20Market!.satoshi! * (serviceFeeVariable / 100)),
         )
 
         break
@@ -695,13 +695,13 @@ export class PsbtService {
         const runeMarket = await UnisatService.findRuneMarket(campaign.name)
         serviceFee = Math.max(
           serviceFeeFix,
-          total * runeMarket!.satoshi! * (serviceFeeVariable / 100),
+          Math.round(total * runeMarket!.satoshi! * (serviceFeeVariable / 100)),
         )
 
         break
 
       default:
-        serviceFee = Math.max(serviceFeeFix, total * (serviceFeeVariable / 100))
+        serviceFee = Math.max(serviceFeeFix, Math.round(total * (serviceFeeVariable / 100)))
 
         break
     }
