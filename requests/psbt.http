@@ -247,9 +247,9 @@ POST {{api}}/claim
 Content-Type: application/json
 
 {
-    "taproot": "bc1p55kw8qwk89fv2py9ddc2ae5q5d3z70d4sdtepl8625vgwyp4edgq005hqu",
-    "pubKey": "02d190cd6826f6557ca2d767bf50e2451aa6a777b2b4e925b688a51ef6323694fc",
-    "campaignid": 11
+    "taproot": "bc1p0xn4tyrvl7wgqpxswe4v8yl4h8yzhrsm3uu2uauyaz3dtn0mst0s52nzmt",
+    "pubKey": "03d880f0ec22561b51d79d0e18f46c145ddefc0f46d9eea47de5bdff617a2fd640",
+    "campaignid": 4
 }
 
 ### Finalize Claim

@@ -710,10 +710,12 @@ export class PsbtService {
       serviceFee = 5 * serviceFeeFix
     }
 
-    let scriptInscriptionUtxos: Array<{ txid: string; vout: number; satoshi: number}> = await UnisatService.getTransferableInscriptions(
-      cltvPayment.address!,
-      campaign.name,
-    )
+    let scriptInscriptionUtxos: Array<{ txid: string; vout: number; satoshi: number}> = campaign!.type === 'BRC20'
+    ? await UnisatService.getTransferableInscriptions(
+        cltvPayment.address!,
+        campaign.name,
+      )
+    : []
     let scriptUncommonGoodsUtxos = await UnisatService.getRuneUtxos(
       cltvPayment.address!,
       encodeURI('1:0'),
