@@ -722,7 +722,7 @@ export class PsbtService {
     )
     let scriptDogGoToTheMoonUtxos = await UnisatService.getRuneUtxos(
       cltvPayment.address!,
-      encodeURI('840015:535'),
+      encodeURI('840000:3'),
     )
     let scriptDotSwapDotSwapUtxos = await UnisatService.getRuneUtxos(
       cltvPayment.address!,

@@ -219,7 +219,7 @@ Content-Type: application/json
 {
     "taproot": "bc1plvqwcy5chr9ja359rm4zkhyfyxacn2tj4rvjtfk40w5ctzagssnszte0m6",
     "pubKey": "02dde3a8a673f9cba281b28077dd6928af5a4aff475af0c031df7afc5d65920b67",
-    "campaignid": 2
+    "campaignid": 3
 }
 
 ### Claim Rune
@@ -247,9 +247,9 @@ POST {{api}}/claim
 Content-Type: application/json
 
 {
-    "taproot": "bc1p0xn4tyrvl7wgqpxswe4v8yl4h8yzhrsm3uu2uauyaz3dtn0mst0s52nzmt",
-    "pubKey": "03d880f0ec22561b51d79d0e18f46c145ddefc0f46d9eea47de5bdff617a2fd640",
-    "campaignid": 4
+    "taproot": "bc1p70yqw8k2kxmjjrd6kza50vqad0m6fgr6vmt9r7ex08jau6w2y9hsve4ph4",
+    "pubKey": "03a961d04ff2f09d3afbeeaaa9aeca548be8a8d219288ff7d9849db5b6f0a26338",
+    "campaignid": 8
 }
 
 ### Finalize Claim
