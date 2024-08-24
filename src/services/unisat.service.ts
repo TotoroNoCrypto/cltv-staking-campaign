@@ -442,9 +442,10 @@ export class UnisatService {
         ticker,
         0, // Take all
         0, // Take all
+        ticker.length
       )
       BTCPrice = result2.data.BTCPrice
-      market = result.data
+      market = ticker.length == 4 ? result.data : result2.data.list.at(0)
       cursor++
     } while (market === undefined)
 

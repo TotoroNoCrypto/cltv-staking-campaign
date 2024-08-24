@@ -85,11 +85,25 @@ Content-Type: application/json
 {
     "taproot": "bc1plvqwcy5chr9ja359rm4zkhyfyxacn2tj4rvjtfk40w5ctzagssnszte0m6",
     "pubKey": "02dde3a8a673f9cba281b28077dd6928af5a4aff475af0c031df7afc5d65920b67",
-    "txid": "f58f1f6ea783723f1c0c01f65cc03e7abb3e721c79280dbb9474dd9711f78ebd",
+    "txid": "d501ec3abd3166829ffe4e152fd12d2d585cc5960fedbd291cd0df800aacb827",
     "vout": 1,
     "campaignid": 13,
     "runeid": "1:0",
     "amt": 1
+}
+
+### Stake Rune Debug
+POST {{api}}/stakeRune
+Content-Type: application/json
+
+{
+    "taproot": "bc1pw9fulk9ts69g0et7yns38tggypjy3qnzwdy3002uu6y894r3mt3qmr2v3w",
+    "pubKey": "02b0c98afa0919de8815b649658e6fac7c6174a40576ae4a145c9ae540e8dd0d91",
+    "txid": "3f487f171b43422fadd77feabd5ee7ad49199bd90b295f5e00f5d9fe3c387a33",
+    "vout": 1,
+    "campaignid": 10,
+    "runeid": "840456:5478",
+    "amt": 1905016
 }
 
 ### Stake BTC
@@ -185,7 +199,7 @@ Content-Type: application/json
 {
     "taproot": "bc1pafup76rku5y3h689hpvesfgzdq28wkn6uuagepehdj9a2elzsnxqqmh9n3",
     "pubKey": "02c2b18c95e7b93daf55de2d8155f6b0620426ccc4a6de0533e3cb959caadb1354",
-    "campaignid": 2
+    "campaignid": 6
 }
 
 ### Claim Dev
@@ -226,6 +240,16 @@ Content-Type: application/json
     "taproot": "bc1plvqwcy5chr9ja359rm4zkhyfyxacn2tj4rvjtfk40w5ctzagssnszte0m6",
     "pubKey": "02dde3a8a673f9cba281b28077dd6928af5a4aff475af0c031df7afc5d65920b67",
     "campaignid": 4
+}
+
+### Claim Debug
+POST {{api}}/claim
+Content-Type: application/json
+
+{
+    "taproot": "bc1p55kw8qwk89fv2py9ddc2ae5q5d3z70d4sdtepl8625vgwyp4edgq005hqu",
+    "pubKey": "02d190cd6826f6557ca2d767bf50e2451aa6a777b2b4e925b688a51ef6323694fc",
+    "campaignid": 11
 }
 
 ### Finalize Claim
@@ -290,8 +314,8 @@ POST {{api}}/restake
 Content-Type: application/json
 
 {
-    "taproot": "bc1pxjz7mk9uvzfxwz0mqvzmxpv7u2rygtqwsuf5ptzp3479xwhnumcsqljguu",
-    "pubKey": "02ea42da0fa56785d9af2c492e3bfae60802f6024556d28fa6715f02aac7552ca2",
+    "taproot": "bc1pc076alhjv2ag9sjpdfvfu5mzkqrjxm96m5wrmmfg5emn4duwwryqyxwpve",
+    "pubKey": "035277d3b3b57e0ca8120812c9772ad00890f722f7532d5722a86d89e0b067f906",
     "fromBlockheight": 847244,
     "toBlockheight": 858052
 }
